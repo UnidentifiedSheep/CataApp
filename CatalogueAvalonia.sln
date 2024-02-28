@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34525.116
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogueAvalonia", "CatalogueAvalonia\CatalogueAvalonia.csproj", "{87611CBF-2904-4AAD-B7CD-0B1C19B11505}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Catalogue", "..\CatalogueApp\Catalogue\Catalogue.csproj", "{479B068E-8D75-47B4-BF5C-56D573D2F3E2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBase", "DataBase\DataBase.csproj", "{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Release|Any CPU.Build.0 = Release|Any CPU
+		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {976933DD-963C-4AA4-9E41-A0F6EA935A9B}
+	EndGlobalSection
+EndGlobal

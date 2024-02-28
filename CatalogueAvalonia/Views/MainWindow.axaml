@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" MinWidth="1000" MinHeight="650"
+        x:Class="CatalogueAvalonia.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+		xmlns:view="using:CatalogueAvalonia.Views"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="CatalogueAvalonia">
+	<Grid>
+		<TabControl>
+			<TabItem Header="Каталог">
+				<view:CatalogueView/>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</Window>
