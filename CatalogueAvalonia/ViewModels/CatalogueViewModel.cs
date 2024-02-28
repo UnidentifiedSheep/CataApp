@@ -4,8 +4,12 @@ using Avalonia.Controls.Selection;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataBaseAction;
+using CatalogueAvalonia.Services.DataStore;
+using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using DynamicData;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +21,7 @@ namespace CatalogueAvalonia.ViewModels
 {
 	public partial class CatalogueViewModel : ViewModelBase
 	{
+		private readonly DataStore _dataStore;
 		private CatalogueModel? _selecteditem;
 		private readonly ObservableCollection<CatalogueModel> _catalogueModels;
 		public HierarchicalTreeDataGridSource<CatalogueModel> CatalogueModels { get; }
@@ -25,24 +30,12 @@ namespace CatalogueAvalonia.ViewModels
 		private string _partName = string.Empty;
 		[ObservableProperty]
 		private string _partUniValue = string.Empty;
+
 		
-		
-		
-		public DataBaseProvider dataBaseProvider = new();
-
-
-
-
-
-		public CatalogueViewModel() 
+		public CatalogueViewModel(IMessenger messenger, DataStore dataStore) : base(messenger) 
 		{
+			_dataStore = dataStore;
 			_catalogueModels = new ObservableCollection<CatalogueModel>();
-			var a = new AsyncRelayCommand(async () =>
-			{
-				foreach (var model in await dataBaseProvider.GetCatalogueAsync())
-					_catalogueModels.Add(model);
-			});
-			a.Execute(null);
 
 			CatalogueModels = new HierarchicalTreeDataGridSource<CatalogueModel>(_catalogueModels)
 			{
@@ -61,11 +54,45 @@ namespace CatalogueAvalonia.ViewModels
 						"Цена", x => x.Price, GridLength.Star)
 				}
 			};
-			
+			Messenger.Register<DataBaseLoadedMessage>(this, OndataBaseLoaded);
 		}
+
+		private void OndataBaseLoaded(object recipient, DataBaseLoadedMessage message)
+		{
+			_catalogueModels.AddRange(_dataStore.CatalogueModels);
+		}
+
 		partial void OnPartNameChanged(string value)
 		{
-			
+			var filter = new AsyncRelayCommand(async (CancellationToken token) =>
+			{
+				_catalogueModels.Clear();
+				await foreach (var res in DataFiltering.FilterByMainName(_dataStore.CatalogueModels, value, token))
+					_catalogueModels.Add(res);
+			});
+			if (value.Length >= 3)
+				filter.Execute(null);
+			else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
+			{
+				_catalogueModels.Clear();
+				_catalogueModels.AddRange(_dataStore.CatalogueModels);
+			}	
+		}
+		partial void OnPartUniValueChanged(string value)
+		{
+			var filter = new AsyncRelayCommand(async (CancellationToken token) =>
+			{
+				_catalogueModels.Clear();
+				await foreach (var res in DataFiltering.FilterByUniValue(_dataStore.CatalogueModels, value, token))
+					_catalogueModels.Add(res);
+			});
+			if (value.Length >= 3)
+				filter.Execute(null);
+			else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
+			{
+				_catalogueModels.Clear();
+				_catalogueModels.AddRange(_dataStore.CatalogueModels);
+			}
 		}
 		[RelayCommand]
 		private async Task DeleteGroup()

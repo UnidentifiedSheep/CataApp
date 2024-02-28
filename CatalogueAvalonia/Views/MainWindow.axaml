@@ -12,7 +12,7 @@
 	<Grid>
 		<TabControl>
 			<TabItem Header="Каталог">
-				<view:CatalogueView/>
+				<view:CatalogueView DataContext="{Binding ViewModels[0]}"/>
 			</TabItem>
 		</TabControl>
 	</Grid>

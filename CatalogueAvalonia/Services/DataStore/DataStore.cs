@@ -1,4 +1,5 @@
 ﻿using CatalogueAvalonia.Models;
+using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using System;
@@ -33,6 +34,9 @@ namespace CatalogueAvalonia.Services.DataStore
 			IEnumerable<CatalogueModel> catalogueModels = await _topModel.GetCatalogueAsync().ConfigureAwait(false);
 			_catalogueModels.Clear();
 			_catalogueModels.AddRange(catalogueModels);
+
+
+			Messenger.Send(new DataBaseLoadedMessage(""));
 		}
 	}
 }
