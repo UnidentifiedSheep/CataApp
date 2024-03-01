@@ -1,4 +1,5 @@
-﻿using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Model;
+using CatalogueAvalonia.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 {
 	public interface IDataBaseProvider
 	{
-		public Task<IEnumerable<CatalogueModel>> GetCatalogueAsync();
+		Task<IEnumerable<CatalogueModel>> GetCatalogueAsync();
+		Task<IEnumerable<ProducerModel>> GetProducersAsync();
+		Task<CatalogueModel> GetCatalogueById(int uniId);
 	}
 }

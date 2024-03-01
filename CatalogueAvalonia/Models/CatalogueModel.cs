@@ -1,20 +1,23 @@
 ﻿using CatalogueAvalonia.Core;
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.Models
 {
-	public class CatalogueModel
+	public partial class CatalogueModel : ObservableObject
 	{
-		public int UniId { get; set; }
+		public int? UniId { get; set; }
 		public int PriceId { get; set; }
-		public int MainCatId { get; set; }
-		public int ProducerId { get; set; }
+		public int? MainCatId { get; set; }
+		[ObservableProperty]
+		private int _producerId;
 		public int CurrencyId { get; set; }
 
 		public string UniValue { get; set; } = string.Empty;
@@ -32,7 +35,8 @@ namespace CatalogueAvalonia.Models
 					_name = value;
 			}
 		}
-		public string ProducerName { get; set; } = string.Empty;
+		[ObservableProperty]
+		private string _producerName  = string.Empty;
 		public string CurrencyName { get; set; } = string.Empty;
 		public int Count { get; set; }
 		public double Price { get; set; }

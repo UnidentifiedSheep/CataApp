@@ -1,4 +1,5 @@
-﻿using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Model;
+using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
@@ -17,12 +18,43 @@ namespace CatalogueAvalonia.Services.DataStore
 
 		private readonly List<CatalogueModel> _catalogueModels;
 		public List<CatalogueModel> CatalogueModels => _catalogueModels;
-		public DataStore(IMessenger messenger) : base(messenger)
+
+		private readonly List<ProducerModel> _producerModels;
+		public List<ProducerModel> ProducerModels => _producerModels;
+		public DataStore(TopModel topModel, IMessenger messenger) : base(messenger)
 		{
-			_topModel = new TopModel();
+			_topModel = topModel;
 			_lazyInit = new Lazy<Task>(LoadAll);
 			_catalogueModels = new List<CatalogueModel>();
+			_producerModels = new List<ProducerModel>();
+
+			Messenger.Register<EditedMessage>(this, OnDataBaseEdited);
+			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
 		}
+
+		private void OnDataBaseDeleted(object recipient, DeletedMessage message)
+		{
+			if (message.Value.Where == "PartCatalogue") 
+			{
+				_catalogueModels.RemoveAll(x => x.UniId == message.Value.Id);
+			}
+		}
+
+		private void OnDataBaseEdited(object recipient, EditedMessage message)
+		{
+			if (message.Value.Where == "PartCatalogue") 
+			{
+				var uniId = message.Value.Id;
+				var model = (CatalogueModel?)message.Value.What;
+				if (model != null)
+				{
+					_catalogueModels.RemoveAll(x => x.UniId == uniId);
+					_catalogueModels.Add(model);
+
+				}
+			}
+		}
+
 		//to initialize Store
 		public async Task LoadLazy()
 		{
@@ -31,9 +63,11 @@ namespace CatalogueAvalonia.Services.DataStore
 
 		public async Task LoadAll()
 		{
-			IEnumerable<CatalogueModel> catalogueModels = await _topModel.GetCatalogueAsync().ConfigureAwait(false);
 			_catalogueModels.Clear();
-			_catalogueModels.AddRange(catalogueModels);
+			_catalogueModels.AddRange(await _topModel.GetCatalogueAsync().ConfigureAwait(false));
+
+			_producerModels.Clear();
+			_producerModels.AddRange(await _topModel.GetProducersAsync().ConfigureAwait(false));
 
 
 			Messenger.Send(new DataBaseLoadedMessage(""));

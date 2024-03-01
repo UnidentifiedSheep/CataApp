@@ -1,15 +1,19 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Models.TreeDataGrid;
-using Avalonia.Controls.Selection;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
-using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
+using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
+using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,9 +23,13 @@ using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.ViewModels
 {
+
 	public partial class CatalogueViewModel : ViewModelBase
 	{
+		private readonly IDialogueService _dialogueService;
+
 		private readonly DataStore _dataStore;
+		private readonly TopModel _topModel;
 		private CatalogueModel? _selecteditem;
 		private readonly ObservableCollection<CatalogueModel> _catalogueModels;
 		public HierarchicalTreeDataGridSource<CatalogueModel> CatalogueModels { get; }
@@ -30,10 +38,13 @@ namespace CatalogueAvalonia.ViewModels
 		private string _partName = string.Empty;
 		[ObservableProperty]
 		private string _partUniValue = string.Empty;
-
 		
-		public CatalogueViewModel(IMessenger messenger, DataStore dataStore) : base(messenger) 
+		public CatalogueViewModel() { }
+		public CatalogueViewModel(IMessenger messenger, DataStore dataStore, 
+								  TopModel topModel, IDialogueService dialogueService) : base(messenger)
 		{
+			_dialogueService = dialogueService;
+			_topModel = topModel;
 			_dataStore = dataStore;
 			_catalogueModels = new ObservableCollection<CatalogueModel>();
 
@@ -55,6 +66,30 @@ namespace CatalogueAvalonia.ViewModels
 				}
 			};
 			Messenger.Register<DataBaseLoadedMessage>(this, OndataBaseLoaded);
+			Messenger.Register<EditedMessage>(this, OnEditedIdDataBase);
+			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
+		}
+
+		private void OnDataBaseDeleted(object recipient, DeletedMessage message)
+		{
+			if (message.Value.Where == "PartCatalogue")
+			{
+				_catalogueModels.Remove(_catalogueModels.Where(x => x.UniId == message.Value.Id).Single());
+			}
+		}
+
+		private void OnEditedIdDataBase(object recipient, EditedMessage message)
+		{
+			if (message.Value.Where == "PartCatalogue")
+			{
+				var uniId = message.Value.Id;
+				var model = (CatalogueModel?)message.Value.What;
+				if (model != null)
+				{
+					_catalogueModels.Remove(_catalogueModels.Where(x => x.UniId == model.UniId).Single());
+					_catalogueModels.Add(model);
+				}
+			}
 		}
 
 		private void OndataBaseLoaded(object recipient, DataBaseLoadedMessage message)
@@ -94,20 +129,82 @@ namespace CatalogueAvalonia.ViewModels
 				_catalogueModels.AddRange(_dataStore.CatalogueModels);
 			}
 		}
-		[RelayCommand]
-		private async Task DeleteGroup()
+		private bool CanDeleteGroup()
 		{
-
+			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			if(_selecteditem != null) 
+			{
+				if (_selecteditem.UniId != null && _selecteditem.MainCatId == null)
+				{
+					return true;
+				}
+				else
+					return false;
+			}
+			else
+				return false;
+		}
+		[RelayCommand(CanExecute = nameof(CanDeleteGroup))]
+		private async Task DeleteGroup(Window parent)
+		{
+			if (_selecteditem != null) 
+			{
+				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить группу запчастей", 
+						$"Вы уверенны что хотите удалить: \n\"{_selecteditem.Name}\"?", 
+						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+				if (res == ButtonResult.Yes)
+				{
+					_catalogueModels.Remove(_selecteditem);
+					_dataStore.CatalogueModels.Remove(_selecteditem);
+					await _topModel.DeleteGroupFromCatalogue(_selecteditem.UniId);
+				}
+			}
+				
+		}
+		private bool CanDeletePart()
+		{
+			if (_selecteditem != null) 
+			{
+				if (_selecteditem.MainCatId != null)
+				{
+					return true;
+				}
+				else
+					return false;
+			}
+			return false;
+		}
+		[RelayCommand(CanExecute = nameof(CanDeletePart))]
+		private async Task DeleteSolo(Window parent)
+		{
+			if (_selecteditem != null)
+			{
+				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить запчасть",
+						$"Вы уверенны что хотите удалить: \n\"{_selecteditem.UniValue}\"?",
+						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+				if (res == ButtonResult.Yes) 
+				{
+					_catalogueModels.Remove(_selecteditem);
+					_dataStore.CatalogueModels.Remove(_selecteditem);
+					await _topModel.DeleteSoloFromCatalogue(_selecteditem.MainCatId);
+				}
+			}
+			
 		}
 		[RelayCommand]
-		private async Task DeleteSolo()
+		private async Task EditCatalogue(Window parent)
 		{
-
-		}
-		[RelayCommand]
-		private async Task EditCatalogue()
-		{
-
+			if (_selecteditem != null)
+			{
+				if (_selecteditem.MainCatId == null && _selecteditem.UniId == null)
+				{
+					
+				}
+				else
+				{
+					await _dialogueService.OpenDialogue(new EditCatalogueWindow(), new EditCatalogueViewModel(Messenger, _dataStore, _selecteditem.UniId, _topModel), parent);
+				}
+			}
 		}
 	}
 

@@ -5,6 +5,7 @@ namespace CatalogueAvalonia
 {
     public class ViewModelBase : ObservableRecipient
     {
+        public ViewModelBase() { }  
         public ViewModelBase(IMessenger messenger) : base(messenger) 
         { }
     }

@@ -6,6 +6,9 @@
              xmlns:vm="using:CatalogueAvalonia.ViewModels"
 			 x:Class="CatalogueAvalonia.Views.CatalogueView"
 			 x:CompileBindings="False">
+	<Design.DataContext>
+		<vm:CatalogueViewModel/>
+	</Design.DataContext>
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition MaxWidth="300"/>
@@ -52,9 +55,12 @@
             </TreeDataGrid.Styles>
 			<TreeDataGrid.ContextMenu>
 				<ContextMenu>
-					<MenuItem Header="Редактировать" Command="{Binding EditCatalogueCommand}"/>
-					<MenuItem Header="Удалить запчасть" Command="{Binding DeleteSoloCommand}"/>
-					<MenuItem Header="Удалить группу запчастей" Command="{Binding DeleteGroupCommand}"/>
+					<MenuItem Header="Редактировать" 
+							  Command="{Binding EditCatalogueCommand}" CommandParameter="{Binding $parent[Window]}" />
+					<MenuItem Header="Удалить запчасть" 
+							  Command="{Binding DeleteSoloCommand}" CommandParameter="{Binding $parent[Window]}"/>
+					<MenuItem Header="Удалить группу запчастей" 
+							  Command="{Binding DeleteGroupCommand}" CommandParameter="{Binding $parent[Window]}"/>
 				</ContextMenu>
 			</TreeDataGrid.ContextMenu>
 		</TreeDataGrid>

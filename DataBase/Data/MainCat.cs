@@ -10,8 +10,22 @@ public partial class MainCat
     public int UniId { get; set; }
 
     public string UniValue { get; set; } = null!;
+    private string _name = string.Empty;
+    public string Name
+    {
+        get
+        {
+            return _name;
+        }
+        set 
+        { 
+            if (value == "Название не указано") 
+                _name = string.Empty;
 
-    public string Name { get; set; } = null!;
+            else
+                _name = value; 
+        }
+    }
 
     public int ProducerId { get; set; }
 

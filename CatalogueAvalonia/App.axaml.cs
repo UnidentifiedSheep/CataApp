@@ -6,11 +6,17 @@ using Avalonia.Markup.Xaml;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
+using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels;
+using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using CatalogueAvalonia.Views;
+using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.Messaging;
+using DataBase.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Reflection.Emit;
 
@@ -56,11 +62,16 @@ namespace CatalogueAvalonia
 			
 			builder.Services.AddSingleton<MainWindowViewModel>();
 			builder.Services.AddSingleton<CatalogueViewModel>();
+			builder.Services.AddScoped<EditCatalogueViewModel>();
 
 			builder.Services.AddSingleton<TopModel>();
 			builder.Services.AddSingleton<DataStore>();
 			builder.Services.AddSingleton<IDataBaseProvider, DataBaseProvider>();
+			builder.Services.AddSingleton<IDataBaseAction, DataBaseAction>();
+			builder.Services.AddSingleton<IDialogueService, DialogueService>();
 			builder.Services.AddSingleton<IMessenger, WeakReferenceMessenger>();
+
+			builder.Services.AddDbContext<DataContext>(o => o.UseSqlite("DataSource=C:\\Users\\Shep\\Desktop\\data.db"));
 
 			return builder;
 		}
