@@ -3,6 +3,7 @@ using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,19 @@ namespace CatalogueAvalonia.Services.DataStore
 
 			Messenger.Register<EditedMessage>(this, OnDataBaseEdited);
 			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
+			Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+		}
+
+		private void OnDataBaseAdded(object recipient, AddedMessage message)
+		{
+			if (message.Value.Where == "Catalogue")
+			{
+				var what = message.Value.What as CatalogueModel;
+				if (what != null)
+				{
+					_catalogueModels.Add(what);
+				}
+			}
 		}
 
 		private void OnDataBaseDeleted(object recipient, DeletedMessage message)

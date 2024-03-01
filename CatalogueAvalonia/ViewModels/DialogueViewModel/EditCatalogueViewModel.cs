@@ -10,6 +10,7 @@ using DynamicData;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,8 +21,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 	{
 		private readonly int? _uniId;
 		private readonly DataStore _dataStore;
-		private readonly ObservableCollection<ProducerModel> _producers;
 		private readonly TopModel _topModel;
+		private readonly ObservableCollection<ProducerModel> _producers;
 		public IEnumerable<ProducerModel> Producers => _producers;
 
 		private readonly ItemsChangeObservableCollection<CatalogueModel> _catalogueModels;
@@ -34,6 +35,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private ProducerModel? _selectedProducer;
 		[ObservableProperty]
 		private CatalogueModel? _selectedCatalogue;
+		
 		public EditCatalogueViewModel()
 		{
 			_producers = new ObservableCollection<ProducerModel>();
@@ -93,7 +95,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				Children = _catalogueModels
 			};
 			await _topModel.EditCatalogueAsync(model);
-			Messenger.Send(new EditedMessage(new ChangedItem { Where = "PartCatalogue", Id = _uniId, What = await _topModel.GetCatalogueByIdAsync(_uniId ?? default)}));
+			Messenger.Send(new EditedMessage(new ChangedItem { Where = "PartCatalogue", Id = _uniId, What = await _topModel.GetCatalogueByIdAsync(_uniId ?? 5923)}));
 			_catalogueModels.Clear();
 		}
 		[RelayCommand]
@@ -123,12 +125,11 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		{
 			if (SelectedCatalogue != null && SelectedProducer != null)
 			{
-				_catalogueModels[index].ProducerId = id;
-				_catalogueModels[index].ProducerName = name;
 				SelectedCatalogue = null;
 				SelectedProducer = null;
+				_catalogueModels[index].ProducerId = id;
+				_catalogueModels[index].ProducerName = name;
 			}
-			
 		}
 	}
 }

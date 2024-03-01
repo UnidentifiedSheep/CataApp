@@ -68,6 +68,19 @@ namespace CatalogueAvalonia.ViewModels
 			Messenger.Register<DataBaseLoadedMessage>(this, OndataBaseLoaded);
 			Messenger.Register<EditedMessage>(this, OnEditedIdDataBase);
 			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
+			Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+		}
+
+		private void OnDataBaseAdded(object recipient, AddedMessage message)
+		{
+			if (message.Value.Where == "Catalogue")
+			{
+				var what = message.Value.What as CatalogueModel;
+				if (what != null)
+				{
+					_catalogueModels.Add(what);
+				}
+			}
 		}
 
 		private void OnDataBaseDeleted(object recipient, DeletedMessage message)
@@ -96,7 +109,7 @@ namespace CatalogueAvalonia.ViewModels
 		{
 			_catalogueModels.AddRange(_dataStore.CatalogueModels);
 		}
-
+		private bool _isFilteringByUniValue = false;
 		partial void OnPartNameChanged(string value)
 		{
 			var filter = new AsyncRelayCommand(async (CancellationToken token) =>
@@ -105,7 +118,11 @@ namespace CatalogueAvalonia.ViewModels
 				await foreach (var res in DataFiltering.FilterByMainName(_dataStore.CatalogueModels, value, token))
 					_catalogueModels.Add(res);
 			});
-			if (value.Length >= 3)
+			if (_isFilteringByUniValue)
+			{
+
+			}
+			else if (value.Length >= 3)
 				filter.Execute(null);
 			else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
 			{
@@ -122,11 +139,16 @@ namespace CatalogueAvalonia.ViewModels
 					_catalogueModels.Add(res);
 			});
 			if (value.Length >= 3)
+			{
 				filter.Execute(null);
+				_isFilteringByUniValue = true;
+			}
 			else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
 			{
+				_isFilteringByUniValue = false;
 				_catalogueModels.Clear();
 				_catalogueModels.AddRange(_dataStore.CatalogueModels);
+				OnPartNameChanged(PartName);
 			}
 		}
 		private bool CanDeleteGroup()
@@ -205,6 +227,11 @@ namespace CatalogueAvalonia.ViewModels
 					await _dialogueService.OpenDialogue(new EditCatalogueWindow(), new EditCatalogueViewModel(Messenger, _dataStore, _selecteditem.UniId, _topModel), parent);
 				}
 			}
+		}
+		[RelayCommand]
+		private async Task AddNewPart(Window parent)
+		{
+			await _dialogueService.OpenDialogue(new AddNewPartView(), new AddNewPartViewModel(Messenger, _dataStore, _topModel), parent);
 		}
 	}
 

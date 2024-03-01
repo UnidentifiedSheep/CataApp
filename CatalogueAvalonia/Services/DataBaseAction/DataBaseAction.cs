@@ -51,5 +51,28 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 			}
 			
 		}
+
+		public async Task<int> AddCatalogue(CatalogueModel catalogueModel)
+		{
+			if (catalogueModel.Children != null)
+			{
+				var model = new MainName
+				{
+					Name = catalogueModel.Name,
+					MainCats = catalogueModel.Children.Select(x => new MainCat
+					{
+						UniValue = x.UniValue,
+						Name = x.Name,
+						ProducerId = x.ProducerId
+					}).ToList()
+				};
+				await _context.MainNames.AddAsync(model);
+				await _context.SaveChangesAsync();
+
+				return model.UniId;
+			}
+			else
+				return 5923;
+		}
 	}
 }

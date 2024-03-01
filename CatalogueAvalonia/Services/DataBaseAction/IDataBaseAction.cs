@@ -14,5 +14,6 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		
 		Task DeleteFromMainCatById(int? id);
 		Task EditCatalogue(CatalogueModel catalogue);
+		Task<int> AddCatalogue(CatalogueModel catalogueModel);
 	}
 }

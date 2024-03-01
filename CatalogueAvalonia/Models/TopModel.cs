@@ -70,5 +70,14 @@ namespace CatalogueAvalonia.Models
 		{
 			return await _dataBaseProvider.GetCatalogueById(id).ConfigureAwait(false);
 		}
+		/// <summary>
+		/// Добавление новой группы в катало запчастей.
+		/// </summary>
+		/// <param name="catalogueModell"></param>
+		/// <returns>Id только что добавленной группы.</returns>
+		public async Task<int> AddNewCatalogue(CatalogueModel catalogueModell)
+		{
+			return await _dataBaseAction.AddCatalogue(catalogueModell);
+		}
 	}
 }

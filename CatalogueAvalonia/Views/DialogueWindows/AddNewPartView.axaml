@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" MinHeight="700" MinWidth="480"
+		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Height="900" Width="880"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewPartView"
+        Title="AddNewPartView"
+		x:CompileBindings="False">
+	<Design.DataContext>
+		<vm:AddNewPartViewModel/>
+	</Design.DataContext>
+	<Grid Margin="10" 
+		  RowDefinitions="100, 178, *, 70">
+		<TextBlock Text="Добавить Новую Запчасть"
+                   FontSize="30"
+                   FontWeight="Heavy"
+                   Foreground="#505050"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" Height="39" Width="408"/>
+		<Grid Grid.Row="1">
+			<StackPanel>
+				<StackPanel Margin="0,0,0,10">
+					<Label Content="Введите Номера запчастей"
+                           FontSize="15"
+                           Foreground="#505050"/>
+					<TextBox HorizontalAlignment="Stretch"
+                             FontSize="20"
+                             Text="{Binding Parts}"/>
+				</StackPanel>
+
+				<StackPanel Margin="0, 10, 0, 0">
+					<Label Content="Введите название"
+                           FontSize="15"
+                           Foreground="#505050"/>
+					<TextBox HorizontalAlignment="Stretch"
+                             Text="{Binding NameOfParts}"
+                             FontSize="20"/>
+				</StackPanel>
+			</StackPanel>
+		</Grid>
+		<Grid Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="240*" MinWidth="60"/>
+				<ColumnDefinition Width="1.5"/>
+				<ColumnDefinition Width="100*" MinWidth="60"/>
+			</Grid.ColumnDefinitions>
+			<DataGrid Grid.Column="0"
+                      ItemsSource="{Binding Catalogues}"
+					  CanUserResizeColumns="True"
+					  CanUserReorderColumns="True"
+                      SelectionMode="Single"
+                      SelectedItem="{Binding SelectedCatalogue}">
+				<DataGrid.Columns>
+					<DataGridTextColumn Header="Номер запчасти"
+                                        Width="*"
+                                        Binding="{Binding UniValue}"
+                                        IsReadOnly="True"/>
+					<DataGridTextColumn Header="Название запчасти"
+										Width="*"
+										Binding="{Binding Name}"/>
+					<DataGridTextColumn Header="Производитель"
+                                        Width="*"
+                                        Binding="{Binding ProducerName}"
+                                        IsReadOnly="True"/>
+				</DataGrid.Columns>
+			</DataGrid>
+			<GridSplitter Grid.Column="1" BorderBrush="#20202020"
+						  BorderThickness="1.5,0, 0,0"/>
+			<Grid Grid.Column="2"
+				  RowDefinitions="40, 32*">
+				<StackPanel Grid.Row="0"
+                            Margin="0,5,0,0">
+					<TextBox HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             Text="{Binding ProducerSearchField}"
+                             FontSize="15.5"/>
+				</StackPanel>
+				<DataGrid Grid.Row="1"
+                          AutoGenerateColumns="False"
+                          ItemsSource="{Binding Producers}"
+                          IsReadOnly="True"
+                          SelectedItem="{Binding SelectedProducer}"
+                          SelectionMode="Single"
+                          Margin="5,5,5,5">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Производитель"
+                                            Width="*"
+                                            Binding="{Binding ProducerName}"/>
+					</DataGrid.Columns>
+				</DataGrid>
+			</Grid>
+		</Grid>
+
+		<Grid Grid.Row="3" Margin="10,10,10,10"
+			  ColumnDefinitions="*,*">
+			<Button Grid.Column="0"
+                    Content="Подтвердить"
+                    HorizontalAlignment="Center"
+					Click="SaveButt_Click"
+                    VerticalAlignment="Center"
+                    MinHeight="40"
+                    MinWidth="150"
+					HorizontalContentAlignment="Center"
+                    FontSize="20"/>
+			<Button Grid.Column="1"
+                    Content="Отмена"
+                    HorizontalAlignment="Center"
+					HorizontalContentAlignment="Center"
+                    VerticalAlignment="Center"
+					Click="CancleButt_Click"
+                    MinHeight="40"
+                    MinWidth="150"
+                    FontSize="20"/>
+		</Grid>
+	</Grid>
+</Window>

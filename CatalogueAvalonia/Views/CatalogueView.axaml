@@ -37,11 +37,13 @@
 				</StackPanel>
 			</StackPanel>
 			<Button Grid.Row="3"
-                    Command=""
+                    Command="{Binding AddNewPartCommand}"
+					CommandParameter="{Binding $parent[Window]}"
                     Content="Добавить запчасть"
                     FontSize="16"
 					HorizontalAlignment="Center"
 					HorizontalContentAlignment="Center"
+					VerticalContentAlignment="Center"
                     MinHeight="40"
                     MinWidth="180"/>
 		</Grid>

@@ -1,4 +1,5 @@
-﻿using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Model;
+using CatalogueAvalonia.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +14,15 @@ namespace CatalogueAvalonia.Core
 	public class DataFiltering
 	{
 		private static readonly Regex reg = new Regex(@"[^a-zА-Яа-яA-Z0-9_]+");
+		private static Regex regSlashes = new Regex(@"([/\\])+|([/\\])\2*");
 
 		public static async IAsyncEnumerable<CatalogueModel> FilterByMainName(List<CatalogueModel> catalogueModels, string objectToFind, [EnumeratorCancellation] CancellationToken token)
 		{
 			for (int i = 0; i < catalogueModels.Count(); i++) 
 			{ 
-				if(!string.IsNullOrEmpty(objectToFind))
+				if (await CheckIfContainsName(catalogueModels[i].Name, objectToFind).ConfigureAwait(false))
 				{
-					if (await CheckIfContainsName(catalogueModels[i], objectToFind).ConfigureAwait(false))
-					{
-						yield return catalogueModels[i];
-					}
+					yield return catalogueModels[i];
 				}
 			}
 		}
@@ -44,13 +43,50 @@ namespace CatalogueAvalonia.Core
 				}
 			}
 		}
+		public static async IAsyncEnumerable<ProducerModel> FilterProducer(List<ProducerModel> producerModels, string objectToFind)
+		{
+			foreach (ProducerModel producerModel in producerModels) 
+			{ 
+				if(await CheckIfContainsName(producerModel.ProducerName, objectToFind))
+				{
+					yield return producerModel;
+				}
+			}
+		}
+		public static async Task<List<string>> FilterSlashes(string textWithSlashes)
+		{
+			List<string> addedItems = new List<string>();
+			string result = "";
+			var models = await ReplaceSlashesAsync(textWithSlashes, "/");
+
+			for (int i = 0; i < models.Length; i++)
+			{
+				if (models[i] == '/' && !string.IsNullOrEmpty(result))
+				{
+					if (!addedItems.Contains(result))
+					{
+						addedItems.Add(result);
+						result = string.Empty;
+					}
+					else
+						result = string.Empty;
+				}
+				else
+					result += models[i];
+			}
+			return addedItems;
+		}
+		private static Task<string> ReplaceSlashesAsync(string text, string replaceWith)
+		{
+			return Task.FromResult(regSlashes.Replace(text, replaceWith));
+		}
 		private static Task<bool> CheckIfContainsUniValue(CatalogueModel catalogueModel, string ObjectToFind)
 		{
 			return Task.FromResult(reg.Replace(catalogueModel.UniValue, "").ToLower().Contains(reg.Replace(ObjectToFind, "").ToLower()));
 		}
-		private static Task<bool> CheckIfContainsName(CatalogueModel catalogueModel, string ObjectToFind)
+		private static Task<bool> CheckIfContainsName(string name, string ObjectToFind)
 		{
-			return Task.FromResult(reg.Replace(catalogueModel.Name, "").ToLower().Contains(reg.Replace(ObjectToFind, "").ToLower()));
+			return Task.FromResult(reg.Replace(name, "").ToLower().Contains(reg.Replace(ObjectToFind, "").ToLower()));
 		}
 	}
 }
