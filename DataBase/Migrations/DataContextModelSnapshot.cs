@@ -100,6 +100,13 @@ namespace DataBase.Migrations
                         .HasDefaultValue(" ")
                         .HasColumnName("currency_name");
 
+                    b.Property<string>("CurrencySign")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(" ")
+                        .HasColumnName("currency_sign");
+
                     b.Property<double>("ToUsd")
                         .HasColumnType("REAL")
                         .HasColumnName("to_usd");
@@ -196,6 +203,10 @@ namespace DataBase.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("uni_id");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("count");
 
                     b.Property<string>("Name")
                         .IsRequired()

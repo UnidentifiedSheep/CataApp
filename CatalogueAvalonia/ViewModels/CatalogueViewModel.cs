@@ -1,5 +1,4 @@
 ﻿using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Models.TreeDataGrid;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -14,7 +13,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -38,9 +36,9 @@ namespace CatalogueAvalonia.ViewModels
 		private string _partName = string.Empty;
 		[ObservableProperty]
 		private string _partUniValue = string.Empty;
-		
+
 		public CatalogueViewModel() { }
-		public CatalogueViewModel(IMessenger messenger, DataStore dataStore, 
+		public CatalogueViewModel(IMessenger messenger, DataStore dataStore,
 								  TopModel topModel, IDialogueService dialogueService) : base(messenger)
 		{
 			_dialogueService = dialogueService;
@@ -128,7 +126,7 @@ namespace CatalogueAvalonia.ViewModels
 			{
 				_catalogueModels.Clear();
 				_catalogueModels.AddRange(_dataStore.CatalogueModels);
-			}	
+			}
 		}
 		partial void OnPartUniValueChanged(string value)
 		{
@@ -154,7 +152,7 @@ namespace CatalogueAvalonia.ViewModels
 		private bool CanDeleteGroup()
 		{
 			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
-			if(_selecteditem != null) 
+			if (_selecteditem != null)
 			{
 				if (_selecteditem.UniId != null && _selecteditem.MainCatId == null)
 				{
@@ -169,10 +167,10 @@ namespace CatalogueAvalonia.ViewModels
 		[RelayCommand(CanExecute = nameof(CanDeleteGroup))]
 		private async Task DeleteGroup(Window parent)
 		{
-			if (_selecteditem != null) 
+			if (_selecteditem != null)
 			{
-				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить группу запчастей", 
-						$"Вы уверенны что хотите удалить: \n\"{_selecteditem.Name}\"?", 
+				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить группу запчастей",
+						$"Вы уверенны что хотите удалить: \n\"{_selecteditem.Name}\"?",
 						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
 				if (res == ButtonResult.Yes)
 				{
@@ -181,11 +179,11 @@ namespace CatalogueAvalonia.ViewModels
 					await _topModel.DeleteGroupFromCatalogue(_selecteditem.UniId);
 				}
 			}
-				
+
 		}
 		private bool CanDeletePart()
 		{
-			if (_selecteditem != null) 
+			if (_selecteditem != null)
 			{
 				if (_selecteditem.MainCatId != null)
 				{
@@ -204,14 +202,14 @@ namespace CatalogueAvalonia.ViewModels
 				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить запчасть",
 						$"Вы уверенны что хотите удалить: \n\"{_selecteditem.UniValue}\"?",
 						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
-				if (res == ButtonResult.Yes) 
+				if (res == ButtonResult.Yes)
 				{
 					_catalogueModels.Remove(_selecteditem);
 					_dataStore.CatalogueModels.Remove(_selecteditem);
 					await _topModel.DeleteSoloFromCatalogue(_selecteditem.MainCatId);
 				}
 			}
-			
+
 		}
 		[RelayCommand]
 		private async Task EditCatalogue(Window parent)
@@ -220,7 +218,7 @@ namespace CatalogueAvalonia.ViewModels
 			{
 				if (_selecteditem.MainCatId == null && _selecteditem.UniId == null)
 				{
-					
+
 				}
 				else
 				{

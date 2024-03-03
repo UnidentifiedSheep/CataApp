@@ -43,13 +43,23 @@ namespace CatalogueAvalonia.Core
 				}
 			}
 		}
-		public static async IAsyncEnumerable<ProducerModel> FilterProducer(List<ProducerModel> producerModels, string objectToFind)
+		public static async IAsyncEnumerable<ProducerModel> FilterProducer(IEnumerable<ProducerModel> producerModels, string objectToFind)
 		{
 			foreach (ProducerModel producerModel in producerModels) 
 			{ 
 				if(await CheckIfContainsName(producerModel.ProducerName, objectToFind))
 				{
 					yield return producerModel;
+				}
+			}
+		}
+		public static async IAsyncEnumerable<AgentModel> FilterAgents(IEnumerable<AgentModel> agentModels, string objectToFind)
+		{
+			foreach(AgentModel agentModel in agentModels)
+			{
+				if (await CheckIfContainsName(agentModel.Name, objectToFind))
+				{
+					yield return agentModel;
 				}
 			}
 		}

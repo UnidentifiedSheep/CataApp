@@ -14,6 +14,9 @@
 			<TabItem Header="Каталог">
 				<view:CatalogueView DataContext="{Binding ViewModels[0]}"/>
 			</TabItem>
+			<TabItem Header="Контрагенты">
+				<view:AgentView DataContext="{Binding ViewModels[1]}"/>
+			</TabItem>
 		</TabControl>
 	</Grid>
 </Window>

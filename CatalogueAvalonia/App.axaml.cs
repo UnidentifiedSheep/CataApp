@@ -59,9 +59,11 @@ namespace CatalogueAvalonia
 
 			builder.Services.AddSingleton<MainWindow>();
 			builder.Services.AddSingleton<CatalogueView>();
+			builder.Services.AddSingleton<AgentView>();
 			
 			builder.Services.AddSingleton<MainWindowViewModel>();
 			builder.Services.AddSingleton<CatalogueViewModel>();
+			builder.Services.AddSingleton<AgentViewModel>();
 			builder.Services.AddScoped<EditCatalogueViewModel>();
 
 			builder.Services.AddSingleton<TopModel>();

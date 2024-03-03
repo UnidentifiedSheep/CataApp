@@ -1,10 +1,6 @@
 ﻿using CatalogueAvalonia.Models;
 using DataBase.Data;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.Services.DataBaseAction
@@ -16,8 +12,8 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		public async Task DeleteMainNameById(int? id)
 		{
 			var el = await _context.MainNames.FindAsync(id);
-			if (el != null) 
-			{ 
+			if (el != null)
+			{
 				_context.MainNames.Remove(el);
 				await _context.SaveChangesAsync();
 			}
@@ -25,11 +21,11 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		public async Task DeleteFromMainCatById(int? id)
 		{
 			var el = await _context.MainCats.FindAsync(id);
-			if(el != null)
+			if (el != null)
 			{
 				_context.MainCats.Remove(el);
 				await _context.SaveChangesAsync();
-			}	
+			}
 		}
 
 		public async Task EditCatalogue(CatalogueModel catalogue)
@@ -49,7 +45,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 				}).ToList();
 				await _context.SaveChangesAsync();
 			}
-			
+
 		}
 
 		public async Task<int> AddCatalogue(CatalogueModel catalogueModel)
@@ -73,6 +69,24 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 			}
 			else
 				return 5923;
+		}
+		public async Task EditAgent(AgentModel agentModel)
+		{
+			var model = await _context.Agents.FindAsync(agentModel.Id);
+			if (model != null)
+			{
+				model.Name = agentModel.Name;
+				model.IsZak = agentModel.IsZak;
+			}
+			await _context.SaveChangesAsync();
+		}
+		public async Task<AgentModel> AddNewAgent(string name, int isZak)
+		{
+			var model = new Agent { Name = name, IsZak = isZak };
+			await _context.Agents.AddAsync(model);
+			await _context.SaveChangesAsync();
+
+			return new AgentModel { Id = model.Id, IsZak = model.IsZak, Name = model.Name};
 		}
 	}
 }

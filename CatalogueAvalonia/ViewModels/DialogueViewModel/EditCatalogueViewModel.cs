@@ -25,7 +25,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private readonly ObservableCollection<ProducerModel> _producers;
 		public IEnumerable<ProducerModel> Producers => _producers;
 
-		private readonly ItemsChangeObservableCollection<CatalogueModel> _catalogueModels;
+		private readonly ObservableCollection<CatalogueModel> _catalogueModels;
 		public IEnumerable<CatalogueModel> Catalogues => _catalogueModels;
 		public bool IsDirty = false;
 
@@ -41,7 +41,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_producers = new ObservableCollection<ProducerModel>();
 			for (int i = 0; i < 10; i++)
 				_producers.Add(new ProducerModel { Id = i, ProducerName = $"Producer{i}" });
-			_catalogueModels = new ItemsChangeObservableCollection<CatalogueModel>();
+			_catalogueModels = new ObservableCollection<CatalogueModel>();
 			for (int i = 0; i < 10; i++)
 				_catalogueModels.Add(new CatalogueModel { Name = "", UniValue=$"part{i}", ProducerName=$"sampa{i}"});
 		}
@@ -51,7 +51,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_uniId = id;
 			_dataStore = dataStore;
 			_producers = new ObservableCollection<ProducerModel>(_dataStore.ProducerModels);
-			_catalogueModels = new ItemsChangeObservableCollection<CatalogueModel>();
+			_catalogueModels = new ObservableCollection<CatalogueModel>();
 			GetParts(_uniId);
 		}
 
@@ -129,6 +129,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				SelectedProducer = null;
 				_catalogueModels[index].ProducerId = id;
 				_catalogueModels[index].ProducerName = name;
+				IsDirty = true;
 			}
 		}
 	}

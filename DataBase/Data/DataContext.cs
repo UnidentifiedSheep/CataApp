@@ -37,6 +37,7 @@ public partial class DataContext : DbContext
 
     public virtual DbSet<Zakupka> Zakupkas { get; set; }
 
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Agent>(entity =>
@@ -81,6 +82,9 @@ public partial class DataContext : DbContext
             entity.Property(e => e.CurrencyName)
                 .HasDefaultValue(" ")
                 .HasColumnName("currency_name");
+            entity.Property(e => e.CurrencySign)
+                .HasDefaultValue(" ")
+                .HasColumnName("currency_sign");
             entity.Property(e => e.ToUsd).HasColumnName("to_usd");
         });
 
@@ -132,6 +136,7 @@ public partial class DataContext : DbContext
             entity.HasIndex(e => e.UniId, "IX_main_name_uni_id").IsUnique();
 
             entity.Property(e => e.UniId).HasColumnName("uni_id");
+            entity.Property(e => e.Count).HasColumnName("count");
             entity.Property(e => e.Name).HasColumnName("name");
         });
 

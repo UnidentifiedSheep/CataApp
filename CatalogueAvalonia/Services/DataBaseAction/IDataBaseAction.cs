@@ -1,4 +1,5 @@
 ﻿using CatalogueAvalonia.Models;
+using DataBase.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		Task DeleteFromMainCatById(int? id);
 		Task EditCatalogue(CatalogueModel catalogue);
 		Task<int> AddCatalogue(CatalogueModel catalogueModel);
+		Task EditAgent(AgentModel agentModel);
+		Task<AgentModel> AddNewAgent(string name, int isZak);
 	}
 }

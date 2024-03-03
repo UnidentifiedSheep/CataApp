@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"  MinHeight="250" MinWidth="350"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewAgentWindow"
+		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Title="Добавление контрагента"
+		x:CompileBindings="False">
+	<Design.DataContext>
+		<vm:AddNewAgentViewModel/>
+	</Design.DataContext>
+	<Grid RowDefinitions="38*, 65*, 43*, 68*">
+		<TextBlock Text="Новый контрагент"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Foreground="#505050" Height="23" Width="162"/>
+		<StackPanel Grid.Row="1" Margin="5,8,5,2">
+			<Label Content="Имя контрагента"
+                   FontSize="14"
+                   Foreground="#505050"/>
+			<TextBox FontSize="13"
+                     Text="{Binding AgentName}"/>
+		</StackPanel>
+		<CheckBox Content="Является ли закупочным"
+                  Margin="5,0,0,0"
+                  Grid.Row="2"
+                  IsChecked="{Binding IsZak}"/>
+		<Grid Grid.Row="3" Margin="0,2,0,0"
+			  ColumnDefinitions="*,*">
+			<Button Grid.Column="0"
+                    Content="Добавить"
+                    FontSize="14"
+                    Width="100"
+					Click="Save_ButtClicked"
+					HorizontalContentAlignment="Center"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"/>
+			<Button Grid.Column="1"
+                    Content="Отмена"
+                    FontSize="14"
+					Click="Cancle_ButtClicked"
+					HorizontalContentAlignment="Center"
+                    Width="100"
+                    VerticalAlignment="Center"
+                    HorizontalAlignment="Center"/>
+		</Grid>
+	</Grid>
+</Window>

@@ -9,6 +9,8 @@ public partial class Currency
 
     public string CurrencyName { get; set; } = null!;
 
+    public string CurrencySign { get; set; } = null!;
+
     public double ToUsd { get; set; }
 
     public virtual ICollection<AgentTransaction> AgentTransactions { get; set; } = new List<AgentTransaction>();

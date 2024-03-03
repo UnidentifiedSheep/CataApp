@@ -8,13 +8,14 @@ namespace CatalogueAvalonia.ViewModels
     public partial class MainWindowViewModel : ViewModelBase
 	{
 		private readonly ObservableCollection<object> _viewModels;
-		public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel, DataStore dataStore) : base(messenger) 
+		public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel, AgentViewModel agentViewModel, DataStore dataStore) : base(messenger) 
 		{
 			_viewModels =
 				[
-					catalogueViewModel
+					catalogueViewModel,
+					agentViewModel,
 				];
-			var load = new RelayCommand(async () => await dataStore.LoadLazy());
+			var load = new AsyncRelayCommand(dataStore.LoadLazy);
 			load.Execute(null);
 		}
 		public ObservableCollection<object> ViewModels { get { return _viewModels; } }

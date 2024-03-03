@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataBase.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240217144319_Initial")]
+    [Migration("20240302200415_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -102,6 +102,13 @@ namespace DataBase.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValue(" ")
                         .HasColumnName("currency_name");
+
+                    b.Property<string>("CurrencySign")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(" ")
+                        .HasColumnName("currency_sign");
 
                     b.Property<double>("ToUsd")
                         .HasColumnType("REAL")
@@ -199,6 +206,10 @@ namespace DataBase.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("uni_id");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("count");
 
                     b.Property<string>("Name")
                         .IsRequired()

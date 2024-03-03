@@ -31,6 +31,7 @@ namespace DataBase.Migrations
                     id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     currency_name = table.Column<string>(type: "TEXT", nullable: false, defaultValue: " "),
+                    currency_sign = table.Column<string>(type: "TEXT", nullable: false, defaultValue: " "),
                     to_usd = table.Column<double>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
@@ -44,7 +45,8 @@ namespace DataBase.Migrations
                 {
                     uni_id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    name = table.Column<string>(type: "TEXT", nullable: false)
+                    name = table.Column<string>(type: "TEXT", nullable: false),
+                    count = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
