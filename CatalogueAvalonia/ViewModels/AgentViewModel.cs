@@ -10,10 +10,15 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using MsBox.Avalonia.Enums;
+using MsBox.Avalonia;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 
 namespace CatalogueAvalonia.ViewModels
 {
@@ -42,6 +47,8 @@ namespace CatalogueAvalonia.ViewModels
 		private DateTime _endDate;
 		[ObservableProperty]
 		private bool _isCurrencyVisible = false;
+		[ObservableProperty]
+		private bool _isLoaded = !false;
 		public AgentViewModel()
 		{
 			_agents = new ObservableCollection<AgentModel>();
@@ -63,8 +70,38 @@ namespace CatalogueAvalonia.ViewModels
 			_startDate = DateTime.Now.AddMonths(-1).Date;
 			_endDate = DateTime.Now.Date;
 
-			Messenger.Register<DataBaseLoadedMessage>(this, OnDataBaseLoaded);
+			Messenger.Register<ActionMessage>(this, OnAction);
 			Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+			Messenger.Register<EditedMessage>(this, OnDataBaseEdited);
+		}
+
+		private void OnDataBaseEdited(object recipient, EditedMessage message)
+		{
+			string where = message.Value.Where;
+			if (where == "Currencies")
+			{
+				var what = message.Value.What as IEnumerable<CurrencyModel>;
+				if (what != null)
+				{
+					_currencyModels.Clear();
+					_currencyModels.AddRange(what);
+				}
+			}
+		}
+
+		private void OnAction(object recipient, ActionMessage message)
+		{
+			if (message.Value == "DataBaseLoaded")
+			{
+				IsLoaded = !true;
+				Dispatcher.UIThread.Post(() =>
+				{
+					_agents.AddRange(_dataStore.AgentModels);
+					_currencyModels.AddRange(_dataStore.CurrencyModels);
+				});
+			}
+			else if(message.Value == "Update")
+				GetTransactionsCommand.Execute(null);
 		}
 
 		private void OnDataBaseAdded(object recipient, AddedMessage message)
@@ -75,12 +112,6 @@ namespace CatalogueAvalonia.ViewModels
 				if (what != null)
 					_agents.Add(what);
 			}
-		}
-
-		private void OnDataBaseLoaded(object recipient, DataBaseLoadedMessage message)
-		{
-			_agents.AddRange(_dataStore.AgentModels);
-			_currencyModels.AddRange(_dataStore.CurrencyModels);
 		}
 		[RelayCommand]
 		private async Task FilterAgent(string value)
@@ -97,7 +128,7 @@ namespace CatalogueAvalonia.ViewModels
 			}
 			else
 			{
-				if (_dataStore.AgentModels.Count != _agents.Count)
+				if (_dataStore.AgentModels.Count() != _agents.Count)
 				{
 					_agents.Clear();
 					_agents.AddRange(_dataStore.AgentModels);
@@ -111,26 +142,29 @@ namespace CatalogueAvalonia.ViewModels
 				IsCurrencyVisible = true;
 			else
 				IsCurrencyVisible = false;
-			GetTransactionsCommand.Execute(value);
+			GetTransactionsCommand.Execute(null);
 		}
 		partial void OnSelectedAgentChanged(AgentModel? value)
 		{
-			GetTransactionsCommand.Execute(value);
+			GetTransactionsCommand.Execute(null);
 		}
 		partial void OnEndDateChanged(DateTime value)
 		{
-			GetTransactionsCommand.Execute(value);
+			GetTransactionsCommand.Execute(null);
 		}
 		partial void OnStartDateChanged(DateTime value)
 		{
-			GetTransactionsCommand.Execute(value);
+			GetTransactionsCommand.Execute(null);
 		}
 		[RelayCommand]
 		private async Task GetTransactions()
 		{
 			_agentTransactions.Clear();
 			if (SelectedAgent != null && SelectedCurrency != null)
-				_agentTransactions.AddRange(await _topModel.GetAgentTransactionsByIdsAsync(SelectedAgent.Id, SelectedCurrency.Id, Converters.ToDateTimeSqlite(StartDate.ToString("dd.MM.yyyy")), Converters.ToDateTimeSqlite(EndDate.ToString("dd.MM.yyyy"))));
+			{
+				var model = await _topModel.GetAgentTransactionsByIdsAsync(SelectedAgent.Id, SelectedCurrency.Id ?? default, Converters.ToDateTimeSqlite(StartDate.ToString("dd.MM.yyyy")), Converters.ToDateTimeSqlite(EndDate.ToString("dd.MM.yyyy")));
+				_agentTransactions.AddRange(model.Where(x => x.TransactionStatus != 3).OrderByDescending(x => x.Id));
+			}
 		}
 		[RelayCommand]
 		private async Task EditAgent()
@@ -138,13 +172,47 @@ namespace CatalogueAvalonia.ViewModels
 			if (SelectedAgent != null)
 			{
 				await _topModel.EditAgentAsync(SelectedAgent);
-				Messenger.Send(new EditedMessage(new ChangedItem { Id = SelectedAgent.Id, Where = "Agents", What = SelectedAgent }));
 			}
 		}
 		[RelayCommand]
 		private async Task AddNewAgent(Window parent)
 		{
 			await _dialogueService.OpenDialogue(new AddNewAgentWindow(), new AddNewAgentViewModel(Messenger, _topModel), parent);
+		}
+		private bool canDoWithAgent() => SelectedAgent != null;
+		[RelayCommand(CanExecute = nameof(canDoWithAgent))]
+		private async Task DeleteAgent()
+		{
+			if (SelectedAgent != null)
+			{
+				await _topModel.DeleteAgentAsync(SelectedAgent.Id);
+				Messenger.Send(new DeletedMessage(new DeletedItem { Id = SelectedAgent.Id, Where = "Agent" }));
+				_agents.Remove(SelectedAgent);
+			}
+		}
+		[RelayCommand(CanExecute = nameof(canDoWithAgent))]
+		private async Task AddNewTransaction(Window parent)
+		{
+			if (SelectedAgent != null)
+			{
+				await _dialogueService.OpenDialogue(new AddNewTransactionWindow(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, SelectedAgent.Name, SelectedAgent.Id), parent);
+			}
+		}
+		private bool canDoWithTransaction() => SelectedTransaction != null;
+		[RelayCommand(CanExecute = nameof(canDoWithTransaction))]
+		private async Task DeleteTransaction(Window parent)
+		{
+			if (SelectedAgent != null && SelectedCurrency != null && SelectedTransaction != null && SelectedTransaction.CurrencyId != 0) 
+			{
+				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить транзакцию",
+						$"Вы уверенны что хотите удалить транзакцию?",
+						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+				if (res == ButtonResult.Yes)
+				{
+					await _topModel.DeleteAgentTransactionAsync(SelectedAgent.Id, SelectedTransaction.CurrencyId, SelectedTransaction.Id);
+					GetTransactionsCommand.Execute(null);
+				}
+			}
 		}
 	}
 }

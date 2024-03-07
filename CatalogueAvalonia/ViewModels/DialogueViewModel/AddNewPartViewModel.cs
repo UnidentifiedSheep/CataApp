@@ -112,7 +112,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			var newId = await _topModel.AddNewCatalogue(new CatalogueModel
 			{
 				Name = NameOfParts,
-				Children = _catalogueModels
+				Children = new(_catalogueModels)
 			});
 
 			Messenger.Send(new AddedMessage(new ChangedItem { Id = newId, Where = "Catalogue", What = await _topModel.GetCatalogueByIdAsync(newId)}));

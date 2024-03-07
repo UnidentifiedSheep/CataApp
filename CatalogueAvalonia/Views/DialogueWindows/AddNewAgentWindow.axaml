@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"  MinHeight="250" MinWidth="350"
+		Height="250" Width="350"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewAgentWindow"
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
         Title="Добавление контрагента"

@@ -15,9 +15,13 @@ public partial class ProdMainGroup
 
     public int CurrencyId { get; set; }
 
+    public int TransactionId { get; set; }
+
     public virtual Agent Agent { get; set; } = null!;
 
     public virtual Currency Currency { get; set; } = null!;
 
     public virtual ICollection<Prodaja> Prodajas { get; set; } = new List<Prodaja>();
+
+    public virtual AgentTransaction Transaction { get; set; } = null!;
 }

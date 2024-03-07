@@ -17,5 +17,6 @@ namespace CatalogueAvalonia.Services.Messeges
 	{
 		public string Where = string.Empty;
 		public int? Id;
+		public int? SecondId;
 	}
 }

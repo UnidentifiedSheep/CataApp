@@ -1,0 +1,112 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+		MinWidth="500" MinHeight="650" Width="500" Height="650"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.EditPricesWindow"
+		xmlns:converter="using:CatalogueAvalonia.Services.Conv"
+		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Title="EditPricesWindow"
+		x:CompileBindings="False">
+	<Design.DataContext>
+		<vm:EditPricesViewModel/>
+	</Design.DataContext>
+	<Grid RowDefinitions="60,*,60, 60"
+		  Margin="15">
+		<StackPanel Orientation="Horizontal"
+					Grid.Row="0"
+					Grid.Column="0">
+			<TextBlock Text="Номер запчасти: "
+					   FontSize="18"
+					   FontWeight="Bold"
+					   VerticalAlignment="Center"/>
+			<TextBlock Text="{Binding UniValue}"
+					   FontSize="18"
+					   FontWeight="Bold"
+					   VerticalAlignment="Center"/>
+		</StackPanel>
+		<DataGrid Grid.Column="0"
+				  ItemsSource="{Binding MainCatPrices}"
+				  CanUserReorderColumns="True"
+				  CanUserResizeColumns="True"
+				  Name="dgPrices"
+				  SelectedItem="{Binding SelectedPrice}"
+				  CellEditEnded="DataGridCellChanged"
+				  CanUserSortColumns="True"
+				  Grid.Row="1">
+			<DataGrid.Columns>
+				<DataGridTemplateColumn Header="Цена"
+										Width="10*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding Price}"
+										   BorderThickness="0"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Количество"
+										Width="7*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding Count}"
+										   BorderThickness="0"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Width="7*"  Header="Валюта">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<ComboBox ItemsSource="{Binding Currency}"
+									  HorizontalAlignment="Stretch"
+									  SelectedItem="{Binding SelectedCurrency}"
+									  Margin="2">
+								<ComboBox.ItemTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding CurrencyName}"/>
+									</DataTemplate>
+								</ComboBox.ItemTemplate>
+							</ComboBox>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				
+			</DataGrid.Columns>
+		</DataGrid>
+		<Grid Grid.Row="2"
+			  HorizontalAlignment="Stretch">
+			<Button HorizontalAlignment="Right"
+					Content="Добавить позицию"
+					Height="37"
+					Command="{Binding AddNewPriceCommand}"
+					VerticalContentAlignment="Center"/>
+			<Button HorizontalAlignment="Left"
+					Content="Удалить позицию"
+					Height="37"
+					Command="{Binding RemovePriceCommand}"
+					VerticalContentAlignment="Center"/>
+		</Grid>
+		
+		<Grid Grid.Row="3"
+			  Margin="5"
+			  RowDefinitions="*,5*,*"
+			  ColumnDefinitions="*,3*, 3*, *">
+			<Button Grid.Column="1"
+					Grid.Row="1"
+					MinWidth="120"
+					HorizontalContentAlignment="Center"
+					HorizontalAlignment="Center"
+					Click="SaveButt_Click"
+					Content="Сохранить"/>
+			<Button Grid.Column="2"
+					Grid.Row="1"
+					MinWidth="120"
+					Click="CancleButt_Click"
+					HorizontalContentAlignment="Center"
+					HorizontalAlignment="Center"
+					Content="Отменить"/>
+		</Grid>
+	</Grid>
+</Window>

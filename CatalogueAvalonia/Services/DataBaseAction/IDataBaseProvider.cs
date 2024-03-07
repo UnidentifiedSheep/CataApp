@@ -15,5 +15,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		Task<IEnumerable<AgentTransactionModel>> GetAgentTransactionsAsync();
 		Task<IEnumerable<AgentTransactionModel>> GetAgentTransactionsByIdsAsync(int agentId, int currencyId, string startDate, string endDate);
 		Task<AgentModel> GetAgentByIdAsync(int id);
+		Task<AgentTransactionModel> GetLastAddedTransaction(int agentId, int currencyId);
+		Task<IEnumerable<MainCatPriceModel>> GetMainCatPricesById(int mainCatId);
 	}
 }

@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:CatalogueAvalonia.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="750"
+			 xmlns:ui="using:FluentAvalonia.UI.Controls"
              x:Class="CatalogueAvalonia.Views.AgentView"
 			 x:CompileBindings="False">
 	<Design.DataContext>
@@ -79,6 +80,14 @@
 				<ColumnDefinition Width="733*"
                                   MinWidth="100"/>
 			</Grid.ColumnDefinitions>
+			<ui:ProgressRing Grid.Column="0"
+							 Grid.Row="0"
+							 BorderThickness="3"
+							 Height="30"
+							 Width="30"
+							 IsEnabled="{Binding IsLoaded}"
+							 IsVisible="{Binding IsLoaded}"
+							 IsIndeterminate="True"/>
 			<DataGrid Grid.Column="0"
                       Grid.Row="0"
                       Grid.RowSpan="2"
@@ -100,10 +109,11 @@
 				</DataGrid.Columns>
 				<DataGrid.ContextMenu>
 					<ContextMenu>
-						<MenuItem Header="Удалить контрагента"
-                                  Command=""/>
 						<MenuItem Header="Новая транзакция"
-                                  Command=""/>
+                                  Command="{Binding AddNewTransactionCommand}"
+								  CommandParameter="{Binding $parent[Window]}"/>
+						<MenuItem Header="Удалить контрагента"
+                                  Command="{Binding DeleteAgentCommand}"/>
 					</ContextMenu>
 				</DataGrid.ContextMenu>
 			</DataGrid>
@@ -125,13 +135,13 @@
 					<DataGridTextColumn Header="Дата"
 										Binding="{Binding TransactionDatatime}"
 										Width="*"/>
-					<DataGridTextColumn Header="Номер операция"
+					<DataGridTextColumn Header="Номер операции"
                                         Binding="{Binding Id}"
                                         Width="*"/>
-					<DataGridTextColumn Header="Сумма"
+					<DataGridTextColumn Header="Сумма (-)"
                                         Binding="{Binding Summa}"
                                         Width="*"/>
-					<DataGridTextColumn Header="Сумма платежа"
+					<DataGridTextColumn Header="Сумма платежа (+)"
                                         Binding="{Binding SummaPlateja}"
                                         Width="*"/>
 					<DataGridTextColumn Header="Сальдо"
@@ -145,7 +155,8 @@
 				<DataGrid.ContextMenu>
 					<ContextMenu>
 						<MenuItem Header="Удалить транзакцию"
-                                  Command=""/>
+                                  Command="{Binding DeleteTransactionCommand}"
+								  CommandParameter="{Binding $parent[Window]}"/>
 					</ContextMenu>
 				</DataGrid.ContextMenu>
 			</DataGrid>

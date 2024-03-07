@@ -22,4 +22,8 @@ public partial class AgentTransaction
     public virtual Agent Agent { get; set; } = null!;
 
     public virtual Currency CurrencyNavigation { get; set; } = null!;
+
+    public virtual ICollection<ProdMainGroup> ProdMainGroups { get; set; } = new List<ProdMainGroup>();
+
+    public virtual ICollection<ZakMainGroup> ZakMainGroups { get; set; } = new List<ZakMainGroup>();
 }

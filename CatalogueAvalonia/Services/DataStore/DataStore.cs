@@ -3,6 +3,7 @@ using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
+using DynamicData;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,8 @@ namespace CatalogueAvalonia.Services.DataStore
 			Messenger.Register<EditedMessage>(this, OnDataBaseEdited);
 			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
 			Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+
+			Task.Run(LoadLazy);
 		}
 
 		private void OnDataBaseAdded(object recipient, AddedMessage message)
@@ -58,10 +61,38 @@ namespace CatalogueAvalonia.Services.DataStore
 
 		private void OnDataBaseDeleted(object recipient, DeletedMessage message)
 		{
-			if (message.Value.Where == "PartCatalogue") 
+			var where = message.Value.Where;
+			if (where == "PartCatalogue")
 			{
-				_catalogueModels.RemoveAll(x => x.UniId == message.Value.Id);
+				var what = _catalogueModels.Find(x => x.UniId == message.Value.Id);
+				if (what != null)
+					_catalogueModels.Remove(what);
 			}
+			else if (where == "Agent")
+			{
+				var what = _agentModels.Find(x => x.Id == message.Value.Id);
+				if (what != null)
+					_agentModels.Remove(what);
+			}
+			else if (where == "CataloguePrices")
+			{
+				int? uniId = message.Value.SecondId;
+				int? mainCatId = message.Value.Id;
+				if (uniId != null && mainCatId != null)
+				{
+					var mainName = _catalogueModels.Where(x => x.UniId == uniId).Single();
+					if (mainName.Children != null)
+					{
+						var mainCats = mainName.Children.Where(x => x.MainCatId == mainCatId).Single();
+						if (mainCats.Children != null)
+						{
+							mainCats.Count = 0;
+							mainCats.Children.Clear();
+						}
+					}
+				}
+			}
+
 		}
 
 		private void OnDataBaseEdited(object recipient, EditedMessage message)
@@ -73,24 +104,46 @@ namespace CatalogueAvalonia.Services.DataStore
 				var model = (CatalogueModel?)message.Value.What;
 				if (model != null)
 				{
-					_catalogueModels.RemoveAll(x => x.UniId == uniId);
-					_catalogueModels.Add(model);
+					var item =_catalogueModels.Where(x => x.UniId == uniId).SingleOrDefault();
+					if (item != null)
+					{
+						_catalogueModels.ReplaceOrAdd(item, model);
+					}
 				}
 			}
-			else if (where == "Agents")
+			else if(where == "Currencies")
 			{
-				var id = message.Value.Id;
-				_agentModels.RemoveAll(x => x.Id == id);
-				var model = (AgentModel?)message.Value.What;
-				if (model != null)
-					_agentModels.Add(model);
+				var what = message.Value.What as IEnumerable<CurrencyModel>;
+				if (what != null)
+				{
+					_currencyModels.Clear();
+					_currencyModels.AddRange(what);
+				}
+			}
+			else if (where == "CataloguePrices")
+			{
+				var what = (CatalogueModel?)message.Value.What;
+				if (what != null)
+				{
+					var mainName = _catalogueModels.Where(x => x.UniId == what.UniId).Single();
+					if (mainName.Children != null)
+					{
+						var mainCats = mainName.Children.Where(x => x.MainCatId == what.MainCatId).Single();
+						if (mainCats != null)
+						{
+							mainName.Children.ReplaceOrAdd(mainCats, what);
+						}
+					}
+
+				}
 			}
 		}
 
 		//to initialize Store
 		public async Task LoadLazy()
 		{
-			await _lazyInit.Value.ConfigureAwait(false);
+			await _lazyInit.Value;
+			Messenger.Send(new ActionMessage("DataBaseLoaded"));
 		}
 
 		public async Task LoadAll()
@@ -106,8 +159,6 @@ namespace CatalogueAvalonia.Services.DataStore
 
 			_currencyModels.Clear();
 			_currencyModels.AddRange(await _topModel.GetAllCurrenciesAsync().ConfigureAwait(false));
-
-			Messenger.Send(new DataBaseLoadedMessage(""));
 		}
 	}
 }

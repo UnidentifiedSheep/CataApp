@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataBase.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240302200415_Initial")]
+    [Migration("20240306145103_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -95,6 +95,12 @@ namespace DataBase.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasColumnName("id");
+
+                    b.Property<int>("CanDelete")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(1)
+                        .HasColumnName("can_delete");
 
                     b.Property<string>("CurrencyName")
                         .IsRequired()
@@ -248,11 +254,17 @@ namespace DataBase.Migrations
                         .HasColumnType("REAL")
                         .HasColumnName("total_sum");
 
+                    b.Property<int>("TransactionId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("transaction_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AgentId");
 
                     b.HasIndex("CurrencyId");
+
+                    b.HasIndex("TransactionId");
 
                     b.HasIndex(new[] { "Id" }, "IX_prod_main_group_id")
                         .IsUnique();
@@ -339,11 +351,17 @@ namespace DataBase.Migrations
                         .HasColumnType("REAL")
                         .HasColumnName("total_sum");
 
+                    b.Property<int>("TransactionId")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("transaction_id");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AgentId");
 
                     b.HasIndex("CurrencyId");
+
+                    b.HasIndex("TransactionId");
 
                     b.HasIndex(new[] { "Id" }, "IX_zak_main_group_id")
                         .IsUnique();
@@ -454,9 +472,17 @@ namespace DataBase.Migrations
                         .HasForeignKey("CurrencyId")
                         .IsRequired();
 
+                    b.HasOne("DataBase.Data.AgentTransaction", "Transaction")
+                        .WithMany("ProdMainGroups")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Agent");
 
                     b.Navigation("Currency");
+
+                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("DataBase.Data.Prodaja", b =>
@@ -489,9 +515,17 @@ namespace DataBase.Migrations
                         .HasForeignKey("CurrencyId")
                         .IsRequired();
 
+                    b.HasOne("DataBase.Data.AgentTransaction", "Transaction")
+                        .WithMany("ZakMainGroups")
+                        .HasForeignKey("TransactionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Agent");
 
                     b.Navigation("Currency");
+
+                    b.Navigation("Transaction");
                 });
 
             modelBuilder.Entity("DataBase.Data.Zakupka", b =>
@@ -516,6 +550,13 @@ namespace DataBase.Migrations
                 {
                     b.Navigation("AgentTransactions");
 
+                    b.Navigation("ProdMainGroups");
+
+                    b.Navigation("ZakMainGroups");
+                });
+
+            modelBuilder.Entity("DataBase.Data.AgentTransaction", b =>
+                {
                     b.Navigation("ProdMainGroups");
 
                     b.Navigation("ZakMainGroups");

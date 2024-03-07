@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
+using Avalonia.Threading;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
@@ -13,6 +14,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -36,6 +38,8 @@ namespace CatalogueAvalonia.ViewModels
 		private string _partName = string.Empty;
 		[ObservableProperty]
 		private string _partUniValue = string.Empty;
+		[ObservableProperty]
+		private bool _isLoaded = !false;
 
 		public CatalogueViewModel() { }
 		public CatalogueViewModel(IMessenger messenger, DataStore dataStore,
@@ -45,7 +49,6 @@ namespace CatalogueAvalonia.ViewModels
 			_topModel = topModel;
 			_dataStore = dataStore;
 			_catalogueModels = new ObservableCollection<CatalogueModel>();
-
 			CatalogueModels = new HierarchicalTreeDataGridSource<CatalogueModel>(_catalogueModels)
 			{
 				Columns =
@@ -57,16 +60,28 @@ namespace CatalogueAvalonia.ViewModels
 						"Номер запчасти", x => x.UniValue, new GridLength(150)),
 					new TextColumn<CatalogueModel, string>(
 						"Производитель", x => x.ProducerName, new GridLength(130)),
+					new TextColumn<CatalogueModel, double>(
+						"Цена", x => x.Price, GridLength.Star),
 					new TextColumn<CatalogueModel, int>(
 						"Количество", x=> x.Count, GridLength.Star),
-					new TextColumn<CatalogueModel, double>(
-						"Цена", x => x.Price, GridLength.Star)
 				}
 			};
-			Messenger.Register<DataBaseLoadedMessage>(this, OndataBaseLoaded);
+			Messenger.Register<ActionMessage>(this, OnAction);
 			Messenger.Register<EditedMessage>(this, OnEditedIdDataBase);
 			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
 			Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+		}
+
+		private void OnAction(object recipient, ActionMessage message)
+		{
+			if (message.Value == "DataBaseLoaded")
+			{
+				Dispatcher.UIThread.Post(() =>
+				{
+					IsLoaded = !true;
+					_catalogueModels.AddRange(_dataStore.CatalogueModels); 
+				});
+			}
 		}
 
 		private void OnDataBaseAdded(object recipient, AddedMessage message)
@@ -83,29 +98,30 @@ namespace CatalogueAvalonia.ViewModels
 
 		private void OnDataBaseDeleted(object recipient, DeletedMessage message)
 		{
-			if (message.Value.Where == "PartCatalogue")
+			var where = message.Value.Where;
+			if (where == "PartCatalogue")
 			{
 				_catalogueModels.Remove(_catalogueModels.Where(x => x.UniId == message.Value.Id).Single());
 			}
+
 		}
 
 		private void OnEditedIdDataBase(object recipient, EditedMessage message)
 		{
-			if (message.Value.Where == "PartCatalogue")
+			var where = message.Value.Where;
+			if (where == "PartCatalogue")
 			{
 				var uniId = message.Value.Id;
 				var model = (CatalogueModel?)message.Value.What;
 				if (model != null)
 				{
-					_catalogueModels.Remove(_catalogueModels.Where(x => x.UniId == model.UniId).Single());
-					_catalogueModels.Add(model);
+					var item = _catalogueModels.Where(x => x.UniId == uniId).SingleOrDefault();
+					if (item != null)
+					{
+						_catalogueModels.ReplaceOrAdd(item, model);
+					}
 				}
 			}
-		}
-
-		private void OndataBaseLoaded(object recipient, DataBaseLoadedMessage message)
-		{
-			_catalogueModels.AddRange(_dataStore.CatalogueModels);
 		}
 		private bool _isFilteringByUniValue = false;
 		partial void OnPartNameChanged(string value)
@@ -136,12 +152,12 @@ namespace CatalogueAvalonia.ViewModels
 				await foreach (var res in DataFiltering.FilterByUniValue(_dataStore.CatalogueModels, value, token))
 					_catalogueModels.Add(res);
 			});
-			if (value.Length >= 3)
+			if (value.Length >= 2)
 			{
 				filter.Execute(null);
 				_isFilteringByUniValue = true;
 			}
-			else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
+			else if (value.Length <= 1 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
 			{
 				_isFilteringByUniValue = false;
 				_catalogueModels.Clear();
@@ -152,18 +168,8 @@ namespace CatalogueAvalonia.ViewModels
 		private bool CanDeleteGroup()
 		{
 			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
-			if (_selecteditem != null)
-			{
-				if (_selecteditem.UniId != null && _selecteditem.MainCatId == null)
-				{
-					return true;
-				}
-				else
-					return false;
-			}
-			else
-				return false;
-		}
+			return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.MainCatId == null && _selecteditem.UniId != 5923;
+		} 
 		[RelayCommand(CanExecute = nameof(CanDeleteGroup))]
 		private async Task DeleteGroup(Window parent)
 		{
@@ -181,19 +187,11 @@ namespace CatalogueAvalonia.ViewModels
 			}
 
 		}
-		private bool CanDeletePart()
+		private bool CanDeletePart() 
 		{
-			if (_selecteditem != null)
-			{
-				if (_selecteditem.MainCatId != null)
-				{
-					return true;
-				}
-				else
-					return false;
-			}
-			return false;
-		}
+			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
+		} 
 		[RelayCommand(CanExecute = nameof(CanDeletePart))]
 		private async Task DeleteSolo(Window parent)
 		{
@@ -204,26 +202,46 @@ namespace CatalogueAvalonia.ViewModels
 						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
 				if (res == ButtonResult.Yes)
 				{
-					_catalogueModels.Remove(_selecteditem);
-					_dataStore.CatalogueModels.Remove(_selecteditem);
-					await _topModel.DeleteSoloFromCatalogue(_selecteditem.MainCatId);
+					var model = _catalogueModels.Where(x => x.UniId == _selecteditem.UniId).SingleOrDefault();
+
+                    if (model != null)
+                    {
+						await _topModel.DeleteSoloFromCatalogue(_selecteditem.MainCatId);
+						var item = _dataStore.CatalogueModels.Where(x => x.UniId == _selecteditem.UniId).SingleOrDefault();
+						if (item != null && item.Children != null) 
+						{ 
+							item.Children.Remove(_selecteditem);
+						}
+					}
 				}
 			}
 
 		}
-		[RelayCommand]
+		private bool CanEditPrices() 
+		{
+			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != 5923;
+		} 
+		[RelayCommand(CanExecute = nameof(CanEditPrices))]
+		private async Task EditPrices(Window parent)
+		{
+			if (_selecteditem != null) 
+			{
+				await _dialogueService.OpenDialogue(new EditPricesWindow(), new EditPricesViewModel(Messenger, _topModel, _selecteditem.MainCatId ?? default, _dataStore, _selecteditem.UniValue), parent);
+			}
+		}
+		private bool canEditCatalogue()
+		{
+			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
+		}
+
+		[RelayCommand(CanExecute = nameof(canEditCatalogue))]
 		private async Task EditCatalogue(Window parent)
 		{
 			if (_selecteditem != null)
 			{
-				if (_selecteditem.MainCatId == null && _selecteditem.UniId == null)
-				{
-
-				}
-				else
-				{
-					await _dialogueService.OpenDialogue(new EditCatalogueWindow(), new EditCatalogueViewModel(Messenger, _dataStore, _selecteditem.UniId, _topModel), parent);
-				}
+				await _dialogueService.OpenDialogue(new EditCatalogueWindow(), new EditCatalogueViewModel(Messenger, _dataStore, _selecteditem.UniId, _topModel), parent);
 			}
 		}
 		[RelayCommand]

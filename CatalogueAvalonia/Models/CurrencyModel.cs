@@ -8,11 +8,25 @@ namespace CatalogueAvalonia.Models
 {
 	public class CurrencyModel
 	{
-		public int Id { get; set; }
-
+		public int? Id { get; set; } = null;
 		public string CurrencyName { get; set; } = string.Empty;
-
-		public double ToUsd { get; set; }
+		private double _toUsd;
+		public double ToUsd 
+		{ 
+			get
+			{
+				return _toUsd;
+			}
+			set
+			{
+				_toUsd = value;
+				IsDirty = true;
+			}
+		}
+		public int CanDelete { get; set; }
 		public string CurrencySign { get; set; } = string.Empty;
+
+
+		public bool IsDirty = false;
 	}
 }

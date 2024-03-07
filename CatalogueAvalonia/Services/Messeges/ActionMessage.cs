@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.Services.Messeges
 {
-	public class DataBaseLoadedMessage : ValueChangedMessage<string>
+	public class ActionMessage : ValueChangedMessage<string>
 	{
-		public DataBaseLoadedMessage(string value) : base(value)
+		public ActionMessage(string value) : base(value)
 		{
 		}
 	}

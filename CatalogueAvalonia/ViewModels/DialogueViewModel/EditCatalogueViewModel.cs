@@ -59,7 +59,15 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		{
 			NameOfPart = _dataStore.CatalogueModels.Where(x => x.UniId == id).OrderBy(x => x.UniId).First().Name;
 			IsDirty = false;
-			var model = _dataStore.CatalogueModels.Where(x => x.UniId == id).OrderBy(x => x.UniId).First().Children;
+			var model = _dataStore.CatalogueModels.Where(x => x.UniId == id).OrderBy(x => x.UniId).First().Children?.Select(x => new CatalogueModel
+			{
+				MainCatId = x.MainCatId,
+				ProducerId = x.ProducerId,
+				ProducerName = x.ProducerName,
+				UniValue = x.UniValue,
+				UniId = x.UniId,
+				Name = x.Name,
+			});
 			if (model != null)
 				_catalogueModels.AddRange(model);
         }
@@ -92,10 +100,11 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			{
 				UniId = _uniId,
 				Name = NameOfPart,
-				Children = _catalogueModels
+				Children = new(_catalogueModels)
 			};
 			await _topModel.EditCatalogueAsync(model);
-			Messenger.Send(new EditedMessage(new ChangedItem { Where = "PartCatalogue", Id = _uniId, What = await _topModel.GetCatalogueByIdAsync(_uniId ?? 5923)}));
+			var what = await _topModel.GetCatalogueByIdAsync(_uniId ?? 5923);
+			Messenger.Send(new EditedMessage(new ChangedItem { Where = "PartCatalogue", Id = _uniId, What = what}));
 			_catalogueModels.Clear();
 		}
 		[RelayCommand]

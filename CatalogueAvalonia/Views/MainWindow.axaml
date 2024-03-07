@@ -9,8 +9,17 @@
 		xmlns:view="using:CatalogueAvalonia.Views"
         Icon="/Assets/avalonia-logo.ico"
         Title="CatalogueAvalonia">
-	<Grid>
-		<TabControl>
+	<Grid RowDefinitions="auto, *">
+		<Menu Grid.Row="0">
+			<MenuItem Header="Настройки">
+				<MenuItem Header="Валюта"
+						  CommandParameter="{Binding $parent[Window]}"
+						  Command="{Binding OpenCurrencySettingsCommand}"/>
+			</MenuItem>
+		</Menu>
+		<TabControl Grid.Row="1"
+					BorderBrush="#20202020"
+					BorderThickness="0,1.8,0,0">
 			<TabItem Header="Каталог">
 				<view:CatalogueView DataContext="{Binding ViewModels[0]}"/>
 			</TabItem>

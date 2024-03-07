@@ -11,6 +11,7 @@ using CatalogueAvalonia.Model;
 using System.Collections;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using CatalogueAvalonia.Core;
+using Avalonia.Collections;
 
 namespace CatalogueAvalonia.Services.DataBaseAction
 {
@@ -57,7 +58,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 					Children = new(x.MainCatPrices.Select(x => new CatalogueModel
 					{
 						UniId = null,
-						MainCatId = null,
+						MainCatId = x.MainCatId,
 						PriceId = x.Id,
 						Count = x.Count,
 						Price = x.Price,
@@ -116,6 +117,8 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 				Id = x.Id,
 				ToUsd = x.ToUsd,
 				CurrencySign = x.CurrencySign,
+				CanDelete = x.CanDelete,
+				IsDirty = false
 			}).ToListAsync();
 		}
 
@@ -176,6 +179,61 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 				return new AgentModel { Id = id, IsZak = model.IsZak, Name = model.Name };
 			else
 				return new AgentModel { };
+		}
+		public async Task<AgentTransactionModel> GetLastAddedTransaction(int agentId, int currencyId)
+		{
+			var lastTransaction = await _context.AgentTransactions.Where(x => x.AgentId == agentId && x.Currency == currencyId).Include(x => x.CurrencyNavigation).OrderBy(x => x.Id).LastOrDefaultAsync();
+			if (lastTransaction != null)
+			{
+				return new AgentTransactionModel
+				{
+					Id = lastTransaction.Id,
+					TransactionStatus = lastTransaction.TransactionStatus,
+					Balance = lastTransaction.Balance,
+					CurrencyId = lastTransaction.Currency,
+					CurrencyName = lastTransaction.CurrencyNavigation.CurrencyName,
+					TransactionDatatime = Converters.ToNormalDateTime(lastTransaction.TransactionDatatime),
+					AgentId = lastTransaction.AgentId,
+					TransactionSum = lastTransaction.TransactionSum,
+					CurrencySign = lastTransaction.CurrencyNavigation.CurrencySign
+				};
+			}
+			else
+			{
+				var model = new AgentTransaction
+				{
+					AgentId = agentId,
+					Currency = currencyId,
+					TransactionSum = 0,
+					TransactionStatus = 3,
+					Balance = 0,
+					TransactionDatatime = Converters.ToDateTimeSqlite(DateTime.Now.ToString("dd.MM.yyyy"))
+				};
+				await _context.AgentTransactions.AddAsync(model);
+				await _context.SaveChangesAsync();
+				return new AgentTransactionModel
+				{
+					AgentId = model.AgentId,
+					CurrencyId = model.Currency,
+					TransactionDatatime = Converters.ToNormalDateTime(model.TransactionDatatime),
+					TransactionStatus = model.TransactionStatus,
+					TransactionSum = model.TransactionSum,
+					Balance = model.Balance,
+					Id = model.Id,	
+				};
+			}
+		}
+		public async Task<IEnumerable<MainCatPriceModel>> GetMainCatPricesById(int mainCatId)
+		{
+			return await _context.MainCatPrices.Where(x => x.MainCatId == mainCatId).Include(x => x.Currency).Select(x => new MainCatPriceModel
+			{
+				Count = x.Count,
+				CurrencyId = x.CurrencyId,
+				Id = x.Id,
+				MainCatId = x.MainCatId,
+				Price = x.Price,
+				IsDirty = false
+			}).ToListAsync();
 		}
 	}
 }

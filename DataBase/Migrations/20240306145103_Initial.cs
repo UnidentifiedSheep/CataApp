@@ -32,7 +32,8 @@ namespace DataBase.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     currency_name = table.Column<string>(type: "TEXT", nullable: false, defaultValue: " "),
                     currency_sign = table.Column<string>(type: "TEXT", nullable: false, defaultValue: " "),
-                    to_usd = table.Column<double>(type: "REAL", nullable: false)
+                    to_usd = table.Column<double>(type: "REAL", nullable: false),
+                    can_delete = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -97,58 +98,6 @@ namespace DataBase.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "prod_main_group",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    datetime = table.Column<string>(type: "TEXT", nullable: false),
-                    total_sum = table.Column<double>(type: "REAL", nullable: false),
-                    agent_id = table.Column<int>(type: "INTEGER", nullable: false),
-                    currency_id = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_prod_main_group", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_prod_main_group_agents_agent_id",
-                        column: x => x.agent_id,
-                        principalTable: "agents",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "FK_prod_main_group_currencies_currency_id",
-                        column: x => x.currency_id,
-                        principalTable: "currencies",
-                        principalColumn: "id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "zak_main_group",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    datetime = table.Column<string>(type: "TEXT", nullable: false),
-                    total_sum = table.Column<double>(type: "REAL", nullable: false),
-                    agent_id = table.Column<int>(type: "INTEGER", nullable: false),
-                    currency_id = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_zak_main_group", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_zak_main_group_agents_agent_id",
-                        column: x => x.agent_id,
-                        principalTable: "agents",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "FK_zak_main_group_currencies_currency_id",
-                        column: x => x.currency_id,
-                        principalTable: "currencies",
-                        principalColumn: "id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "main_cat",
                 columns: table => new
                 {
@@ -173,6 +122,72 @@ namespace DataBase.Migrations
                         name: "FK_main_cat_producer_producer_id",
                         column: x => x.producer_id,
                         principalTable: "producer",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "prod_main_group",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    datetime = table.Column<string>(type: "TEXT", nullable: false),
+                    total_sum = table.Column<double>(type: "REAL", nullable: false),
+                    agent_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    currency_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    transaction_id = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_prod_main_group", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_prod_main_group_agent_transactions_transaction_id",
+                        column: x => x.transaction_id,
+                        principalTable: "agent_transactions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_prod_main_group_agents_agent_id",
+                        column: x => x.agent_id,
+                        principalTable: "agents",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_prod_main_group_currencies_currency_id",
+                        column: x => x.currency_id,
+                        principalTable: "currencies",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "zak_main_group",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    datetime = table.Column<string>(type: "TEXT", nullable: false),
+                    total_sum = table.Column<double>(type: "REAL", nullable: false),
+                    agent_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    currency_id = table.Column<int>(type: "INTEGER", nullable: false),
+                    transaction_id = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_zak_main_group", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_zak_main_group_agent_transactions_transaction_id",
+                        column: x => x.transaction_id,
+                        principalTable: "agent_transactions",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_zak_main_group_agents_agent_id",
+                        column: x => x.agent_id,
+                        principalTable: "agents",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "FK_zak_main_group_currencies_currency_id",
+                        column: x => x.currency_id,
+                        principalTable: "currencies",
                         principalColumn: "id");
                 });
 
@@ -341,6 +356,11 @@ namespace DataBase.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_prod_main_group_transaction_id",
+                table: "prod_main_group",
+                column: "transaction_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_prodaja_id",
                 table: "prodaja",
                 column: "id",
@@ -379,6 +399,11 @@ namespace DataBase.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_zak_main_group_transaction_id",
+                table: "zak_main_group",
+                column: "transaction_id");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_zakupka_id",
                 table: "zakupka",
                 column: "id",
@@ -398,9 +423,6 @@ namespace DataBase.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "agent_transactions");
-
             migrationBuilder.DropTable(
                 name: "main_cat_prices");
 
@@ -424,6 +446,9 @@ namespace DataBase.Migrations
 
             migrationBuilder.DropTable(
                 name: "producer");
+
+            migrationBuilder.DropTable(
+                name: "agent_transactions");
 
             migrationBuilder.DropTable(
                 name: "agents");

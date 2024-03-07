@@ -13,6 +13,8 @@ public partial class Currency
 
     public double ToUsd { get; set; }
 
+    public int CanDelete { get; set; }
+
     public virtual ICollection<AgentTransaction> AgentTransactions { get; set; } = new List<AgentTransaction>();
 
     public virtual ICollection<MainCatPrice> MainCatPrices { get; set; } = new List<MainCatPrice>();

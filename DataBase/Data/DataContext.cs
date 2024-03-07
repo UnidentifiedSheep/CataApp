@@ -37,6 +37,8 @@ public partial class DataContext : DbContext
 
     public virtual DbSet<Zakupka> Zakupkas { get; set; }
 
+/*    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        => optionsBuilder.UseSqlite("DataSource=C:\\Users\\Shep\\Desktop\\data.db");*/
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +81,9 @@ public partial class DataContext : DbContext
             entity.HasIndex(e => e.Id, "IX_currencies_id").IsUnique();
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CanDelete)
+                .HasDefaultValue(1)
+                .HasColumnName("can_delete");
             entity.Property(e => e.CurrencyName)
                 .HasDefaultValue(" ")
                 .HasColumnName("currency_name");
@@ -151,6 +156,7 @@ public partial class DataContext : DbContext
             entity.Property(e => e.CurrencyId).HasColumnName("currency_id");
             entity.Property(e => e.Datetime).HasColumnName("datetime");
             entity.Property(e => e.TotalSum).HasColumnName("total_sum");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
             entity.HasOne(d => d.Agent).WithMany(p => p.ProdMainGroups)
                 .HasForeignKey(d => d.AgentId)
@@ -159,6 +165,8 @@ public partial class DataContext : DbContext
             entity.HasOne(d => d.Currency).WithMany(p => p.ProdMainGroups)
                 .HasForeignKey(d => d.CurrencyId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Transaction).WithMany(p => p.ProdMainGroups).HasForeignKey(d => d.TransactionId);
         });
 
         modelBuilder.Entity<Prodaja>(entity =>
@@ -201,6 +209,7 @@ public partial class DataContext : DbContext
             entity.Property(e => e.CurrencyId).HasColumnName("currency_id");
             entity.Property(e => e.Datetime).HasColumnName("datetime");
             entity.Property(e => e.TotalSum).HasColumnName("total_sum");
+            entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
             entity.HasOne(d => d.Agent).WithMany(p => p.ZakMainGroups)
                 .HasForeignKey(d => d.AgentId)
@@ -209,6 +218,8 @@ public partial class DataContext : DbContext
             entity.HasOne(d => d.Currency).WithMany(p => p.ZakMainGroups)
                 .HasForeignKey(d => d.CurrencyId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Transaction).WithMany(p => p.ZakMainGroups).HasForeignKey(d => d.TransactionId);
         });
 
         modelBuilder.Entity<Zakupka>(entity =>

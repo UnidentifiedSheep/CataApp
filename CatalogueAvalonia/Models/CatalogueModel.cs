@@ -16,31 +16,28 @@ namespace CatalogueAvalonia.Models
 		public int? UniId { get; set; }
 		public int PriceId { get; set; }
 		public int? MainCatId { get; set; }
-		[ObservableProperty]
-		private int _producerId;
+		public int ProducerId { get; set; }
 		public int CurrencyId { get; set; }
 
-		public string UniValue { get; set; } = string.Empty;
-		private string _name = string.Empty;
-		public string Name { 
-			get
-			{
-				return _name;
-			}
-			set
-			{
-				if (string.IsNullOrEmpty(value) || value == " ")
-					_name = "Название не указано";
-				else
-					_name = value;
-			}
-		}
+		[ObservableProperty]
+		private string _uniValue = string.Empty;
 		[ObservableProperty]
 		private string _producerName  = string.Empty;
-		public string CurrencyName { get; set; } = string.Empty;
-		public int Count { get; set; }
-		public double Price { get; set; }
+		[ObservableProperty]
+		private string _currencyName = string.Empty;
+		[ObservableProperty]
+		private int _count;
+		[ObservableProperty]
+		private double _price;
+		[ObservableProperty]
+		private string _name = " ";
 
 		public ObservableCollection<CatalogueModel>? Children { get; set; }
+
+		partial void OnNameChanged(string value)
+		{
+			if (string.IsNullOrEmpty(value) || value == " ")
+				Name = "Название не указано";
+		}
 	}
 }

@@ -1,0 +1,90 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" MinHeight="600" MinWidth="500" Height="500" Width="400"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.CurrencySettingsWindow"
+		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Title="CurrencySettingsWindow"
+		x:CompileBindings="False">
+	<Design.DataContext>
+		<vm:CurrencySettingsViewModel/>
+	</Design.DataContext>
+	<Grid RowDefinitions="50, 60, *, 40"
+		  Margin="10">
+		<TextBlock Text="Настройки валют"
+				   Grid.Row="0"
+				   HorizontalAlignment="Center"
+				   VerticalAlignment="Center"
+				   FontSize="20"
+				   FontWeight="Bold"/>
+		<Grid Grid.Row="1"
+			  Margin="0,0,0,5">
+			<Button Content="Добавить валюту"
+					HorizontalAlignment="Left"
+					Command="{Binding AddNewCurrencyCommand}"
+					Background="#20202020"
+					Width="130"
+					HorizontalContentAlignment="Center"
+					VerticalAlignment="Center"/>
+			<Button Content="Удалить валюту"
+					Width="130"
+					Command="{Binding RemoveCurrencyCommand}"
+					HorizontalContentAlignment="Center"
+					HorizontalAlignment="Right"
+					Background="#20202020"
+					VerticalAlignment="Center"/>
+		</Grid>
+		<DataGrid Grid.Row="2"
+				  ItemsSource="{Binding CurrencyModels}"
+				  SelectedItem="{Binding SelectedCurrency}"
+				  CellEditEnded="EditEnded"
+				  CanUserReorderColumns="True"
+				  CanUserResizeColumns="True"
+				  CanUserSortColumns="True">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Название"
+									Width="*"
+									Binding="{Binding CurrencyName}"/>
+				<DataGridTextColumn Header="Обозначение"
+									Width="*"
+									Binding="{Binding CurrencySign}"/>
+				<DataGridTemplateColumn Header="К доллару"
+										Width="*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding ToUsd}"
+										   BorderThickness="0"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+			</DataGrid.Columns>
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Добавить"
+							  Command="{Binding AddNewCurrencyCommand}"/>
+					<MenuItem Header="Удалить"
+							  Command="{Binding RemoveCurrencyCommand}"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
+		</DataGrid>
+		<Grid Grid.Row="3"
+			  ColumnDefinitions="*,170, * ,170,*">
+			<Button Content="Сохранить"
+					Width="130"
+					Grid.Column="1"
+					Click="SaveButt_Click"
+					HorizontalAlignment="Center"
+					HorizontalContentAlignment="Center"
+					VerticalAlignment="Center"/>
+			<Button Content="Отмена"
+					Width="130"
+					Grid.Column="3"
+					Click="CancleButt_Click"
+					HorizontalAlignment="Center"
+					HorizontalContentAlignment="Center"
+					VerticalAlignment="Center"/>
+		</Grid>
+	</Grid>
+</Window>

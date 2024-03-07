@@ -136,9 +136,98 @@ namespace CatalogueAvalonia.Models
 		{
 			return await _dataBaseAction.AddNewAgent(name, isZak).ConfigureAwait(false);
 		}
+		/// <summary>
+		/// Получение контрагента по id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
 		public async Task<AgentModel> GetAgentByIdAsync(int id)
 		{
 			return await _dataBaseProvider.GetAgentByIdAsync(id).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Удаление контрагента по id.
+		/// </summary>
+		/// <param name="id"></param>
+		/// <returns></returns>
+		public async Task DeleteAgentAsync(int id)
+		{
+			await _dataBaseAction.DeleteAgent(id).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Добавление нвой транзакции.
+		/// </summary>
+		/// <param name="agentTransactionModel"></param>
+		/// <returns></returns>
+		public async Task<int> AddNewTransactionAsync(AgentTransactionModel agentTransactionModel)
+		{
+			return await _dataBaseAction.AddNewTransaction(agentTransactionModel).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Получение последней транзакции.
+		/// </summary>
+		/// <param name="agentId"></param>
+		/// <param name="currencyId"></param>
+		/// <returns></returns>
+		public async Task<AgentTransactionModel> GetLastTransactionAsync(int agentId, int currencyId)
+		{
+			return await _dataBaseProvider.GetLastAddedTransaction(agentId, currencyId).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Удаляет транзакцию и меняет Сальдо последующих операций.
+		/// </summary>
+		/// <param name="agentId"></param>
+		/// <param name="currencyId"></param>
+		/// <param name="transactionId"></param>
+		/// <returns></returns>
+		public async Task DeleteAgentTransactionAsync(int agentId, int currencyId, int transactionId)
+		{
+			await _dataBaseAction.DeleteTransaction(agentId, currencyId, transactionId).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Returns prices of part.
+		/// </summary>
+		/// <param name="mainCatId"></param>
+		/// <returns></returns>
+		public async Task<IEnumerable<MainCatPriceModel>> GetMainCatPricesByIdAsync(int mainCatId)
+		{
+			return await _dataBaseProvider.GetMainCatPricesById(mainCatId).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Редактирует цены и количество запчасти.
+		/// </summary>
+		/// <param name="mainCatPrices"></param>
+		/// <returns></returns>
+		public async Task<CatalogueModel?> EditMainCatPricesAsync(IEnumerable<MainCatPriceModel> mainCatPrices, int mainCatId)
+		{
+			return await _dataBaseAction.EditMainCatPrices(mainCatPrices, mainCatId).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Удаляет цены запчастей по id.
+		/// </summary>
+		/// <param name="mainCatId"></param>
+		/// <returns></returns>
+		public async Task DeleteMainCatPricesByIdAsync(int mainCatId)
+		{
+			await _dataBaseAction.DeleteMainCatPricesById(mainCatId).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Изменяет валюты.
+		/// </summary>
+		/// <param name="currencyModels"></param>
+		/// <param name="deletedIds">Ids которые были удалены</param>
+		/// <returns></returns>
+		public async Task EditCurrenciesAsync(IEnumerable<CurrencyModel> currencyModels, IEnumerable<int> deletedIds)
+		{
+			await _dataBaseAction.EditCurrency(currencyModels, deletedIds).ConfigureAwait(false);
+		}
+		/// <summary>
+		/// Удаляет все валюты кроме "Доллара" и "Неизвестной".
+		/// </summary>
+		/// <returns></returns>
+		public async Task DeleteAllCurrenciesAsync()
+		{
+			await _dataBaseAction.DeleteAllCurrencies().ConfigureAwait(false);
 		}
 	}
 }
