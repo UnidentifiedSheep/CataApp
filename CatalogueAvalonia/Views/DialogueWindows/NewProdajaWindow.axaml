@@ -1,0 +1,224 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" MinHeight="600" MinWidth="1000" Height="600" Width="1000"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.NewProdajaWindow"
+		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Title="NewProdajaWindow"
+		x:CompileBindings="False">
+	<Design.DataContext>
+		<vm:NewProdajaViewModel/>
+	</Design.DataContext>
+	<Grid Margin="5"
+		  RowDefinitions="55,55,290*,30,50">
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="11*"/>
+				<ColumnDefinition Width="*"/>
+				<ColumnDefinition Width="24*"/>
+			</Grid.ColumnDefinitions>
+			<Grid Grid.Column="0"
+                  VerticalAlignment="Center">
+				<Grid ColumnDefinitions="2*, 4*">
+					<Label Grid.Column="0"
+                           Content="Дата"
+                           VerticalAlignment="Center"
+                           FontSize="15"
+                           Foreground="#505050"/>
+					<CalendarDatePicker HorizontalAlignment="Stretch"
+                                        Grid.Column="1"
+                                        SelectedDate="{Binding ProdajaDate}"/>
+				</Grid>
+			</Grid>
+			<Grid Grid.Column="2">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="6*"/>
+					<ColumnDefinition Width="4*"/>
+					<ColumnDefinition Width="7*"/>
+					<ColumnDefinition Width="10*"/>
+				</Grid.ColumnDefinitions>
+				<Label Content="Валюта накладной"
+                       FontSize="15"
+                       Foreground="#505050"
+                       Grid.Column="0"
+                       VerticalAlignment="Center"/>
+				<ComboBox Grid.Column="1"
+                          VerticalAlignment="Center"
+                          SelectedItem="{Binding SelectedCurrency}"
+                          ItemsSource="{Binding Currencies}"
+                          HorizontalAlignment="Stretch">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding CurrencyName}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<Button Grid.Column="2"
+						Content="Коментарий"
+						IsVisible="{Binding IsVisibleConverter}"
+						Width="120"
+						HorizontalContentAlignment="Center"
+						Margin="40,0,0,0"/>
+			</Grid>
+
+		</Grid>
+		<Grid Grid.Row="1">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="15*"/>
+				<ColumnDefinition Width="34*"/>
+			</Grid.ColumnDefinitions>
+			<Grid Grid.Column="0"
+				  ColumnDefinitions="15*, 29*">
+				<Label Content="Поставщик"
+                       FontSize="15"
+                       VerticalAlignment="Center"
+                       Grid.Column="0"
+                       Foreground="#505050"/>
+				<ComboBox VerticalAlignment="Center"
+                          Grid.Column="1"
+						  IsEnabled="{Binding IsVisibleConverter}"
+                          SelectedItem="{Binding SelectedAgent}"
+                          HorizontalAlignment="Stretch"
+                          ItemsSource="{Binding Agents}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Name}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+			</Grid>
+			<Grid Grid.Column="1">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="52*"/>
+					<ColumnDefinition Width="30*"/>
+					<ColumnDefinition Width="52*"/>
+					<ColumnDefinition Width="64*"/>
+					<ColumnDefinition Width="2*"/>
+				</Grid.ColumnDefinitions>
+				<Button Grid.Column="0"
+                        Content="Добавить"
+                        VerticalAlignment="Center"
+						HorizontalContentAlignment="Center"
+                        HorizontalAlignment="Center"
+						Width="120"
+						CommandParameter="{Binding $parent[Window]}"
+                        Command="{Binding AddNewPartCommand}"/>
+				<Button Grid.Column="1"
+						HorizontalContentAlignment="Center"
+                        Content="Изменить"
+						Width="120"
+                        Command="{Binding ChangePartCommand}"
+						CommandParameter="{Binding $parent[Window]}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"/>
+				<Button Grid.Column="2"
+						HorizontalContentAlignment="Center"
+                        Content="Удалить"
+						Width="120"
+                        Command="{Binding DeletePartCommand}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center"/>
+			</Grid>
+		</Grid>
+		<DataGrid Grid.Row="2"
+                  SelectionMode="Single"
+                  SelectedItem="{Binding SelectedProdaja}"
+				  CanUserReorderColumns="True"
+				  CanUserResizeColumns="True"
+				  CanUserSortColumns="False"
+                  ItemsSource="{Binding Prodaja}">
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Номер запчасти"
+                                    Binding="{Binding UniValue}"
+                                    Width="*"
+                                    IsReadOnly="True"/>
+				<DataGridTextColumn Header="Название оригинала"
+                                    Width="2*"
+                                    IsReadOnly="True"
+                                    Binding="{Binding MainName}"/>
+				<DataGridTextColumn Header="Название неориг."
+                                    Width="2*"
+                                    IsReadOnly="True"
+                                    Binding="{Binding MainCatName}"/>
+				<DataGridTemplateColumn Header="Цена"
+										Width="*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding Price}"
+										   BorderThickness="0"
+										   ValueChanged="NumericUpDownPrice_ValueChanged"
+										   Minimum="0"
+										   FormatString="{}{0:#,0.00}"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Количество"
+										Width="*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding Count}"
+										   FormatString="#"
+										   ValueChanged="NumericUpDownCount_ValueChanged"
+										   BorderThickness="0"
+										   Minimum="0"
+										   Maximum="{Binding MaxCount}"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="Сумма"
+									Width="*"
+									IsReadOnly="True"
+									Binding="{Binding PriceSum}"/>
+			</DataGrid.Columns>
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Добавить"
+                              CommandParameter="{Binding $parent[Window]}"
+							  Command="{Binding AddNewPartCommand}"/>
+					<MenuItem Header="Изменить"
+                              Command="{Binding ChangePartCommand}"
+							  CommandParameter="{Binding $parent[Window]}"/>
+					<MenuItem Header="Удалить"
+                              Command="{Binding DeletePartCommand}"/>
+				</ContextMenu>
+			</DataGrid.ContextMenu>
+		</DataGrid>
+		<StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+			<Label Content="Общая сумма:"
+                   FontSize="18"
+                   Foreground="#404040"/>
+			<TextBlock Text=""
+                       FontSize="18"
+                       Foreground="#404040"/>
+			<TextBlock Text="{Binding TotalSum}"
+                       FontSize="18"
+					   VerticalAlignment="Center"
+                       Foreground="#404040"/>
+			<TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
+                       FontSize="18"
+					   VerticalAlignment="Center"
+                       Foreground="#404040"/>
+		</StackPanel>
+		<Grid Grid.Row="4">
+			<StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+				<Button Content="Сохранить"
+                        Width="110"
+						HorizontalContentAlignment="Center"
+                        Click="SaveButt_Clicked"/>
+				<Button Content="Отмена"
+                        Width="110"
+						HorizontalContentAlignment="Center"
+                        Click="CancleButt_Clicked"
+                        Margin="25,0,0,0"/>
+			</StackPanel>
+		</Grid>
+	</Grid>
+</Window>
