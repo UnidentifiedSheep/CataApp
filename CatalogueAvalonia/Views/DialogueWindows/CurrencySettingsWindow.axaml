@@ -55,6 +55,7 @@
 						<DataTemplate>
 							<NumericUpDown Value="{Binding ToUsd}"
 										   BorderThickness="0"
+										   FormatString="{}{0:#,0.00}"
 										   ShowButtonSpinner="False"/>
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>

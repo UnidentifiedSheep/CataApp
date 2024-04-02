@@ -11,11 +11,15 @@ public partial class Zakupka
 
     public double Price { get; set; }
 
-    public int MainCatId { get; set; }
-
     public int ZakId { get; set; }
 
-    public virtual MainCat MainCat { get; set; } = null!;
+    public int? MainCatId { get; set; }
+
+    public string? UniValue { get; set; }
+
+    public string? MainName { get; set; }
+
+    public virtual MainCat? MainCat { get; set; }
 
     public virtual ZakMainGroup Zak { get; set; } = null!;
 }

@@ -40,6 +40,9 @@ namespace CatalogueAvalonia.ViewModels
 		private string _partUniValue = string.Empty;
 		[ObservableProperty]
 		private bool _isLoaded = !false;
+		[ObservableProperty]
+		[NotifyCanExecuteChangedFor(nameof(AddNewPartCommand))]
+		private bool _isDataBaseLoaded = false;
 
 		public CatalogueViewModel() { }
 		public CatalogueViewModel(IMessenger messenger, DataStore dataStore,
@@ -79,6 +82,7 @@ namespace CatalogueAvalonia.ViewModels
 				Dispatcher.UIThread.Post(() =>
 				{
 					IsLoaded = !true;
+					IsDataBaseLoaded = true;
 					_catalogueModels.AddRange(_dataStore.CatalogueModels); 
 				});
 			}
@@ -115,10 +119,11 @@ namespace CatalogueAvalonia.ViewModels
 				var model = (CatalogueModel?)message.Value.What;
 				if (model != null)
 				{
-					var item = _catalogueModels.Where(x => x.UniId == uniId).SingleOrDefault();
+					var item = _catalogueModels.SingleOrDefault(x => x.UniId == uniId);
 					if (item != null)
 					{
 						_catalogueModels.ReplaceOrAdd(item, model);
+						
 					}
 				}
 			}
@@ -189,7 +194,10 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		private bool CanDeletePart() 
 		{
-			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			var partIndex = CatalogueModels.RowSelection!.SelectedIndex;
+			CatalogueModels.RowSelection!.SelectedIndex = partIndex;
+			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
+
 			return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
 		} 
 		[RelayCommand(CanExecute = nameof(CanDeletePart))]
@@ -219,7 +227,10 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		private bool CanEditPrices() 
 		{
-			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			var partIndex = CatalogueModels.RowSelection!.SelectedIndex;
+			CatalogueModels.RowSelection!.SelectedIndex = partIndex;
+			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
+
 			return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != 5923;
 		} 
 		[RelayCommand(CanExecute = nameof(CanEditPrices))]
@@ -232,7 +243,10 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		private bool canEditCatalogue()
 		{
-			_selecteditem = CatalogueModels.RowSelection?.SelectedItem;
+			var partIndex = CatalogueModels.RowSelection!.SelectedIndex;
+			CatalogueModels.RowSelection!.SelectedIndex = partIndex;
+			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
+
 			return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
 		}
 
@@ -244,7 +258,7 @@ namespace CatalogueAvalonia.ViewModels
 				await _dialogueService.OpenDialogue(new EditCatalogueWindow(), new EditCatalogueViewModel(Messenger, _dataStore, _selecteditem.UniId, _topModel), parent);
 			}
 		}
-		[RelayCommand]
+		[RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]
 		private async Task AddNewPart(Window parent)
 		{
 			await _dialogueService.OpenDialogue(new AddNewPartView(), new AddNewPartViewModel(Messenger, _dataStore, _topModel), parent);

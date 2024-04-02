@@ -16,6 +16,7 @@ namespace CatalogueAvalonia.Services.Messeges
 	public class ChangedItem
 	{
 		public string Where = string.Empty;
+		public string MainName = string.Empty;
 		public int? Id;
 		public object? What;
 	}

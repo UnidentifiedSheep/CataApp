@@ -9,13 +9,17 @@ public partial class Prodaja
 
     public int ProdajaId { get; set; }
 
-    public int MainCatId { get; set; }
-
     public double Price { get; set; }
 
     public int Count { get; set; }
 
-    public virtual MainCat MainCat { get; set; } = null!;
+    public int? MainCatId { get; set; }
+
+    public string? UniValue { get; set; }
+
+    public string? MainName { get; set; }
+
+    public virtual MainCat? MainCat { get; set; }
 
     public virtual ProdMainGroup ProdajaNavigation { get; set; } = null!;
 }

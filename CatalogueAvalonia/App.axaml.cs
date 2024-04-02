@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
@@ -57,17 +58,15 @@ namespace CatalogueAvalonia
 
 			builder.Services.AddTransient<ViewLocator>();
 
-			builder.Services.AddSingleton<MainWindow>();
-			builder.Services.AddSingleton<CatalogueView>();
-			builder.Services.AddSingleton<AgentView>();
-			
 			builder.Services.AddSingleton<MainWindowViewModel>();
 			builder.Services.AddSingleton<CatalogueViewModel>();
 			builder.Services.AddSingleton<AgentViewModel>();
-			builder.Services.AddScoped<EditCatalogueViewModel>();
+			builder.Services.AddSingleton<ZakupkaViewModel>();
+			builder.Services.AddSingleton<ProdajaViewModel>();
 
 			builder.Services.AddSingleton<TopModel>();
 			builder.Services.AddSingleton<DataStore>();
+			builder.Services.AddSingleton<TaskQueue>();
 			builder.Services.AddSingleton<IDataBaseProvider, DataBaseProvider>();
 			builder.Services.AddSingleton<IDataBaseAction, DataBaseAction>();
 			builder.Services.AddSingleton<IDialogueService, DialogueService>();

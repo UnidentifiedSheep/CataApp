@@ -1,4 +1,5 @@
-﻿using CatalogueAvalonia.Model;
+﻿using CatalogueAvalonia.Core;
+using CatalogueAvalonia.Model;
 using CatalogueAvalonia.Services.DataBaseAction;
 using DataBase.Data;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
@@ -6,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,6 +22,8 @@ namespace CatalogueAvalonia.Models
 			_dataBaseProvider = dataBaseProvider;
 			_dataBaseAction = dataBaseAction;
 		}
+		///Исправить _task.queue. вызывается в основном потоке.
+
 		/// <summary>
 		/// Получает все запчасти из каталога.
 		/// </summary>
@@ -59,9 +63,9 @@ namespace CatalogueAvalonia.Models
 		/// </summary>
 		/// <param name="catalogue"></param>
 		/// <returns></returns>
-		public async Task EditCatalogueAsync(CatalogueModel catalogue)
+		public async Task EditCatalogueAsync(CatalogueModel catalogue, List<int> deleteIds)
 		{
-			await _dataBaseAction.EditCatalogue(catalogue).ConfigureAwait(false);
+			await _dataBaseAction.EditCatalogue(catalogue, deleteIds).ConfigureAwait(false);
 		}
 		/// <summary>
 		/// Получает группу запчастей по основному id.
@@ -71,6 +75,10 @@ namespace CatalogueAvalonia.Models
 		public async Task<CatalogueModel> GetCatalogueByIdAsync(int id)
 		{
 			return await _dataBaseProvider.GetCatalogueById(id).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<CatalogueModel>> GetCatalogueByIdAsync(IEnumerable<int> ids)
+		{
+			return await _dataBaseProvider.GetCatalogueById(ids).ConfigureAwait(false);
 		}
 		/// <summary>
 		/// Добавление новой группы в катало запчастей.
@@ -228,6 +236,50 @@ namespace CatalogueAvalonia.Models
 		public async Task DeleteAllCurrenciesAsync()
 		{
 			await _dataBaseAction.DeleteAllCurrencies().ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<ZakupkiModel>> GetZakupkiMainGroupAsync(string startD, string endD, int agentId)
+		{
+			return await _dataBaseProvider.GetZakupkiMainModel(startD, endD, agentId).ConfigureAwait(false);
+		}
+		public async Task AddNewZakupkaAsync(IEnumerable<ZakupkaAltModel> zakupkaAlts, ZakupkiModel zakupkiModel)
+		{
+			await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel);
+		}
+		public async Task<IEnumerable<CatalogueModel>> AddNewPricesForPartsAsync(IEnumerable<ZakupkaAltModel> catas, int currencyId)
+		{
+			return await _dataBaseAction.AddNewPricesForParts(catas, currencyId).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<ZakupkaAltModel>> GetZakAltGroup(int mainGroupId)
+		{
+			return await _dataBaseProvider.GetZakupkiAltModel(mainGroupId).ConfigureAwait(false);
+		}
+		public async Task DeleteZakupkaByTransactionIdAsync(int transactionId)
+		{
+			await _dataBaseAction.DeleteZakupkaByTransactionId(transactionId).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<CatalogueModel>> DeleteZakupkaWithPricesReCount(int transactionId, IEnumerable<ZakupkaAltModel> zakupkaAltModels)
+		{
+			return await _dataBaseAction.DeleteZakupkaWithCountReCalc(transactionId, zakupkaAltModels).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<CatalogueModel>> EditZakupkaAsync(IEnumerable<int> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts, Dictionary<int, int> lastCounts, CurrencyModel currency,double totalSum, string date, int transactionId)
+		{
+			return await _dataBaseAction.EditZakupka(deletedIds, zakupkaAlts, lastCounts, currency, date, totalSum, transactionId).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<ProdajaModel>> GetProdajaMainGroupAsync(string startD, string endD, int agentId)
+		{
+			return await _dataBaseProvider.GetProdajaMainGroup(startD, endD, agentId).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltGroupAsync(int mainGroupId)
+		{
+			return await _dataBaseProvider.GetProdajaAltModel(mainGroupId).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models, ProdajaModel mainModel)
+		{
+			return await _dataBaseAction.AddNewProdaja(models, mainModel).ConfigureAwait(false);
+		}
+		public async Task<IEnumerable<CatalogueModel>> DeleteProdajaAsync(int transactionId, IEnumerable<ProdajaAltModel> prodajaAltModels, int currencyId)
+		{
+			return await _dataBaseAction.DeleteProdajaCountReCalc(transactionId, prodajaAltModels, currencyId).ConfigureAwait(false);
 		}
 	}
 }

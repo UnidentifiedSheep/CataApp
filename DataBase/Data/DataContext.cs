@@ -37,8 +37,9 @@ public partial class DataContext : DbContext
 
     public virtual DbSet<Zakupka> Zakupkas { get; set; }
 
-/*    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlite("DataSource=C:\\Users\\Shep\\Desktop\\data.db");*/
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlite("DataSource=C:\\Users\\Shep\\Desktop\\data.db");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -153,6 +154,7 @@ public partial class DataContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AgentId).HasColumnName("agent_id");
+            entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.CurrencyId).HasColumnName("currency_id");
             entity.Property(e => e.Datetime).HasColumnName("datetime");
             entity.Property(e => e.TotalSum).HasColumnName("total_sum");
@@ -178,12 +180,12 @@ public partial class DataContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Count).HasColumnName("count");
             entity.Property(e => e.MainCatId).HasColumnName("main_cat_id");
+            entity.Property(e => e.MainName).HasColumnName("main_name");
             entity.Property(e => e.Price).HasColumnName("price");
             entity.Property(e => e.ProdajaId).HasColumnName("prodaja_id");
+            entity.Property(e => e.UniValue).HasColumnName("uniValue");
 
-            entity.HasOne(d => d.MainCat).WithMany(p => p.Prodajas)
-                .HasForeignKey(d => d.MainCatId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.MainCat).WithMany(p => p.Prodajas).HasForeignKey(d => d.MainCatId);
 
             entity.HasOne(d => d.ProdajaNavigation).WithMany(p => p.Prodajas).HasForeignKey(d => d.ProdajaId);
         });
@@ -206,6 +208,7 @@ public partial class DataContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.AgentId).HasColumnName("agent_id");
+            entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.CurrencyId).HasColumnName("currency_id");
             entity.Property(e => e.Datetime).HasColumnName("datetime");
             entity.Property(e => e.TotalSum).HasColumnName("total_sum");
@@ -231,12 +234,12 @@ public partial class DataContext : DbContext
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Count).HasColumnName("count");
             entity.Property(e => e.MainCatId).HasColumnName("main_cat_id");
+            entity.Property(e => e.MainName).HasColumnName("main_name");
             entity.Property(e => e.Price).HasColumnName("price");
+            entity.Property(e => e.UniValue).HasColumnName("uni_value");
             entity.Property(e => e.ZakId).HasColumnName("zak_id");
 
-            entity.HasOne(d => d.MainCat).WithMany(p => p.Zakupkas)
-                .HasForeignKey(d => d.MainCatId)
-                .OnDelete(DeleteBehavior.ClientSetNull);
+            entity.HasOne(d => d.MainCat).WithMany(p => p.Zakupkas).HasForeignKey(d => d.MainCatId);
 
             entity.HasOne(d => d.Zak).WithMany(p => p.Zakupkas).HasForeignKey(d => d.ZakId);
         });

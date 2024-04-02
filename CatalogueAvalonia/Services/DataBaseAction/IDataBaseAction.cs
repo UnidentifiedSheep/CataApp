@@ -13,7 +13,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		
 		Task DeleteMainNameById(int? id);
 		Task DeleteFromMainCatById(int? id);
-		Task EditCatalogue(CatalogueModel catalogue);
+		Task EditCatalogue(CatalogueModel catalogue, List<int> deleteIds);
 		Task<int> AddCatalogue(CatalogueModel catalogueModel);
 		Task EditAgent(AgentModel agentModel);
 		Task<AgentModel> AddNewAgent(string name, int isZak);
@@ -24,5 +24,12 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		Task DeleteMainCatPricesById(int mainCatId);
 		Task EditCurrency(IEnumerable<CurrencyModel> currencyModels, IEnumerable<int> deletedIds);
 		Task DeleteAllCurrencies();
+		Task AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain);
+		Task<IEnumerable<CatalogueModel>> AddNewPricesForParts(IEnumerable<ZakupkaAltModel> parts, int currencyId);
+		Task DeleteZakupkaByTransactionId(int transactionId);
+		Task<IEnumerable<CatalogueModel>> DeleteZakupkaWithCountReCalc(int transactionId, IEnumerable<ZakupkaAltModel> zakupkaAltModels);
+		Task<IEnumerable<CatalogueModel>> EditZakupka(IEnumerable<int> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts, Dictionary<int, int> lastCounts, CurrencyModel currency, string date, double TotalSum, int transactionId);
+		Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models, ProdajaModel mainModel);
+		Task<IEnumerable<CatalogueModel>> DeleteProdajaCountReCalc(int transactionId, IEnumerable<ProdajaAltModel> prodajaAltModels, int currencyId);
 	}
 }

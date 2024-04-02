@@ -23,6 +23,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private readonly DataStore _dataStore;
 		private readonly TopModel _topModel;
 		private readonly ObservableCollection<ProducerModel> _producers;
+		List<int> ids = new List<int>();
 		public IEnumerable<ProducerModel> Producers => _producers;
 
 		private readonly ObservableCollection<CatalogueModel> _catalogueModels;
@@ -87,6 +88,10 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		{
 			if (SelectedCatalogue != null)
 			{
+				if (SelectedCatalogue.MainCatId != null)
+				{
+					ids.Add(SelectedCatalogue.MainCatId ?? 0);
+				}
 				_catalogueModels.Remove(SelectedCatalogue);
 				IsDirty = true;
 			}
@@ -102,7 +107,9 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				Name = NameOfPart,
 				Children = new(_catalogueModels)
 			};
-			await _topModel.EditCatalogueAsync(model);
+				
+
+			await _topModel.EditCatalogueAsync(model, ids);
 			var what = await _topModel.GetCatalogueByIdAsync(_uniId ?? 5923);
 			Messenger.Send(new EditedMessage(new ChangedItem { Where = "PartCatalogue", Id = _uniId, What = what}));
 			_catalogueModels.Clear();

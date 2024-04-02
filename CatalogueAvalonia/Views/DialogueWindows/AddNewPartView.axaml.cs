@@ -22,8 +22,8 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 				{
 					if(!string.IsNullOrEmpty(dc.NameOfParts))
 					{
-						dc.AddToCatalogueCommand.Execute(null);
 						Close();
+						dc.AddToCatalogueCommand.Execute(null);
 					}
 					else
 						await MessageBoxManager.GetMessageBoxStandard("?",
@@ -31,8 +31,6 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 				}
 				else
 				{
-					await MessageBoxManager.GetMessageBoxStandard("?",
-						$"Вы ввели ни одной запчасти.", ButtonEnum.Ok).ShowWindowDialogAsync(this);
 					Close();
 				}
 			}

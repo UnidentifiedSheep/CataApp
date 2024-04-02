@@ -1,4 +1,5 @@
-﻿using CatalogueAvalonia.Model;
+﻿using CatalogueAvalonia.Core;
+using CatalogueAvalonia.Model;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -125,16 +126,34 @@ namespace CatalogueAvalonia.Services.DataStore
 				var what = (CatalogueModel?)message.Value.What;
 				if (what != null)
 				{
-					var mainName = _catalogueModels.Where(x => x.UniId == what.UniId).Single();
+					var mainName = _catalogueModels.Single(x => x.UniId == what.UniId);
 					if (mainName.Children != null)
 					{
-						var mainCats = mainName.Children.Where(x => x.MainCatId == what.MainCatId).Single();
+						var mainCats = mainName.Children.Single(x => x.MainCatId == what.MainCatId);
 						if (mainCats != null)
 						{
 							mainName.Children.ReplaceOrAdd(mainCats, what);
 						}
 					}
-
+				}
+			}
+			else if (where == "CataloguePricesList")
+			{
+				var what = (IEnumerable<CatalogueModel>?)message.Value.What;
+				if (what != null)
+				{
+					foreach (var item in what)
+					{
+						var mainName = _catalogueModels.Single(x => x.UniId == item.UniId);
+						if (mainName.Children != null)
+						{
+							var mainCats = mainName.Children.Single(x => x.MainCatId == item.MainCatId);
+							if (mainCats != null)
+							{
+								mainName.Children.ReplaceOrAdd(mainCats, item);
+							}
+						}
+					}
 				}
 			}
 		}

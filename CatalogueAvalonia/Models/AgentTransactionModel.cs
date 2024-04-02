@@ -21,9 +21,9 @@ namespace CatalogueAvalonia.Models
 			set
 			{
 				_transactionSum = value;
-				if (TransactionStatus == 0)
+				if (TransactionStatus == 0 || TransactionStatus == 2)
 					Summa = value;
-				else if(TransactionStatus == 1)
+				else if(TransactionStatus == 1 || TransactionStatus == 4)
 					SummaPlateja = value;
 			}
 		}

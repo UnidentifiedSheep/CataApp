@@ -3,6 +3,7 @@ using Avalonia.Interactivity;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia;
+using Avalonia.Input;
 
 namespace CatalogueAvalonia.Views.DialogueWindows
 {
@@ -21,8 +22,8 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 				{
 					if (dc.SelectedCurrency != null)
 					{
-						dc.AddTransactionCommand.Execute(null);
 						Close();
+						dc.AddTransactionCommand.Execute(null);
 					}
 					else
 						await MessageBoxManager.GetMessageBoxStandard("?",

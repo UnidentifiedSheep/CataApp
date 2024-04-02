@@ -26,12 +26,12 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 			var dc = (EditPricesViewModel?)DataContext;
 			if (dc != null)
 			{
-				if (dc.IsDirty || dc.MainCatPrices.Where(x => x.IsDirty).Any())
+				if (dc.IsDirty || dc.MainCatPrices.Any(x => x.IsDirty))
 				{
 					if (dc.MainCatPrices.Any())
 					{
-						dc.SaveChangesCommand.Execute(null);
 						Close();
+						dc.SaveChangesCommand.Execute(null);
 					}
 					else
 					{

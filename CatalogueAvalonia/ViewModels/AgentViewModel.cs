@@ -49,6 +49,9 @@ namespace CatalogueAvalonia.ViewModels
 		private bool _isCurrencyVisible = false;
 		[ObservableProperty]
 		private bool _isLoaded = !false;
+		[ObservableProperty]
+		[NotifyCanExecuteChangedFor(nameof(AddNewAgentCommand))]
+		private bool _isDataBaseLoaded = false;
 		public AgentViewModel()
 		{
 			_agents = new ObservableCollection<AgentModel>();
@@ -93,15 +96,16 @@ namespace CatalogueAvalonia.ViewModels
 		{
 			if (message.Value == "DataBaseLoaded")
 			{
-				IsLoaded = !true;
 				Dispatcher.UIThread.Post(() =>
 				{
-					_agents.AddRange(_dataStore.AgentModels);
+					IsLoaded = !true;
+					IsDataBaseLoaded = true;
+					_agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 0));
 					_currencyModels.AddRange(_dataStore.CurrencyModels);
 				});
 			}
-			else if(message.Value == "Update")
-				GetTransactionsCommand.Execute(null);
+			else if (message.Value == "Update")
+				Dispatcher.UIThread.Post(() => GetTransactionsCommand.Execute(null));
 		}
 
 		private void OnDataBaseAdded(object recipient, AddedMessage message)
@@ -172,9 +176,10 @@ namespace CatalogueAvalonia.ViewModels
 			if (SelectedAgent != null)
 			{
 				await _topModel.EditAgentAsync(SelectedAgent);
+				Messenger.Send(new EditedMessage(new ChangedItem { Id = SelectedAgent.Id, Where = "AgentEdited" }));
 			}
 		}
-		[RelayCommand]
+		[RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]
 		private async Task AddNewAgent(Window parent)
 		{
 			await _dialogueService.OpenDialogue(new AddNewAgentWindow(), new AddNewAgentViewModel(Messenger, _topModel), parent);
@@ -202,17 +207,30 @@ namespace CatalogueAvalonia.ViewModels
 		[RelayCommand(CanExecute = nameof(canDoWithTransaction))]
 		private async Task DeleteTransaction(Window parent)
 		{
-			if (SelectedAgent != null && SelectedCurrency != null && SelectedTransaction != null && SelectedTransaction.CurrencyId != 0) 
+			if (SelectedAgent != null)
 			{
-				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить транзакцию",
-						$"Вы уверенны что хотите удалить транзакцию?",
-						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
-				if (res == ButtonResult.Yes)
+				if (SelectedCurrency != null && SelectedTransaction != null && SelectedTransaction.CurrencyId != 0)
 				{
-					await _topModel.DeleteAgentTransactionAsync(SelectedAgent.Id, SelectedTransaction.CurrencyId, SelectedTransaction.Id);
-					GetTransactionsCommand.Execute(null);
+					if (SelectedTransaction.TransactionStatus == 2 || SelectedTransaction.TransactionStatus == 4)
+					{
+						var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку/продажу",
+							$"Нельзя удалить транзакцию закупки/продажу.\n Для удаления транзакции нужно удалить закупку.",
+							ButtonEnum.Ok).ShowWindowDialogAsync(parent);
+					}
+					else
+					{
+						var res = await MessageBoxManager.GetMessageBoxStandard("Удалить транзакцию",
+							$"Вы уверенны что хотите удалить транзакцию?",
+							ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+						if (res == ButtonResult.Yes)
+						{
+							await _topModel.DeleteAgentTransactionAsync(SelectedAgent.Id, SelectedTransaction.CurrencyId, SelectedTransaction.Id);
+							GetTransactionsCommand.Execute(null);
+						}
+					}
 				}
 			}
+			
 		}
 	}
 }

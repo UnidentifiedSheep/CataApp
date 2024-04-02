@@ -30,8 +30,8 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 				{
 					if (dc.Catalogues.Any())
 					{
-						dc.SaveChangesCommand.Execute(null);
 						Close();
+						dc.SaveChangesCommand.Execute(null);
 					}
 					else 
 					{
@@ -43,8 +43,8 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 								).ShowWindowDialogAsync(this);
 						if (res == MsBox.Avalonia.Enums.ButtonResult.Yes)
 						{
-							dc.DeleteGroupCommand.Execute(null);
 							Close();
+							dc.DeleteGroupCommand.Execute(null);
 						}
 						else
 						{

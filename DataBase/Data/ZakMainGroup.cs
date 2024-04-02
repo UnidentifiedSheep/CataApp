@@ -17,6 +17,8 @@ public partial class ZakMainGroup
 
     public int TransactionId { get; set; }
 
+    public string? Comment { get; set; }
+
     public virtual Agent Agent { get; set; } = null!;
 
     public virtual Currency Currency { get; set; } = null!;

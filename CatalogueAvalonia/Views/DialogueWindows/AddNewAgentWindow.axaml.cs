@@ -24,8 +24,8 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 			{
 				if (!string.IsNullOrEmpty(dc.AgentName))
 				{
-					dc.AddNewAgentCommand.Execute(null);
 					Close();
+					dc.AddNewAgentCommand.Execute(null);
 				}
 				else
 					await MessageBoxManager.GetMessageBoxStandard("?",

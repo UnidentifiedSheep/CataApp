@@ -24,7 +24,21 @@ namespace CatalogueAvalonia.Models
 			}
 		}
 		public int CanDelete { get; set; }
-		public string CurrencySign { get; set; } = string.Empty;
+		private string _currencySign = string.Empty;
+		public string CurrencySign
+		{
+			get
+			{
+				return _currencySign;
+			}
+			set
+			{
+				if (string.IsNullOrEmpty(value) || value == " ")
+					_currencySign = value.Substring(0, 3) + '.';
+				else
+					_currencySign = value;
+			}
+		}
 
 
 		public bool IsDirty = false;

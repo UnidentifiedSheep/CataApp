@@ -30,7 +30,7 @@ namespace CatalogueAvalonia.Models
 		[ObservableProperty]
 		private double _price;
 		[ObservableProperty]
-		private string _name = " ";
+		private string _name = "Название не указано";
 
 		public ObservableCollection<CatalogueModel>? Children { get; set; }
 

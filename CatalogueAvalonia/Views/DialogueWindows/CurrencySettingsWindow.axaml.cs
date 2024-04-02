@@ -26,8 +26,8 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 			{ 
 				if (dc.IsDirty || dc.CurrencyModels.Where(x => x.IsDirty).Any()) 
 				{
-					dc.SaveChangesCommand.Execute(this);
 					Close();
+					dc.SaveChangesCommand.Execute(this);
 				}
 				else
 					Close();

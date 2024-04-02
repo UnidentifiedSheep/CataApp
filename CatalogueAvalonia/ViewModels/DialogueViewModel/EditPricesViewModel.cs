@@ -74,7 +74,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 
 				if (item.SelectedCurrency != null && item.CurrencyId != 2)
 				{
-					item.Price /= item.SelectedCurrency.ToUsd;
+					item.Price = Math.Round(item.Price / item.SelectedCurrency.ToUsd, 2);
 					item.SelectedCurrency = usdCurrency;
 				}
 			}
