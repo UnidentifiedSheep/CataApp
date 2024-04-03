@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using CatalogueAvalonia.Services.BillingService;
 
 namespace CatalogueAvalonia.ViewModels
 {
@@ -35,9 +36,9 @@ namespace CatalogueAvalonia.ViewModels
 		private ProdajaModel? _selectedProdaja;
 		[ObservableProperty]
 		private ProdajaAltModel? _selectedAltModel;
-		[ObservableProperty]
-		[NotifyCanExecuteChangedFor(nameof(NewProdajaCommand))]
-		private bool _isLoaded = false;
+
+		[ObservableProperty] [NotifyCanExecuteChangedFor(nameof(NewProdajaCommand))]
+		private bool _isLoaded;
 
 		private readonly ObservableCollection<ProdajaModel> _prodajaMainGroup;
 		public IEnumerable<ProdajaModel> MainGroup => _prodajaMainGroup;
@@ -54,8 +55,9 @@ namespace CatalogueAvalonia.ViewModels
 			_prodajaMainGroup = new ObservableCollection<ProdajaModel>();
 			_agents = new ObservableCollection<AgentModel>();
 		}
-		public ProdajaViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel, IDialogueService dialogueService) : base(messenger) 
-		{ 
+		public ProdajaViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel, IDialogueService dialogueService) : base(messenger)
+		{
+			_isLoaded = false;
 			_dataStore = dataStore;
 			_topModel = topModel;
 			_dialogueService = dialogueService;
@@ -145,6 +147,15 @@ namespace CatalogueAvalonia.ViewModels
 					Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
 					Messenger.Send(new ActionMessage("Update"));
 				}
+			}
+		}
+
+		[RelayCommand]
+		private void CreateInvoice()
+		{
+			if (SelectedProdaja != null)
+			{
+				Invoice.CreateInvoice(_prodajaAltGroup, SelectedProdaja);
 			}
 		}
 		[RelayCommand]

@@ -99,6 +99,8 @@
 						<MenuItem Header="Редактировать"
 								  CommandParameter="{Binding $parent[Window]}"
 								  Command="{Binding EditProdajaCommand}"/>
+						<MenuItem Header="Печать"
+						          Command="{Binding CreateInvoiceCommand}"/>
 					</ContextMenu>
 				</DataGrid.ContextMenu>
 			</DataGrid>

@@ -27,6 +27,8 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="QuestPDF" Version="2023.12.6" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1-dev-00582" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00972" />
     <PackageReference Include="Splat.Avalonia.Microsoft.Extensions.DependencyInjection" Version="14.8.12" />
   </ItemGroup>
 

@@ -59,7 +59,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				_catalogueModels.AddRange(parts.Select(x => new CatalogueModel
 				{
 					UniValue = x,
-					ProducerId = 0,
+					ProducerId = 1,
 					ProducerName = "Неизвестный"
 				}));
 			

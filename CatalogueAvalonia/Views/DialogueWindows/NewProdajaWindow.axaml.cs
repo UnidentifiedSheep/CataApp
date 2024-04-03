@@ -5,7 +5,6 @@ using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using Avalonia.Interactivity;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia;
-using Microsoft.CodeAnalysis.CSharp;
 
 namespace CatalogueAvalonia.Views.DialogueWindows
 {

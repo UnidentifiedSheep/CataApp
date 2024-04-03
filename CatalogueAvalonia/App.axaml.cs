@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using CatalogueAvalonia.Core;
@@ -9,23 +8,32 @@ using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels;
-using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using CatalogueAvalonia.Views;
-using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.Messaging;
 using DataBase.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using System;
-using System.Reflection.Emit;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using ILogger = Serilog.ILogger;
+
 
 namespace CatalogueAvalonia
 {
 	public partial class App : Application
 	{
 		public IHost? GlobalHost { get; private set; }
+		
+		private static void CheckDir()
+		{
+			List<string> dir = ["Data", "Documents", "Logger"];
+			
+			foreach (var path in dir)
+				System.IO.Directory.CreateDirectory($"../{path}");
+		}
 		public override void Initialize()
 		{
 			AvaloniaXamlLoader.Load(this);
@@ -35,7 +43,10 @@ namespace CatalogueAvalonia
 			var hostBuilder = CreateHostBuilder();
 			var host = hostBuilder.Build();
 			GlobalHost = host;
+			
 
+			await GlobalHost.Services.GetRequiredService<DataContext>().Database.EnsureCreatedAsync();
+			
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 			{
 				// Line below is needed to remove Avalonia data validation.
@@ -54,10 +65,19 @@ namespace CatalogueAvalonia
 
 		private static HostApplicationBuilder CreateHostBuilder()
 		{
+			CheckDir();
+			
+			ILogger log = new LoggerConfiguration()
+				.Enrich.FromLogContext()
+				.WriteTo.File(path: "../Logger/log.txt", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true)
+				.CreateLogger();
+			
 			var builder = Host.CreateApplicationBuilder(Environment.GetCommandLineArgs());
 
+			builder.Services.AddSingleton<ILogger>(log);
+			builder.Services.AddDbContext<DataContext>(o => o.UseSqlite("DataSource=../Data/data.db"));
 			builder.Services.AddTransient<ViewLocator>();
-
+			
 			builder.Services.AddSingleton<MainWindowViewModel>();
 			builder.Services.AddSingleton<CatalogueViewModel>();
 			builder.Services.AddSingleton<AgentViewModel>();
@@ -72,7 +92,6 @@ namespace CatalogueAvalonia
 			builder.Services.AddSingleton<IDialogueService, DialogueService>();
 			builder.Services.AddSingleton<IMessenger, WeakReferenceMessenger>();
 
-			builder.Services.AddDbContext<DataContext>(o => o.UseSqlite("DataSource=C:\\Users\\Shep\\Desktop\\data.db"));
 
 			return builder;
 		}

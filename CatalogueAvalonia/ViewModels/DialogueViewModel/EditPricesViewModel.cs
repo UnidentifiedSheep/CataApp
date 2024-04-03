@@ -86,7 +86,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_mainCatPrices.AddRange(await _topModel.GetMainCatPricesByIdAsync(_mainCatId));
 			foreach (var item in _mainCatPrices)
 			{
-				item.Currency = new(_currencies.Where(x => x.Id != 0));
+				item.Currency = new(_currencies.Where(x => x.Id != 1));
 				item.SelectedCurrency = item.Currency.Where(x => x.Id == item.CurrencyId).SingleOrDefault();
 			}
 			IsDirty = false;
@@ -98,8 +98,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			{ 
 				Id = null,
 				Count = 0,
-				Currency = new(_currencies.Where(x => x.Id != 0)),
-				CurrencyId = 0,
+				Currency = new(_currencies.Where(x => x.Id != 1)),
+				CurrencyId = 1,
 				MainCatId = _mainCatId,
 				Price = 0,
 				IsDirty = false

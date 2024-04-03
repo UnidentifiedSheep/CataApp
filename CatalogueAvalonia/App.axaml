@@ -9,6 +9,7 @@
         <local:ViewLocator/>
     </Application.DataTemplates>
   
+             
     <Application.Styles>
         <FluentTheme />
 		<StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>

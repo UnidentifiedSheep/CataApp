@@ -62,8 +62,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 
 			_purchaseDate = DateTime.Now.Date;
 			_canEditUsd = !ConvertToUsd;
-			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 0));
-			_agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.IsZak == 1 && x.Id != 0));
+			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
+			_agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.IsZak == 1 && x.Id != 1));
 			_zakupka = new ObservableCollection<ZakupkaAltModel>();
 			Messenger.Register<AddedMessage>(this, OnItemAdded);
 		}

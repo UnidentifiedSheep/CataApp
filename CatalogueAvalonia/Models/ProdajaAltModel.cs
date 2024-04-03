@@ -13,18 +13,19 @@ namespace CatalogueAvalonia.Models
 		public int ProdajaId { get; set; }
 		public int? MainCatId { get; set; }
 		[ObservableProperty]
-		public int _maxCount;
+		private int _maxCount;
 		[ObservableProperty]
-		public string? _mainCatName = string.Empty;
+		private string? _mainCatName = string.Empty;
 		[ObservableProperty]
-		public string? _uniValue = string.Empty;
+		private string? _uniValue = string.Empty;
 		[ObservableProperty]
-		public string? _mainName = string.Empty;
-
+		private string? _mainName = string.Empty;
 		[ObservableProperty]
-		public double _price;
+		private string _producerName = string.Empty;
 		[ObservableProperty]
-		public int _count;
+		private double _price;
+		[ObservableProperty]
+		private int _count;
 		[ObservableProperty]
 		private double _priceSum;
 

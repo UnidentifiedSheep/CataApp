@@ -5,8 +5,6 @@ VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogueAvalonia", "CatalogueAvalonia\CatalogueAvalonia.csproj", "{87611CBF-2904-4AAD-B7CD-0B1C19B11505}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Catalogue", "..\CatalogueApp\Catalogue\Catalogue.csproj", "{479B068E-8D75-47B4-BF5C-56D573D2F3E2}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBase", "DataBase\DataBase.csproj", "{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}"
 EndProject
 Global
@@ -19,10 +17,6 @@ Global
 		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{87611CBF-2904-4AAD-B7CD-0B1C19B11505}.Release|Any CPU.Build.0 = Release|Any CPU
-		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{479B068E-8D75-47B4-BF5C-56D573D2F3E2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU

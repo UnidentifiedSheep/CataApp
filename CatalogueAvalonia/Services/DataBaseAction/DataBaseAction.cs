@@ -260,7 +260,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		{
 			foreach (var item in deletedIds)
 			{
-				if (item != 1)
+				if (item != 0 && item != 2)
 				{
 					var entity = await _context.Currencies.FindAsync(item);
 					if (entity != null)
@@ -296,7 +296,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		}
 		public async Task DeleteAllCurrencies()
 		{
-			_context.Currencies.RemoveRange(await _context.Currencies.Where(x => x.Id != 0 || x.Id != 2).ToListAsync());
+			_context.Currencies.RemoveRange(await _context.Currencies.Where(x => x.Id != 1 || x.Id != 2).ToListAsync());
 			await _context.SaveChangesAsync();
 		}
 		public async Task AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain)
@@ -565,7 +565,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 							await _context.MainCatPrices.AddAsync(new MainCatPrice
 							{
 								Count = count,
-								CurrencyId = currency.Id ?? 0,
+								CurrencyId = currency.Id ?? 1,
 								MainCatId = item.MainCatId ?? 0,
 								Price = Math.Round(item.Price / currency.ToUsd, 2)
 							});

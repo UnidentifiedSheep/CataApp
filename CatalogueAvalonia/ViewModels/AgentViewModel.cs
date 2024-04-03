@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 
 namespace CatalogueAvalonia.ViewModels
 {
@@ -47,8 +48,14 @@ namespace CatalogueAvalonia.ViewModels
 		private DateTime _endDate;
 		[ObservableProperty]
 		private bool _isCurrencyVisible = false;
+		[ObservableProperty] 
+		private bool _isDebtCreditVisible = false;
 		[ObservableProperty]
 		private bool _isLoaded = !false;
+		[ObservableProperty] 
+		private double _totalDebt;
+		[ObservableProperty] 
+		private double _totalCredit;
 		[ObservableProperty]
 		[NotifyCanExecuteChangedFor(nameof(AddNewAgentCommand))]
 		private bool _isDataBaseLoaded = false;
@@ -57,6 +64,7 @@ namespace CatalogueAvalonia.ViewModels
 			_agents = new ObservableCollection<AgentModel>();
 			_currencyModels = new ObservableCollection<CurrencyModel>();
 			_agentTransactions = new ObservableCollection<AgentTransactionModel>();
+			_isDebtCreditVisible = true;
 
 			_startDate = DateTime.Now.AddMonths(-1).Date;
 			_endDate = DateTime.Now.Date;
@@ -100,7 +108,7 @@ namespace CatalogueAvalonia.ViewModels
 				{
 					IsLoaded = !true;
 					IsDataBaseLoaded = true;
-					_agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 0));
+					_agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 1));
 					_currencyModels.AddRange(_dataStore.CurrencyModels);
 				});
 			}
@@ -142,10 +150,16 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		partial void OnSelectedCurrencyChanged(CurrencyModel? value)
 		{
-			if (SelectedCurrency != null && SelectedCurrency.Id == 0)
+			if (SelectedCurrency != null && SelectedCurrency.Id == 1)
+			{
 				IsCurrencyVisible = true;
+				IsDebtCreditVisible = false;
+			}
 			else
+			{
 				IsCurrencyVisible = false;
+				IsDebtCreditVisible = true;
+			}
 			GetTransactionsCommand.Execute(null);
 		}
 		partial void OnSelectedAgentChanged(AgentModel? value)
@@ -163,11 +177,21 @@ namespace CatalogueAvalonia.ViewModels
 		[RelayCommand]
 		private async Task GetTransactions()
 		{
+			TotalDebt = 0;
+			TotalCredit = 0;
 			_agentTransactions.Clear();
 			if (SelectedAgent != null && SelectedCurrency != null)
 			{
 				var model = await _topModel.GetAgentTransactionsByIdsAsync(SelectedAgent.Id, SelectedCurrency.Id ?? default, Converters.ToDateTimeSqlite(StartDate.ToString("dd.MM.yyyy")), Converters.ToDateTimeSqlite(EndDate.ToString("dd.MM.yyyy")));
 				_agentTransactions.AddRange(model.Where(x => x.TransactionStatus != 3).OrderByDescending(x => x.Id));
+				var lastTr = _agentTransactions.FirstOrDefault();
+				if (lastTr != null)
+				{
+					if (lastTr.Balance > 0)
+						TotalDebt = lastTr.Balance;
+					else if(lastTr.Balance < 0)
+						TotalCredit = lastTr.Balance * -1;
+				}
 			}
 		}
 		[RelayCommand]
@@ -209,7 +233,7 @@ namespace CatalogueAvalonia.ViewModels
 		{
 			if (SelectedAgent != null)
 			{
-				if (SelectedCurrency != null && SelectedTransaction != null && SelectedTransaction.CurrencyId != 0)
+				if (SelectedCurrency != null && SelectedTransaction != null && SelectedTransaction.CurrencyId != 1)
 				{
 					if (SelectedTransaction.TransactionStatus == 2 || SelectedTransaction.TransactionStatus == 4)
 					{

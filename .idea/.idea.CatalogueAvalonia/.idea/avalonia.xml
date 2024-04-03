@@ -3,8 +3,12 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="CatalogueAvalonia/App.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/AgentView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/CatalogueView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/EditPricesWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/NewProdajaWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/ProdajaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
       </map>
     </option>
   </component>

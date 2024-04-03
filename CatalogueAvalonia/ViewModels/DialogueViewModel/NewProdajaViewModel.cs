@@ -59,8 +59,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_dialogueService = dialogueService;
 
 			_prodajaDate = DateTime.Now.Date;
-			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 0));
-			_agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.Id != 0));
+			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
+			_agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.Id != 1));
 			_prodajaAlts = new ObservableCollection<ProdajaAltModel>();
 
 			Messenger.Register<AddedMessage>(this, OnItemAdded);

@@ -151,7 +151,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 			FormattableString queryWithOutCurrency = $"SELECT * from agent_transactions where {startDate} <= transaction_datatime and {endDate} >= transaction_datatime and agent_id = {agentId}";
 
 			
-			if (currencyId == 0)
+			if (currencyId == 1)
 			{
 				var transactions = await _context.AgentTransactions.FromSql(queryWithOutCurrency).Include(x => x.CurrencyNavigation).ToListAsync().ConfigureAwait(false);
 				return AgentTransactionToModel(transactions);
@@ -245,7 +245,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 			FormattableString queryWithOutAgent = $"SELECT * from zak_main_group where {_startD} <= datetime and {_endD} >= datetime";
 			FormattableString queryWithAgent = $"SELECT * from zak_main_group where {_startD} <= datetime and {_endD} >= datetime and agent_id = {agentId}";
 
-			if (agentId == 0)
+			if (agentId == 1)
 			{
 				return await _context.ZakMainGroups.FromSql(queryWithOutAgent).Include(x => x.Agent).Include(x => x.Currency).OrderByDescending(x => x.Id).Select(x => new ZakupkiModel
 				{
@@ -318,7 +318,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 			FormattableString queryWithOutAgent = $"SELECT * from prod_main_group where {_startD} <= datetime and {_endD} >= datetime";
 			FormattableString queryWithAgent = $"SELECT * from prod_main_group where {_startD} <= datetime and {_endD} >= datetime and agent_id = {agentId}";
 
-			if (agentId == 0)
+			if (agentId == 1)
 			{
 				return await _context.ProdMainGroups.FromSql(queryWithOutAgent).Include(x => x.Agent).Include(x => x.Currency).OrderByDescending(x => x.Id).Select(x => new ProdajaModel
 				{
@@ -351,7 +351,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 		}
 		public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId)
 		{
-			var model = await _context.Prodajas.Include(x => x.MainCat).Where(x => x.ProdajaId == zakMainGroupId).ToListAsync();
+			var model = await _context.Prodajas.Include(x => x.MainCat).ThenInclude(x => x.Producer).Where(x => x.ProdajaId == zakMainGroupId).ToListAsync();
 			List<ProdajaAltModel> list = new List<ProdajaAltModel>();
 			foreach (var item in model)
 			{
@@ -367,6 +367,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 						Price = item.Price,
 						UniValue = item.MainCat.UniValue,
 						ProdajaId = item.ProdajaId,
+						ProducerName = item.MainCat.Producer.ProducerName
 					});
 				}
 				else

@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using System;
+using QuestPDF.Infrastructure;
 
 namespace CatalogueAvalonia
 {
@@ -11,6 +12,7 @@ namespace CatalogueAvalonia
 		[STAThread]
 		public static void Main(string[] args)
 		{
+			QuestPDF.Settings.License = LicenseType.Community;
 			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 		}
 

@@ -621,6 +621,19 @@ namespace DataBase.Migrations
                 {
                     b.Navigation("Zakupkas");
                 });
+            
+            
+            modelBuilder.Entity<Producer>().HasData(new Producer { Id = 0, ProducerName = "Неизвестный" });
+            modelBuilder.Entity<Agent>().HasData(new Agent { Id = 0, Name = "Неизвестный", IsZak = 1 });
+            modelBuilder.Entity<MainName>().HasData(new MainName { UniId = 5923, Name = "unKnown" });
+            modelBuilder.Entity<Currency>().HasData(new Currency
+            {
+                Id = 0, CurrencyName = "Неизвестно", CurrencySign = "Un", ToUsd = 0, CanDelete = 0
+            },
+                new Currency
+            {
+                Id = 2, CurrencyName = "Доллары", CurrencySign = "$", ToUsd = 1, CanDelete = 0
+            });
 #pragma warning restore 612, 618
         }
     }

@@ -1,15 +1,10 @@
-﻿using CatalogueAvalonia.Core;
-using CatalogueAvalonia.Model;
+﻿using CatalogueAvalonia.Model;
 using CatalogueAvalonia.Services.DataBaseAction;
-using DataBase.Data;
-using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
+using MsBox.Avalonia;
+using Serilog;
 
 namespace CatalogueAvalonia.Models
 {
@@ -17,10 +12,12 @@ namespace CatalogueAvalonia.Models
 	{
 		private readonly IDataBaseProvider _dataBaseProvider;
 		private readonly IDataBaseAction _dataBaseAction;
-		public TopModel(IDataBaseProvider dataBaseProvider, IDataBaseAction dataBaseAction)
+		private readonly ILogger _logger;
+		public TopModel(IDataBaseProvider dataBaseProvider, IDataBaseAction dataBaseAction, ILogger logger)
 		{
 			_dataBaseProvider = dataBaseProvider;
 			_dataBaseAction = dataBaseAction;
+			_logger = logger;
 		}
 		///Исправить _task.queue. вызывается в основном потоке.
 
@@ -30,7 +27,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<CatalogueModel>> GetCatalogueAsync()
 		{
-			return await _dataBaseProvider.GetCatalogueAsync();
+			try
+			{
+				return await _dataBaseProvider.GetCatalogueAsync();
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
+			
 		}
 		/// <summary>
 		/// Удаляет основную группу запчастей по id основной группы.
@@ -39,7 +47,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task DeleteGroupFromCatalogue(int? id)
 		{
-			await _dataBaseAction.DeleteMainNameById(id);
+			try
+			{
+				await _dataBaseAction.DeleteMainNameById(id);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Удаляет запчасть по id.
@@ -48,7 +66,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task DeleteSoloFromCatalogue(int? id)
 		{
-			await _dataBaseAction.DeleteFromMainCatById(id);
+			try
+			{
+
+				await _dataBaseAction.DeleteFromMainCatById(id);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Получает всех производителей из базы данных.
@@ -56,16 +84,37 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<ProducerModel>> GetProducersAsync()
 		{
-			return await _dataBaseProvider.GetProducersAsync();
+			try
+			{
+				return await _dataBaseProvider.GetProducersAsync();
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<ProducerModel>();
+			}
 		}
 		/// <summary>
 		/// Редактирует группу запчастей.
 		/// </summary>
 		/// <param name="catalogue"></param>
-		/// <returns></returns>
+		/// <param name="deleteIds"></param>
 		public async Task EditCatalogueAsync(CatalogueModel catalogue, List<int> deleteIds)
 		{
-			await _dataBaseAction.EditCatalogue(catalogue, deleteIds).ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.EditCatalogue(catalogue, deleteIds).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Получает группу запчастей по основному id.
@@ -74,11 +123,33 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<CatalogueModel> GetCatalogueByIdAsync(int id)
 		{
-			return await _dataBaseProvider.GetCatalogueById(id).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetCatalogueById(id).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new CatalogueModel();
+			}
 		}
 		public async Task<IEnumerable<CatalogueModel>> GetCatalogueByIdAsync(IEnumerable<int> ids)
 		{
-			return await _dataBaseProvider.GetCatalogueById(ids).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetCatalogueById(ids).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
 		}
 		/// <summary>
 		/// Добавление новой группы в катало запчастей.
@@ -87,7 +158,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns>Id только что добавленной группы.</returns>
 		public async Task<int> AddNewCatalogue(CatalogueModel catalogueModell)
 		{
-			return await _dataBaseAction.AddCatalogue(catalogueModell);
+			try
+			{
+				return await _dataBaseAction.AddCatalogue(catalogueModell);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return -1;
+			}
 		}
 		/// <summary>
 		/// Получает всеx контрагентов из базы данных.
@@ -95,7 +177,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<AgentModel>> GetAllAgentsAsync()
 		{
-			return await _dataBaseProvider.GetAgentsAsync().ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetAgentsAsync().ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<AgentModel>();
+			}
 		}
 		/// <summary>
 		/// Получает все валюты из базы данных.
@@ -103,7 +196,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<CurrencyModel>> GetAllCurrenciesAsync()
 		{
-			return await _dataBaseProvider.GetCurrenciesAsync().ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetCurrenciesAsync().ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CurrencyModel>();
+			}
 		}
 		/// <summary>
 		/// Получает все транзакции из базы данных.
@@ -111,7 +215,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<AgentTransactionModel>> GetAllAgentTransactionsAsync()
 		{
-			return await _dataBaseProvider.GetAgentTransactionsAsync().ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetAgentTransactionsAsync().ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<AgentTransactionModel>();
+			}
 		}
 		/// <summary>
 		/// Получает транзакции выбранного контрагента за определенный период времени.
@@ -123,7 +238,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<AgentTransactionModel>> GetAgentTransactionsByIdsAsync(int agentId, int currencyId, string sartDate, string endDate)
 		{
-			return await _dataBaseProvider.GetAgentTransactionsByIdsAsync(agentId, currencyId, sartDate, endDate).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetAgentTransactionsByIdsAsync(agentId, currencyId, sartDate, endDate).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<AgentTransactionModel>();
+			}
 		}
 		/// <summary>
 		/// Изменяет название или возможность закупки Контрагента.
@@ -132,7 +258,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task EditAgentAsync(AgentModel agentModel)
 		{
-			await _dataBaseAction.EditAgent(agentModel).ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.EditAgent(agentModel).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Добавление нового контрагента.
@@ -142,7 +278,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<AgentModel> AddNewAgentAsync(string name, int isZak)
 		{
-			return await _dataBaseAction.AddNewAgent(name, isZak).ConfigureAwait(false);
+			try
+			{
+
+				return await _dataBaseAction.AddNewAgent(name, isZak).ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new AgentModel();
+			}
 		}
 		/// <summary>
 		/// Получение контрагента по id.
@@ -151,7 +298,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<AgentModel> GetAgentByIdAsync(int id)
 		{
-			return await _dataBaseProvider.GetAgentByIdAsync(id).ConfigureAwait(false);
+			try
+			{
+
+				return await _dataBaseProvider.GetAgentByIdAsync(id).ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new AgentModel();
+			}
 		}
 		/// <summary>
 		/// Удаление контрагента по id.
@@ -160,7 +318,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task DeleteAgentAsync(int id)
 		{
-			await _dataBaseAction.DeleteAgent(id).ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.DeleteAgent(id).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Добавление нвой транзакции.
@@ -169,7 +337,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<int> AddNewTransactionAsync(AgentTransactionModel agentTransactionModel)
 		{
-			return await _dataBaseAction.AddNewTransaction(agentTransactionModel).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.AddNewTransaction(agentTransactionModel).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return -1;
+			}
 		}
 		/// <summary>
 		/// Получение последней транзакции.
@@ -179,7 +358,18 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<AgentTransactionModel> GetLastTransactionAsync(int agentId, int currencyId)
 		{
-			return await _dataBaseProvider.GetLastAddedTransaction(agentId, currencyId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetLastAddedTransaction(agentId, currencyId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new AgentTransactionModel();
+			}
 		}
 		/// <summary>
 		/// Удаляет транзакцию и меняет Сальдо последующих операций.
@@ -190,7 +380,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task DeleteAgentTransactionAsync(int agentId, int currencyId, int transactionId)
 		{
-			await _dataBaseAction.DeleteTransaction(agentId, currencyId, transactionId).ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.DeleteTransaction(agentId, currencyId, transactionId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Returns prices of part.
@@ -199,16 +399,39 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task<IEnumerable<MainCatPriceModel>> GetMainCatPricesByIdAsync(int mainCatId)
 		{
-			return await _dataBaseProvider.GetMainCatPricesById(mainCatId).ConfigureAwait(false);
+			try
+			{
+
+				return await _dataBaseProvider.GetMainCatPricesById(mainCatId).ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<MainCatPriceModel>();
+			}
 		}
 		/// <summary>
 		/// Редактирует цены и количество запчасти.
 		/// </summary>
 		/// <param name="mainCatPrices"></param>
+		/// <param name="mainCatId"></param>
 		/// <returns></returns>
 		public async Task<CatalogueModel?> EditMainCatPricesAsync(IEnumerable<MainCatPriceModel> mainCatPrices, int mainCatId)
 		{
-			return await _dataBaseAction.EditMainCatPrices(mainCatPrices, mainCatId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.EditMainCatPrices(mainCatPrices, mainCatId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new CatalogueModel();
+			}
 		}
 		/// <summary>
 		/// Удаляет цены запчастей по id.
@@ -217,7 +440,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task DeleteMainCatPricesByIdAsync(int mainCatId)
 		{
-			await _dataBaseAction.DeleteMainCatPricesById(mainCatId).ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.DeleteMainCatPricesById(mainCatId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Изменяет валюты.
@@ -227,7 +460,17 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task EditCurrenciesAsync(IEnumerable<CurrencyModel> currencyModels, IEnumerable<int> deletedIds)
 		{
-			await _dataBaseAction.EditCurrency(currencyModels, deletedIds).ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.EditCurrency(currencyModels, deletedIds).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		/// <summary>
 		/// Удаляет все валюты кроме "Доллара" и "Неизвестной".
@@ -235,51 +478,180 @@ namespace CatalogueAvalonia.Models
 		/// <returns></returns>
 		public async Task DeleteAllCurrenciesAsync()
 		{
-			await _dataBaseAction.DeleteAllCurrencies().ConfigureAwait(false);
+			try
+			{
+				await _dataBaseAction.DeleteAllCurrencies().ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		public async Task<IEnumerable<ZakupkiModel>> GetZakupkiMainGroupAsync(string startD, string endD, int agentId)
 		{
-			return await _dataBaseProvider.GetZakupkiMainModel(startD, endD, agentId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetZakupkiMainModel(startD, endD, agentId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<ZakupkiModel>();
+			}
 		}
 		public async Task AddNewZakupkaAsync(IEnumerable<ZakupkaAltModel> zakupkaAlts, ZakupkiModel zakupkiModel)
 		{
-			await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel);
+			try
+			{
+				await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		public async Task<IEnumerable<CatalogueModel>> AddNewPricesForPartsAsync(IEnumerable<ZakupkaAltModel> catas, int currencyId)
 		{
-			return await _dataBaseAction.AddNewPricesForParts(catas, currencyId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.AddNewPricesForParts(catas, currencyId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
 		}
 		public async Task<IEnumerable<ZakupkaAltModel>> GetZakAltGroup(int mainGroupId)
 		{
-			return await _dataBaseProvider.GetZakupkiAltModel(mainGroupId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetZakupkiAltModel(mainGroupId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<ZakupkaAltModel>();
+			}
 		}
 		public async Task DeleteZakupkaByTransactionIdAsync(int transactionId)
 		{
-			await _dataBaseAction.DeleteZakupkaByTransactionId(transactionId).ConfigureAwait(false);
+			try
+			{
+
+				await _dataBaseAction.DeleteZakupkaByTransactionId(transactionId).ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+			}
 		}
 		public async Task<IEnumerable<CatalogueModel>> DeleteZakupkaWithPricesReCount(int transactionId, IEnumerable<ZakupkaAltModel> zakupkaAltModels)
 		{
-			return await _dataBaseAction.DeleteZakupkaWithCountReCalc(transactionId, zakupkaAltModels).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.DeleteZakupkaWithCountReCalc(transactionId, zakupkaAltModels).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
 		}
 		public async Task<IEnumerable<CatalogueModel>> EditZakupkaAsync(IEnumerable<int> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts, Dictionary<int, int> lastCounts, CurrencyModel currency,double totalSum, string date, int transactionId)
 		{
-			return await _dataBaseAction.EditZakupka(deletedIds, zakupkaAlts, lastCounts, currency, date, totalSum, transactionId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.EditZakupka(deletedIds, zakupkaAlts, lastCounts, currency, date, totalSum, transactionId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
 		}
 		public async Task<IEnumerable<ProdajaModel>> GetProdajaMainGroupAsync(string startD, string endD, int agentId)
 		{
-			return await _dataBaseProvider.GetProdajaMainGroup(startD, endD, agentId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseProvider.GetProdajaMainGroup(startD, endD, agentId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<ProdajaModel>();
+			}
 		}
 		public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltGroupAsync(int mainGroupId)
 		{
-			return await _dataBaseProvider.GetProdajaAltModel(mainGroupId).ConfigureAwait(false);
+			try
+			{
+
+				return await _dataBaseProvider.GetProdajaAltModel(mainGroupId).ConfigureAwait(false);
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<ProdajaAltModel>();
+			}
 		}
 		public async Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models, ProdajaModel mainModel)
 		{
-			return await _dataBaseAction.AddNewProdaja(models, mainModel).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.AddNewProdaja(models, mainModel).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
 		}
 		public async Task<IEnumerable<CatalogueModel>> DeleteProdajaAsync(int transactionId, IEnumerable<ProdajaAltModel> prodajaAltModels, int currencyId)
 		{
-			return await _dataBaseAction.DeleteProdajaCountReCalc(transactionId, prodajaAltModels, currencyId).ConfigureAwait(false);
+			try
+			{
+				return await _dataBaseAction.DeleteProdajaCountReCalc(transactionId, prodajaAltModels, currencyId).ConfigureAwait(false);
+
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
 		}
 	}
 }

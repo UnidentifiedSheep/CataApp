@@ -42,7 +42,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private async Task LoadCurrency()
 		{
 			var currencys = await _topModel.GetAllCurrenciesAsync();
-			_currencyModels.AddRange(currencys.Where(x => x.Id != 0));
+			_currencyModels.AddRange(currencys.Where(x => x.Id != 1));
 		}
 		[RelayCommand]
 		private void AddNewCurrency()

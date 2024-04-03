@@ -68,8 +68,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_agentId = transactionData.AgentId;
 			Date = DateTime.Now.Date;
 			TransactionSum = -1 * transactionData.TransactionSum;
-			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 0));
-			SelectedCurrency = _currencies.Where(x => x.Id == transactionData.CurrencyId).FirstOrDefault();
+			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
+			SelectedCurrency = _currencies.FirstOrDefault(x => x.Id == transactionData.CurrencyId);
 		}
 		/// <summary>
 		/// Для создания транзакции.
@@ -87,7 +87,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_dataStore = dataStore;
 			_nameOfAgent = nameOfAgent;
 			_agentId = agentId;
-			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 0));
+			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
 			Date = DateTime.Now.Date;
 		}
 		partial void OnTransactionSumChanged(double value)

@@ -14,8 +14,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -73,6 +71,8 @@ namespace CatalogueAvalonia.ViewModels
 			Messenger.Register<EditedMessage>(this, OnEditedIdDataBase);
 			Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
 			Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+
+			
 		}
 
 		private void OnAction(object recipient, ActionMessage message)
@@ -96,6 +96,7 @@ namespace CatalogueAvalonia.ViewModels
 				if (what != null)
 				{
 					_catalogueModels.Add(what);
+					CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
 				}
 			}
 		}
@@ -105,9 +106,8 @@ namespace CatalogueAvalonia.ViewModels
 			var where = message.Value.Where;
 			if (where == "PartCatalogue")
 			{
-				_catalogueModels.Remove(_catalogueModels.Where(x => x.UniId == message.Value.Id).Single());
+				_catalogueModels.Remove(_catalogueModels.Single(x => x.UniId == message.Value.Id));
 			}
-
 		}
 
 		private void OnEditedIdDataBase(object recipient, EditedMessage message)
@@ -123,7 +123,7 @@ namespace CatalogueAvalonia.ViewModels
 					if (item != null)
 					{
 						_catalogueModels.ReplaceOrAdd(item, model);
-						
+						CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
 					}
 				}
 			}
@@ -194,8 +194,6 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		private bool CanDeletePart() 
 		{
-			var partIndex = CatalogueModels.RowSelection!.SelectedIndex;
-			CatalogueModels.RowSelection!.SelectedIndex = partIndex;
 			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
 
 			return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
@@ -210,12 +208,12 @@ namespace CatalogueAvalonia.ViewModels
 						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
 				if (res == ButtonResult.Yes)
 				{
-					var model = _catalogueModels.Where(x => x.UniId == _selecteditem.UniId).SingleOrDefault();
+					var model = _catalogueModels.SingleOrDefault(x => x.UniId == _selecteditem.UniId);
 
                     if (model != null)
                     {
 						await _topModel.DeleteSoloFromCatalogue(_selecteditem.MainCatId);
-						var item = _dataStore.CatalogueModels.Where(x => x.UniId == _selecteditem.UniId).SingleOrDefault();
+						var item = _dataStore.CatalogueModels.SingleOrDefault(x => x.UniId == _selecteditem.UniId);
 						if (item != null && item.Children != null) 
 						{ 
 							item.Children.Remove(_selecteditem);
@@ -227,8 +225,6 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		private bool CanEditPrices() 
 		{
-			var partIndex = CatalogueModels.RowSelection!.SelectedIndex;
-			CatalogueModels.RowSelection!.SelectedIndex = partIndex;
 			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
 
 			return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != 5923;
@@ -241,16 +237,14 @@ namespace CatalogueAvalonia.ViewModels
 				await _dialogueService.OpenDialogue(new EditPricesWindow(), new EditPricesViewModel(Messenger, _topModel, _selecteditem.MainCatId ?? default, _dataStore, _selecteditem.UniValue), parent);
 			}
 		}
-		private bool canEditCatalogue()
+		private bool CanEditCatalogue()
 		{
-			var partIndex = CatalogueModels.RowSelection!.SelectedIndex;
-			CatalogueModels.RowSelection!.SelectedIndex = partIndex;
-			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
+			_selecteditem = CatalogueModels.RowSelection.SelectedItem;
 
 			return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
 		}
 
-		[RelayCommand(CanExecute = nameof(canEditCatalogue))]
+		[RelayCommand(CanExecute = nameof(CanEditCatalogue))]
 		private async Task EditCatalogue(Window parent)
 		{
 			if (_selecteditem != null)

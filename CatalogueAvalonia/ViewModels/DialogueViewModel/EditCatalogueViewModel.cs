@@ -7,11 +7,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
+
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -79,7 +77,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		[RelayCommand]
 		private void AddNewPart()
 		{
-			_catalogueModels.Add(new CatalogueModel { MainCatId = null, UniId = _uniId, ProducerId = 0, ProducerName = "Неизвестный", Name = "Название не указано" });
+			_catalogueModels.Add(new CatalogueModel { MainCatId = null, UniId = _uniId, ProducerId = 1, ProducerName = "Неизвестный", Name = "Название не указано" });
 			IsDirty = true;
 		}
 		private bool canDelete() => _catalogueModels.Any();
