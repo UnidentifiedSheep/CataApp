@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignHeight="650" d:DesignWidth="1200"
              x:Class="CatalogueAvalonia.Views.ZakupkaView"
-			 xmlns:ui="using:FluentAvalonia.UI.Controls"
 			 xmlns:vm="using:CatalogueAvalonia.ViewModels"
 			 x:CompileBindings="False">
 	<Design.DataContext>
@@ -74,9 +73,17 @@
                       ItemsSource="{Binding ZakupkiMainGroup}"
                       IsReadOnly="True">
 				<DataGrid.Columns>
-					<DataGridTextColumn Header="Номер накладной"
-                                        Width="*"
-                                        Binding="{Binding Id}"/>
+					<DataGridTemplateColumn Header="Номер накладной"
+                                        Width="*">
+						<DataTemplate>
+							<Grid Margin="10,0,0,0"
+							      HorizontalAlignment="Stretch">
+								<TextBlock Text="{Binding Id}"
+								           VerticalAlignment="Center"
+								           ToolTip.Tip="{Binding Comment}"/>
+							</Grid>
+						</DataTemplate>
+					</DataGridTemplateColumn>
 					<DataGridTextColumn Header="Дата"
                                         Width="*"
                                         Binding="{Binding Datetime}"/>

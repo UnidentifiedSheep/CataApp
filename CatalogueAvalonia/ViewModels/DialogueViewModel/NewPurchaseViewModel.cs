@@ -46,6 +46,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private ZakupkaAltModel? _selectedZakupka;
 		[ObservableProperty]
 		private bool _isVisibleConverter = true;
+		[ObservableProperty]
+		private string _comment = String.Empty;
 		public NewPurchaseViewModel()
 		{
 			_purchaseDate = DateTime.Now.Date;
@@ -77,13 +79,16 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				string mainName = message.Value.MainName;
 				if (what != null)
 				{
-					_zakupka.Add(new ZakupkaAltModel
+					if (!_zakupka.Any(x => x.MainCatId == what.MainCatId))
 					{
-						MainCatId = what.MainCatId,
-						MainCatName = what.Name,
-						MainName = mainName,
-						UniValue = what.UniValue,
-					});
+						_zakupka.Add(new ZakupkaAltModel
+						{
+							MainCatId = what.MainCatId,
+							MainCatName = what.Name,
+							MainName = mainName,
+							UniValue = what.UniValue,
+						});
+					}
 				}
 			}
 			else if (where == "ZakupkaPartItemEdited")
@@ -127,7 +132,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			await _dialogueServices.OpenDialogue(new CatalogueItemWindow(), new CatalogueItemViewModel(Messenger, _dataStore, 0), parent);
 		}
 		[RelayCommand]
-		private void DeletePart()
+		private void DeletePart(Window parent)
 		{
 			if(SelectedZakupka != null) 
 			{
@@ -161,13 +166,15 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				};
 				int transactionId = await _topModel.AddNewTransactionAsync(agentModel);
 				await _dialogueServices.OpenDialogue(new AddNewPayment(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name), parent);
+				parent.Close();
 				var zakMain = new ZakupkiModel
 				{
 					AgentId = SelectedAgent.Id,
 					CurrencyId = SelectedCurrency.Id ?? default,
 					Datetime = PurchaseDate.Date.ToString("dd.MM.yyyy"),
 					TransactionId = transactionId,
-					TotalSum = TotalSum
+					TotalSum = TotalSum,
+					Comment = Comment
 				};
 				await _topModel.AddNewZakupkaAsync(_zakupka, zakMain);
 
@@ -193,7 +200,6 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 					Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
 					Messenger.Send(new ActionMessage("Update"));
 				}
-				parent.Close();
 			}
 		}
 	}

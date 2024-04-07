@@ -10,70 +10,115 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 {
 	public partial class NewProdajaWindow : Window
 	{
+		private readonly string _viewModelName;
 		public NewProdajaWindow()
 		{
 			InitializeComponent();
 		}
+
+		public NewProdajaWindow(string viewModelName)
+		{
+			InitializeComponent();
+			_viewModelName = viewModelName;
+		}
 		private void NumericUpDownPrice_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
 		{
-			var dc = (NewProdajaViewModel?)DataContext;
+			EditProdajaViewModel? dcE = null;
+			NewProdajaViewModel? dcN = null;
+			if (_viewModelName == "NewProdajaViewModel")
+				dcN = (NewProdajaViewModel?)DataContext;
+			else if (_viewModelName == "EditProdajaViewModel")
+				dcE = (EditProdajaViewModel?)DataContext;
 
-			if (dc != null)
+			if (dcN != null)
 			{
 				if (e.NewValue != null)
 				{ 
-					if (dc.SelectedProdaja != null)
+					if (dcN.SelectedProdaja != null)
 					{
-						dc.SelectedProdaja.Price = (double)e.NewValue;
-						dc.TotalSum = Math.Round(dc.Prodaja.Sum(x => x.PriceSum), 2);
+						dcN.SelectedProdaja.Price = (double)e.NewValue;
+						dcN.TotalSum = Math.Round(dcN.Prodaja.Sum(x => x.PriceSum), 2);
 					}
 				}
 				
 			}
+			else if (dcE != null) 
+			{
+				if (e.NewValue != null)
+				{
+					if (dcE.SelectedProdaja != null)
+					{
+						dcE.IsDirty = true;
+						dcE.SelectedProdaja.Price = (double)e.NewValue;
+						dcE.TotalSum = Math.Round(dcE.Prodaja.Sum(x => x.PriceSum), 2);
+					}
+				}
+			}
 		}
 		private void NumericUpDownCount_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
 		{
-			var dc = (NewProdajaViewModel?)DataContext;
+			EditProdajaViewModel? dcE = null;
+			NewProdajaViewModel? dcN = null;
+			if (_viewModelName == "NewProdajaViewModel")
+				dcN = (NewProdajaViewModel?)DataContext;
+			else if (_viewModelName == "EditProdajaViewModel")
+				dcE = (EditProdajaViewModel?)DataContext;
 
-			if (dc != null)
+			if (dcN != null)
 			{
 
 				if (e.NewValue != null)
 				{ 
-					if (dc.SelectedProdaja != null)
+					if (dcN.SelectedProdaja != null)
 					{ 
-						dc.SelectedProdaja!.Count = (int)e.NewValue; 
-						dc.TotalSum = Math.Round(dc.Prodaja.Sum(x => x.PriceSum), 2);
+						dcN.SelectedProdaja!.Count = (int)e.NewValue; 
+						dcN.TotalSum = Math.Round(dcN.Prodaja.Sum(x => x.PriceSum), 2);
 					}
 				}
 
 			}
+			else if(dcE != null) 
+			{
+				if (e.NewValue != null)
+				{
+					if (dcE.SelectedProdaja != null)
+					{
+						dcE.IsDirty = true;
+						dcE.SelectedProdaja!.Count = (int)e.NewValue;
+						dcE.TotalSum = Math.Round(dcE.Prodaja.Sum(x => x.PriceSum), 2);
+					}
+				}
+			}
 		}
 		private async void SaveButt_Clicked(object sender, RoutedEventArgs e)
 		{
-			var dc = (NewProdajaViewModel?)DataContext;
-			if (dc != null) 
+			EditProdajaViewModel? dcE = null;
+			NewProdajaViewModel? dcN = null;
+			if (_viewModelName == "NewProdajaViewModel")
+				dcN = (NewProdajaViewModel?)DataContext;
+			else if (_viewModelName == "EditProdajaViewModel")
+				dcE = (EditProdajaViewModel?)DataContext;
+			
+			if (dcN != null) 
 			{
-				if (dc.Prodaja.Any())
+				if (dcN.Prodaja.Any())
 				{
-					var whereZero = dc.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0);
+					var whereZero = dcN.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0);
 					if (!whereZero.Any())
 					{
-						if (dc.SelectedAgent != null)
+						if (dcN.SelectedAgent != null)
 						{
-							if (dc.SelectedCurrency != null)
+							if (dcN.SelectedCurrency != null)
 							{
-								dc.SaveChangesCommand.Execute(this);
+								dcN.SaveChangesCommand.Execute(this);
 							}
 							else
 								await MessageBoxManager.GetMessageBoxStandard("?",
-								$"Вы не выбрали валюту.",
-								ButtonEnum.Ok).ShowWindowDialogAsync(this);
+								$"Вы не выбрали валюту.").ShowWindowDialogAsync(this);
 						}
 						else
 							await MessageBoxManager.GetMessageBoxStandard("?",
-							$"Вы не выбрали контрагента.",
-							ButtonEnum.Ok).ShowWindowDialogAsync(this);
+							$"Вы не выбрали контрагента.").ShowWindowDialogAsync(this);
 					}
 					else
 					{
@@ -81,13 +126,60 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 						$"Есть позиции у которых Цена либо Количество = 0.\n Удалить их и продолжить закупку?",
 						ButtonEnum.YesNo).ShowWindowDialogAsync(this);
 						if (res == ButtonResult.Yes)
-							dc.RemoveWhereZero(whereZero);
+							dcN.RemoveWhereZero(whereZero);
 					}
 				}
 				else
 					await MessageBoxManager.GetMessageBoxStandard("?",
-							$"Вы не добавили ни одной позиции.",
-							ButtonEnum.Ok).ShowWindowDialogAsync(this);
+							$"Вы не добавили ни одной позиции.").ShowWindowDialogAsync(this);
+			}
+			else if(dcE != null)
+			{
+				if (dcE.Prodaja.Any())
+				{
+					if (dcE.IsDirty)
+					{
+						var whereZero = dcE.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0);
+						if (!whereZero.Any())
+						{
+							if (dcE.SelectedAgent != null)
+							{
+								if (dcE.SelectedCurrency != null)
+								{
+									Close();
+									dcE.SaveZakupkaCommand.Execute(null);
+								}
+								else
+									await MessageBoxManager.GetMessageBoxStandard("?",
+										$"Вы не выбрали валюту.").ShowWindowDialogAsync(this);
+							}
+							else
+								await MessageBoxManager.GetMessageBoxStandard("?",
+									$"Вы не выбрали контрагента.").ShowWindowDialogAsync(this);
+						}
+						else
+						{
+							var res = await MessageBoxManager.GetMessageBoxStandard("?",
+								$"Есть позиции у которых Цена либо Количество = 0.\n Удалить их и продолжить закупку?",
+								ButtonEnum.YesNo).ShowWindowDialogAsync(this);
+							if (res == ButtonResult.Yes)
+								dcE.RemoveWhereZero(whereZero);
+						}
+					}
+					else
+						Close();
+				}
+				else
+				{
+					var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку?",
+						$"Вы уверенны что хотите удалить закупку?",
+						ButtonEnum.YesNo).ShowWindowDialogAsync(this);
+					if (res == ButtonResult.Yes)
+					{
+						dcE.DeleteAllCommand.Execute(null);
+						Close();
+					}
+				}
 			}
 		}
 		private void CancleButt_Clicked(object sender, RoutedEventArgs e)

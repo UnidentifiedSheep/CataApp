@@ -1,8 +1,6 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Threading;
-using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
-using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
@@ -11,9 +9,7 @@ using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.ViewModels

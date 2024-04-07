@@ -5,7 +5,7 @@
         mc:Ignorable="d" MinHeight="600" MinWidth="1000" Height="600" Width="1000"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.NewPurchaseWindow"
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
-        Title="NewPurchaseWindow"
+        Title="Новая закупка"
 		x:CompileBindings="False">
 	<Design.DataContext>
 		<vm:NewPurchaseViewModel/>
@@ -56,10 +56,16 @@
 				</ComboBox>
 				<Button Grid.Column="2"
 						Content="Коментарий"
-						IsVisible="{Binding IsVisibleConverter}"
 						Width="120"
 						HorizontalContentAlignment="Center"
-						Margin="40,0,0,0"/>
+						Margin="40,0,0,0">
+					<Button.Flyout>
+						<Flyout>
+							<TextBox Text="{Binding Comment}"
+							         MaxLength="50"/>
+						</Flyout>
+					</Button.Flyout>
+				</Button>
 				<CheckBox Content="Переводить к доллару"
                       Grid.Column="3"
 						  Margin="30,0,0,0"
@@ -188,7 +194,7 @@
 										   FormatString="#"
 										   ValueChanged="NumericUpDownCount_ValueChanged"
 										   BorderThickness="0"
-										   Minimum="0"
+										   Minimum="{Binding MinCount}"
 										   Maximum="2147483647"
 										   ShowButtonSpinner="False"/>
 						</DataTemplate>
@@ -208,7 +214,8 @@
                               Command="{Binding ChangePartCommand}"
 							  CommandParameter="{Binding $parent[Window]}"/>
 					<MenuItem Header="Удалить"
-                              Command="{Binding DeletePartCommand}"/>
+                              Command="{Binding DeletePartCommand}"
+                              CommandParameter="{Binding $parent[Window]}"/>
 				</ContextMenu>
 			</DataGrid.ContextMenu>
 		</DataGrid>

@@ -1,5 +1,4 @@
 ﻿using CatalogueAvalonia.Core;
-using CatalogueAvalonia.Model;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.Messeges;

@@ -1,8 +1,8 @@
-﻿using CatalogueAvalonia.Model;
-using CatalogueAvalonia.Services.DataBaseAction;
+﻿using CatalogueAvalonia.Services.DataBaseAction;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CatalogueAvalonia.Core;
 using MsBox.Avalonia;
 using Serilog;
 
@@ -13,11 +13,13 @@ namespace CatalogueAvalonia.Models
 		private readonly IDataBaseProvider _dataBaseProvider;
 		private readonly IDataBaseAction _dataBaseAction;
 		private readonly ILogger _logger;
+		private readonly TaskQueue _taskQueue;
 		public TopModel(IDataBaseProvider dataBaseProvider, IDataBaseAction dataBaseAction, ILogger logger)
 		{
 			_dataBaseProvider = dataBaseProvider;
 			_dataBaseAction = dataBaseAction;
 			_logger = logger;
+			_taskQueue = new TaskQueue();
 		}
 		///Исправить _task.queue. вызывается в основном потоке.
 
@@ -49,7 +51,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.DeleteMainNameById(id);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.DeleteMainNameById(id));
 
 			}
 			catch (Exception e)
@@ -68,7 +70,6 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-
 				await _dataBaseAction.DeleteFromMainCatById(id);
 			}
 			catch (Exception e)
@@ -106,7 +107,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.EditCatalogue(catalogue, deleteIds).ConfigureAwait(false);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.EditCatalogue(catalogue, deleteIds).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -160,7 +161,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				return await _dataBaseAction.AddCatalogue(catalogueModell);
+				return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddCatalogue(catalogueModell));
 
 			}
 			catch (Exception e)
@@ -281,7 +282,7 @@ namespace CatalogueAvalonia.Models
 			try
 			{
 
-				return await _dataBaseAction.AddNewAgent(name, isZak).ConfigureAwait(false);
+				return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewAgent(name, isZak).ConfigureAwait(false));
 			}
 			catch (Exception e)
 			{
@@ -320,7 +321,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.DeleteAgent(id).ConfigureAwait(false);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.DeleteAgent(id).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -339,7 +340,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				return await _dataBaseAction.AddNewTransaction(agentTransactionModel).ConfigureAwait(false);
+				return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewTransaction(agentTransactionModel).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -382,7 +383,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.DeleteTransaction(agentId, currencyId, transactionId).ConfigureAwait(false);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.DeleteTransaction(agentId, currencyId, transactionId).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -418,12 +419,12 @@ namespace CatalogueAvalonia.Models
 		/// <param name="mainCatPrices"></param>
 		/// <param name="mainCatId"></param>
 		/// <returns></returns>
-		public async Task<CatalogueModel?> EditMainCatPricesAsync(IEnumerable<MainCatPriceModel> mainCatPrices, int mainCatId)
+		public async Task<CatalogueModel?> EditMainCatPricesAsync(IEnumerable<MainCatPriceModel> mainCatPrices, int mainCatId, int endCount)
 		{
 			try
 			{
-				return await _dataBaseAction.EditMainCatPrices(mainCatPrices, mainCatId).ConfigureAwait(false);
-
+				return await _taskQueue.Enqueue(async () =>
+					await _dataBaseAction.EditMainCatPrices(mainCatPrices, mainCatId, endCount).ConfigureAwait(false));
 			}
 			catch (Exception e)
 			{
@@ -442,7 +443,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.DeleteMainCatPricesById(mainCatId).ConfigureAwait(false);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.DeleteMainCatPricesById(mainCatId).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -462,7 +463,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.EditCurrency(currencyModels, deletedIds).ConfigureAwait(false);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.EditCurrency(currencyModels, deletedIds).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -509,7 +510,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel);
+				await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel));
 
 			}
 			catch (Exception e)
@@ -523,7 +524,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				return await _dataBaseAction.AddNewPricesForParts(catas, currencyId).ConfigureAwait(false);
+				return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewPricesForParts(catas, currencyId).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -567,7 +568,9 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				return await _dataBaseAction.DeleteZakupkaWithCountReCalc(transactionId, zakupkaAltModels).ConfigureAwait(false);
+				return await _taskQueue.Enqueue(async () =>
+					await _dataBaseAction.DeleteZakupkaWithCountReCalc(transactionId, zakupkaAltModels)
+						.ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -578,11 +581,12 @@ namespace CatalogueAvalonia.Models
 				return new List<CatalogueModel>();
 			}
 		}
-		public async Task<IEnumerable<CatalogueModel>> EditZakupkaAsync(IEnumerable<int> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts, Dictionary<int, int> lastCounts, CurrencyModel currency,double totalSum, string date, int transactionId)
+		public async Task<IEnumerable<CatalogueModel>> EditZakupkaAsync(IEnumerable<int> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts, Dictionary<int, int> lastCounts, 
+			CurrencyModel currency,double totalSum, string date, int transactionId, string comment)
 		{
 			try
 			{
-				return await _dataBaseAction.EditZakupka(deletedIds, zakupkaAlts, lastCounts, currency, date, totalSum, transactionId).ConfigureAwait(false);
+				return await _taskQueue.Enqueue(async () => await _dataBaseAction.EditZakupka(deletedIds, zakupkaAlts, lastCounts, currency, date, totalSum, transactionId, comment).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -627,7 +631,7 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				return await _dataBaseAction.AddNewProdaja(models, mainModel).ConfigureAwait(false);
+				return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewProdaja(models, mainModel).ConfigureAwait(false));
 
 			}
 			catch (Exception e)
@@ -642,8 +646,9 @@ namespace CatalogueAvalonia.Models
 		{
 			try
 			{
-				return await _dataBaseAction.DeleteProdajaCountReCalc(transactionId, prodajaAltModels, currencyId).ConfigureAwait(false);
-
+				return await _taskQueue.Enqueue(async () =>
+					await _dataBaseAction.DeleteProdajaCountReCalc(transactionId, prodajaAltModels, currencyId)
+						.ConfigureAwait(false));
 			}
 			catch (Exception e)
 			{
@@ -651,6 +656,42 @@ namespace CatalogueAvalonia.Models
 				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
 					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
 				return new List<CatalogueModel>();
+			}
+		}
+
+		public async Task<IEnumerable<CatalogueModel>> EditProdajaAsync(IEnumerable<Tuple<int, double>> deletedIds,
+			IEnumerable<ProdajaAltModel> prodajaAltModels, Dictionary<int, int> lastCounts, CurrencyModel currency,
+			string date, double totalSum, int transactionId, string comment)
+		{
+			try
+			{
+				return await  _taskQueue.Enqueue(async () => await _dataBaseAction
+					.EditProdaja(deletedIds, prodajaAltModels, lastCounts, currency, date, totalSum, transactionId, comment)
+					.ConfigureAwait(false));
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return new List<CatalogueModel>();
+			}
+		}
+
+		public async Task<int?> CanDeleteProdaja(int? mainCatId)
+		{
+			try
+			{
+				return await  _taskQueue.Enqueue(async () => await _dataBaseAction
+					.CheckCanDeleteProdaja(mainCatId)
+					.ConfigureAwait(false));
+			}
+			catch (Exception e)
+			{
+				_logger.Error($"Ошибка: {e}");
+				await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+					$"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+				return 0;
 			}
 		}
 	}

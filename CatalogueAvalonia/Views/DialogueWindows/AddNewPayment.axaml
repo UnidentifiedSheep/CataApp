@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Height="450" Width="200" MinHeight="450" MinWidth="400"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewPayment"
-        Title="AddNewPayment"
+        Title="Выплата"
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
 		x:CompileBindings="False">
 	<Design.DataContext>

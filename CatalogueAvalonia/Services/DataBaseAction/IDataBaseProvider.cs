@@ -1,5 +1,4 @@
-﻿using CatalogueAvalonia.Model;
-using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

@@ -116,6 +116,12 @@
 						<MenuItem Header="Новая транзакция"
                                   Command="{Binding AddNewTransactionCommand}"
 								  CommandParameter="{Binding $parent[Window]}"/>
+						<MenuItem Header="Новая Расход"
+						          Command="{Binding AddNewConsumptionCommand}"
+						          CommandParameter="{Binding $parent[Window]}"/>
+						<MenuItem Header="Новая Приход"
+						          Command="{Binding AddNewInComeCommand}"
+						          CommandParameter="{Binding $parent[Window]}"/>
 						<MenuItem Header="Удалить контрагента"
                                   Command="{Binding DeleteAgentCommand}"/>
 					</ContextMenu>

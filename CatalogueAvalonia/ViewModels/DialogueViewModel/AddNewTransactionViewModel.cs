@@ -1,5 +1,4 @@
-﻿using CatalogueAvalonia.Core;
-using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,9 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Tmds.DBus.Protocol;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 {
@@ -21,9 +18,13 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private readonly DataStore _dataStore;
 		private readonly AgentTransactionModel? _transactionData;
 		public AgentTransactionModel? TransactionData => _transactionData;
-		private int action = 0;
-		public int Action => action;
+		private int _action = 0;
+		public int Action => _action;
 		private int _agentId;
+		[ObservableProperty]
+		private string _actionName = "Транзакция:";
+		[ObservableProperty]
+		private Decimal _minTrSum = Decimal.MinValue;
 		[ObservableProperty]
 		private double _transactionSum;
 		[ObservableProperty]
@@ -58,7 +59,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		/// <param name="nameOfAgent"></param>
 		public AddNewTransactionViewModel(IMessenger messenger, TopModel topModel, DataStore dataStore, AgentTransactionModel transactionData, string nameOfAgent) : base(messenger)
 		{
-			action = 1;
+			_action = 1;
 			_transactionData = transactionData;
 			_isVisAndEnb = false;
 			_isEnb = false;
@@ -71,6 +72,20 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
 			SelectedCurrency = _currencies.FirstOrDefault(x => x.Id == transactionData.CurrencyId);
 		}
+
+		private void OnStart()
+		{
+			if (_action == 2)
+			{
+				MinTrSum = 0;
+				ActionName = "Расход:";
+			}
+			else if(_action == 3)
+			{
+				MinTrSum = 0;
+				ActionName = "Приход:";
+			}
+		}
 		/// <summary>
 		/// Для создания транзакции.
 		/// </summary>
@@ -79,9 +94,10 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		/// <param name="dataStore"></param>
 		/// <param name="nameOfAgent"></param>
 		/// <param name="agentId"></param>
-		public AddNewTransactionViewModel(IMessenger messenger, TopModel topModel,DataStore dataStore, string nameOfAgent, int agentId) : base(messenger)
+		/// <param name="action">2 - Новый расход, 3 - Новый приход</param>
+		public AddNewTransactionViewModel(IMessenger messenger, TopModel topModel,DataStore dataStore, string nameOfAgent, int agentId, int action) : base(messenger)
 		{
-			action = 0;
+			_action = action;
 			_isVisAndEnb = false;
 			_topModel = topModel;
 			_dataStore = dataStore;
@@ -89,6 +105,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_agentId = agentId;
 			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
 			Date = DateTime.Now.Date;
+			
+			OnStart();
 		}
 		partial void OnTransactionSumChanged(double value)
 		{
@@ -104,11 +122,19 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		[RelayCommand]
 		private async Task AddTransaction()
 		{
-			if (action == 0)
+			if (_action == 0)
 			{
 				await AddNewTransactionNormal(TransactionSum);
 			}
-			else if(action == 1)
+			else if(_action == 2)
+			{
+				await AddNewTransactionNormal(-1 * TransactionSum);
+			}
+			else if(_action == 3)
+			{
+				await AddNewTransactionNormal(TransactionSum);
+			}
+			else if(_action == 1)
 			{
 				if (ConvertFromCurr)
 				{

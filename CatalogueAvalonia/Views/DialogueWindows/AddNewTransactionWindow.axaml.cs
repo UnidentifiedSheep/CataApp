@@ -3,7 +3,6 @@ using Avalonia.Interactivity;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia;
-using Avalonia.Input;
 
 namespace CatalogueAvalonia.Views.DialogueWindows
 {

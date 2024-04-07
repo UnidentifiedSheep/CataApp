@@ -1,9 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.Models
 {
@@ -25,6 +21,10 @@ namespace CatalogueAvalonia.Models
 		public int _count;
 		[ObservableProperty]
 		private double _priceSum;
+		[ObservableProperty] 
+		private int _minCount = 0;
+		[ObservableProperty] 
+		private bool _canDelete = true;
 
 		partial void OnPriceChanged(double value)
 		{

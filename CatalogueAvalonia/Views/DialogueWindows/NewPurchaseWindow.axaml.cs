@@ -112,13 +112,11 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 							}
 							else
 								await MessageBoxManager.GetMessageBoxStandard("?",
-								$"Вы не выбрали валюту.",
-								ButtonEnum.Ok).ShowWindowDialogAsync(this);
+								$"Вы не выбрали валюту.").ShowWindowDialogAsync(this);
 						}
 						else
 							await MessageBoxManager.GetMessageBoxStandard("?",
-							$"Вы не выбрали контрагента.",
-							ButtonEnum.Ok).ShowWindowDialogAsync(this);
+							$"Вы не выбрали контрагента.").ShowWindowDialogAsync(this);
 					}
 					else
 					{
@@ -150,13 +148,11 @@ namespace CatalogueAvalonia.Views.DialogueWindows
 								}
 								else
 									await MessageBoxManager.GetMessageBoxStandard("?",
-									$"Вы не выбрали валюту.",
-									ButtonEnum.Ok).ShowWindowDialogAsync(this);
+									$"Вы не выбрали валюту.").ShowWindowDialogAsync(this);
 							}
 							else
 								await MessageBoxManager.GetMessageBoxStandard("?",
-								$"Вы не выбрали контрагента.",
-								ButtonEnum.Ok).ShowWindowDialogAsync(this);
+								$"Вы не выбрали контрагента.").ShowWindowDialogAsync(this);
 						}
 						else
 						{

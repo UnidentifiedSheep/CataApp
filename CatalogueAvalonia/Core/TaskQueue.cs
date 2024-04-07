@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +9,7 @@ namespace CatalogueAvalonia.Core
 		private SemaphoreSlim semaphore;
 		public TaskQueue()
 		{
-			semaphore = new SemaphoreSlim(1);
+			semaphore = new SemaphoreSlim(2,2);
 		}
 
 		public async Task<T> Enqueue<T>(Func<Task<T>> taskGenerator)
@@ -20,7 +17,8 @@ namespace CatalogueAvalonia.Core
 			await semaphore.WaitAsync();
 			try
 			{
-				return await taskGenerator();
+				
+				return await Task.Run(taskGenerator);
 			}
 			finally
 			{
@@ -32,7 +30,7 @@ namespace CatalogueAvalonia.Core
 			await semaphore.WaitAsync();
 			try
 			{
-				await taskGenerator();
+				await Task.Run(taskGenerator);
 			}
 			finally
 			{

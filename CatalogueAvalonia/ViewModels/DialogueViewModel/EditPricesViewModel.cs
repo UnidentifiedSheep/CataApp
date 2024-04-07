@@ -1,17 +1,13 @@
-﻿using Avalonia.Controls;
-using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
-using MsBox.Avalonia.Enums;
-using MsBox.Avalonia;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Services.Messeges;
 
@@ -21,6 +17,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 	{
 		private readonly TopModel _topModel;
 		private readonly DataStore _dataStore;
+		private int _totalCountStart = 0;
 		private readonly int _mainCatId;
 		public bool IsDirty = false;
 		private readonly ObservableCollection<MainCatPriceModel> _mainCatPrices;
@@ -51,7 +48,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private async Task SaveChanges()
 		{
 			BeforeSave();
-			CatalogueModel? model = await _topModel.EditMainCatPricesAsync(_mainCatPrices, _mainCatId);
+			var endCount = _mainCatPrices.Sum(x => x.Count) - _totalCountStart;
+			CatalogueModel? model = await _topModel.EditMainCatPricesAsync(_mainCatPrices, _mainCatId, endCount);
 			if (_mainCatPrices.Any() && (_mainCatPrices.Where(x => x.IsDirty).Any() || IsDirty))
 			{
 				Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePrices", Id = _mainCatId, What = model}));
@@ -86,6 +84,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_mainCatPrices.AddRange(await _topModel.GetMainCatPricesByIdAsync(_mainCatId));
 			foreach (var item in _mainCatPrices)
 			{
+				_totalCountStart += item.Count;
 				item.Currency = new(_currencies.Where(x => x.Id != 1));
 				item.SelectedCurrency = item.Currency.Where(x => x.Id == item.CurrencyId).SingleOrDefault();
 			}

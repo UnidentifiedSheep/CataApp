@@ -6,7 +6,7 @@
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
         Height="900" Width="880"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewPartView"
-        Title="AddNewPartView"
+        Title="Новая Запчасть"
 		x:CompileBindings="False">
 	<Design.DataContext>
 		<vm:AddNewPartViewModel/>

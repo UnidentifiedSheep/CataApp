@@ -5,7 +5,7 @@
         mc:Ignorable="d" MinHeight="600" MinWidth="500" Height="500" Width="400"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.CurrencySettingsWindow"
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
-        Title="CurrencySettingsWindow"
+        Title="Настройки валюты"
 		x:CompileBindings="False">
 	<Design.DataContext>
 		<vm:CurrencySettingsViewModel/>

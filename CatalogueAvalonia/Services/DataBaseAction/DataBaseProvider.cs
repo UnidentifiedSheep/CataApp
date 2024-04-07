@@ -5,15 +5,14 @@ using System.Linq;
 using DataBase.Data;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using CatalogueAvalonia.Model;
 using CatalogueAvalonia.Core;
 
 namespace CatalogueAvalonia.Services.DataBaseAction
 {
 	public class DataBaseProvider : IDataBaseProvider
 	{
-		private readonly DataContext _context;
-		public DataBaseProvider(DataContext dataContext) 
+		private readonly DataContextDataProvider _context;
+		public DataBaseProvider(DataContextDataProvider dataContext) 
 		{ 
 			_context = dataContext; 
 		}
@@ -257,7 +256,8 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 					CurrencyName = x.Currency.CurrencyName,
 					CurrencySign = x.Currency.CurrencySign,
 					Datetime = Converters.ToNormalDateTime(x.Datetime),
-					TotalSum = x.TotalSum
+					TotalSum = x.TotalSum,
+					Comment = x.Comment
 				}).ToListAsync();
 			}
 			else
@@ -273,6 +273,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 					Datetime = Converters.ToNormalDateTime(x.Datetime),
 					TotalSum = x.TotalSum,
 					CurrencySign = x.Currency.CurrencySign,
+					Comment = x.Comment
 				}).ToListAsync();
 			}
 		}
@@ -330,7 +331,8 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 					CurrencyName = x.Currency.CurrencyName,
 					CurrencySign = x.Currency.CurrencySign,
 					Datetime = Converters.ToNormalDateTime(x.Datetime),
-					TotalSum = x.TotalSum
+					TotalSum = x.TotalSum,
+					Comment = x.Comment
 				}).ToListAsync();
 			}
 			else
@@ -346,6 +348,7 @@ namespace CatalogueAvalonia.Services.DataBaseAction
 					Datetime = Converters.ToNormalDateTime(x.Datetime),
 					TotalSum = x.TotalSum,
 					CurrencySign = x.Currency.CurrencySign,
+					Comment = x.Comment
 				}).ToListAsync();
 			}
 		}

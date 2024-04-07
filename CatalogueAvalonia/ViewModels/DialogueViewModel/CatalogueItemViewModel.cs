@@ -1,20 +1,12 @@
 ﻿using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls;
-using Avalonia.Threading;
-using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
-using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia;
-using ReactiveUI;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Models;
@@ -137,8 +129,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			else
 			{
 				await MessageBoxManager.GetMessageBoxStandard("?",
-						$"Выбранная вами запчасть является либо 'Основной группой' либо 'Ценой'.",
-						ButtonEnum.Ok).ShowWindowDialogAsync(parent);
+						$"Выбранная вами запчасть является либо 'Основной группой' либо 'Ценой'.").ShowWindowDialogAsync(parent);
 			}
 		}
 	}

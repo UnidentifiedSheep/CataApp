@@ -6,7 +6,7 @@
 		MinWidth="500" MinHeight="650" Width="500" Height="650"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.EditPricesWindow"
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
-        Title="EditPricesWindow"
+        Title="Редактировать цены"
 		x:CompileBindings="False">
 	<Design.DataContext>
 		<vm:EditPricesViewModel/>

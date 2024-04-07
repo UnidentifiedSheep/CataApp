@@ -15,7 +15,7 @@
 		  RowDefinitions="63*, 174*, 114*, 64*">
 		<StackPanel Grid.Row="0"
                     Orientation="Horizontal">
-			<TextBlock Text="Транзакция:"
+			<TextBlock Text="{Binding ActionName}"
                        FontSize="22"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"
@@ -36,6 +36,7 @@
                    VerticalAlignment="Center"/>
 			<NumericUpDown Grid.Column="1"
                            Grid.ColumnSpan="2"
+                           Minimum="{Binding MinTrSum}"
 						   FormatString="{}{0:#,0.00}"
                            Value="{Binding TransactionSum}"
 						   ShowButtonSpinner="False"

@@ -6,9 +6,19 @@
         <entry key="CatalogueAvalonia/App.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/AgentView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/CatalogueView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/AddNewAgentWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/AddNewPartView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/AddNewPayment.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/AddNewTransactionWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/CatalogueItemWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/CurrencySettingsWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/EditCatalogueWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/EditPricesWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/NewProdajaWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/NewPurchaseWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/MainWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ProdajaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/ZakupkaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
       </map>
     </option>
   </component>

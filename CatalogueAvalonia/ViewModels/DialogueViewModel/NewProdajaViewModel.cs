@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel
@@ -45,6 +44,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private bool _isVisibleConverter = true;
 		[ObservableProperty]
 		string _comment = string.Empty;
+		[ObservableProperty] 
+		private int _overPrice = 20;
 		public NewProdajaViewModel() 
 		{
 			_currencies = new ObservableCollection<CurrencyModel>();
@@ -57,7 +58,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_topModel = topModel;
 			_dataStore = dataStore;
 			_dialogueService = dialogueService;
-
+			
 			_prodajaDate = DateTime.Now.Date;
 			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
 			_agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.Id != 1));
@@ -72,12 +73,22 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			var where = message.Value.Where;
 			if (where == "CataloguePartItemSelected")
 			{
+				double price = 0;
 				var what = (CatalogueModel?)message.Value.What;
 				string mainName = message.Value.MainName;
 				if (what != null)
 				{
-					if (!_prodajaAlts.Where(x => x.MainCatId == what.MainCatId).Any())
+					if (!_prodajaAlts.Any(x => x.MainCatId == what.MainCatId))
 					{
+						if (what.Children != null && what.Children.Any())
+						{
+							var firstPrice = what.Children.First();
+							var partsCurr = _dataStore.CurrencyModels.FirstOrDefault(x => x.Id == firstPrice.CurrencyId);
+
+							if (partsCurr != null && SelectedCurrency != null)
+								price = Math.Round(firstPrice.Price / partsCurr.ToUsd * SelectedCurrency.ToUsd * (100+OverPrice)/100, 2);
+						}
+						
 						_prodajaAlts.Add(new ProdajaAltModel
 						{
 							MainCatId = what.MainCatId,
@@ -85,6 +96,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 							MainName = mainName,
 							MaxCount = what.Count,
 							UniValue = what.UniValue,
+							Price = price
 						});
 					}
 				}
@@ -95,7 +107,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				string mainName = message.Value.MainName;
 				if (what != null)
 				{
-					if (!_prodajaAlts.Where(x => x.MainCatId == what.MainCatId).Any())
+					if (!_prodajaAlts.Any(x => x.MainCatId == what.MainCatId))
 					{
 						if (SelectedProdaja != null)
 						{
@@ -151,6 +163,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				};
 				int transactionId = await _topModel.AddNewTransactionAsync(agentModel);
 				await _dialogueService.OpenDialogue(new AddNewPayment(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name), parent);
+				parent.Close();
 				ProdajaModel mainModel = new ProdajaModel
 				{
 					AgentId = SelectedAgent.Id,
@@ -158,12 +171,11 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 					Comment = Comment,
 					CurrencyId = SelectedCurrency.Id ?? 0,
 					TotalSum = TotalSum,
-					TransactionId = transactionId
+					TransactionId = transactionId,
 				};
 				var catas = await _topModel.AddNewProdaja(Prodaja, mainModel);
 				Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
 				Messenger.Send(new ActionMessage("Update"));
-				parent.Close();
 			}
 		}
 	}

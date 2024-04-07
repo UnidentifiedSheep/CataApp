@@ -1,15 +1,11 @@
-﻿using CatalogueAvalonia.Core;
-using CatalogueAvalonia.Model;
-using CatalogueAvalonia.Models;
+﻿using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.Services.DataStore
@@ -81,10 +77,10 @@ namespace CatalogueAvalonia.Services.DataStore
 				int? mainCatId = message.Value.Id;
 				if (uniId != null && mainCatId != null)
 				{
-					var mainName = _catalogueModels.Where(x => x.UniId == uniId).Single();
+					var mainName = _catalogueModels.Single(x => x.UniId == uniId);
 					if (mainName.Children != null)
 					{
-						var mainCats = mainName.Children.Where(x => x.MainCatId == mainCatId).Single();
+						var mainCats = mainName.Children.Single(x => x.MainCatId == mainCatId);
 						if (mainCats.Children != null)
 						{
 							mainCats.Count = 0;
@@ -129,7 +125,7 @@ namespace CatalogueAvalonia.Services.DataStore
 					var mainName = _catalogueModels.Single(x => x.UniId == what.UniId);
 					if (mainName.Children != null)
 					{
-						var mainCats = mainName.Children.Single(x => x.MainCatId == what.MainCatId);
+						var mainCats = mainName.Children.SingleOrDefault(x => x.MainCatId == what.MainCatId);
 						if (mainCats != null)
 						{
 							mainName.Children.ReplaceOrAdd(mainCats, what);
@@ -147,7 +143,7 @@ namespace CatalogueAvalonia.Services.DataStore
 						var mainName = _catalogueModels.Single(x => x.UniId == item.UniId);
 						if (mainName.Children != null)
 						{
-							var mainCats = mainName.Children.Single(x => x.MainCatId == item.MainCatId);
+							var mainCats = mainName.Children.SingleOrDefault(x => x.MainCatId == item.MainCatId);
 							if (mainCats != null)
 							{
 								mainName.Children.ReplaceOrAdd(mainCats, item);

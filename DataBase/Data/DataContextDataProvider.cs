@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace DataBase.Data;
 
-public partial class DataContext : DbContext
+public partial class DataContextDataProvider : DbContext
 {
-    public DataContext()
-    {
-    }
-
-    public DataContext(DbContextOptions<DataContext> options)
+    public DataContextDataProvider() { }
+    public DataContextDataProvider(DbContextOptions<DataContextDataProvider> options)
         : base(options)
     {
     }
-
     public virtual DbSet<Agent> Agents { get; set; }
 
     public virtual DbSet<AgentTransaction> AgentTransactions { get; set; }
@@ -240,21 +234,7 @@ public partial class DataContext : DbContext
 
             entity.HasOne(d => d.Zak).WithMany(p => p.Zakupkas).HasForeignKey(d => d.ZakId);
         });
-        modelBuilder.Entity<Producer>().HasData(new Producer { Id = 1, ProducerName = "Неизвестный" });
-        modelBuilder.Entity<Agent>().HasData(new Agent { Id = 1, Name = "Неизвестный", IsZak = 1 });
-        modelBuilder.Entity<MainName>().HasData(new MainName { UniId = 5923, Name = "unKnown" });
-        modelBuilder.Entity<Currency>().HasData(new Currency
-            {
-                Id = 1, CurrencyName = "Неизвестно", CurrencySign = "Un", ToUsd = 0, CanDelete = 0
-            },
-            new Currency
-            {
-                Id = 2, CurrencyName = "Доллары", CurrencySign = "$", ToUsd = 1, CanDelete = 0
-            });
-
         OnModelCreatingPartial(modelBuilder);
     }
-    
-
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

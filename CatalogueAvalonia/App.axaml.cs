@@ -16,7 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
@@ -76,6 +75,7 @@ namespace CatalogueAvalonia
 
 			builder.Services.AddSingleton<ILogger>(log);
 			builder.Services.AddDbContext<DataContext>(o => o.UseSqlite("DataSource=../Data/data.db"));
+			builder.Services.AddDbContext<DataContextDataProvider>(o => o.UseSqlite("DataSource=../Data/data.db").UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 			builder.Services.AddTransient<ViewLocator>();
 			
 			builder.Services.AddSingleton<MainWindowViewModel>();

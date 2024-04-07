@@ -3,13 +3,10 @@ using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
-using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
-using MsBox.Avalonia.Enums;
-using MsBox.Avalonia;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Views.DialogueWindows;
+using MsBox.Avalonia;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 {
@@ -30,8 +28,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private readonly ObservableCollection<ZakupkaAltModel> _zakupka;
 		private readonly ZakupkiModel _zakupkaMainGroup;
 
-		private List<int> deletedIds = new List<int>();
-		private Dictionary<int, int> prevCounts = new Dictionary<int, int>();
+		private List<int> _deletedIds = new List<int>();
+		private Dictionary<int, int> _prevCounts = new Dictionary<int, int>();
 
 		public IEnumerable<CurrencyModel> Currencies => _currencies;
 		public IEnumerable<AgentModel> Agents => _agents;
@@ -56,6 +54,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private ZakupkaAltModel? _selectedZakupka;
 		[ObservableProperty]
 		private bool _isVisibleConverter = false;
+		[ObservableProperty] 
+		private string _comment = string.Empty;
 		public EditPurchaseViewModel()
 		{
 			_purchaseDate = DateTime.Now.Date;
@@ -70,6 +70,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_dataStore = dataStore;
 			_topModel = topModel;
 			_dialogueServices = dialogueService;
+			_comment = zakupkaMainGroup.Comment ?? String.Empty;
 			DateTime.TryParse(zakupkaMainGroup.Datetime, out _purchaseDate);
 			_canEditUsd = !ConvertToUsd;
 			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
@@ -83,24 +84,48 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		private async Task LoadZakupki()
 		{
 			_zakupka.AddRange(await _topModel.GetZakAltGroup(_zakupkaMainGroup.Id));
+			
 			foreach (var item in _zakupka)
 			{
-				if (!prevCounts.ContainsKey(item.MainCatId ?? 0))
+				int? diff = await _topModel.CanDeleteProdaja(item.MainCatId ?? 1);
+				if (diff != null)
 				{
-					prevCounts.Add(item.MainCatId ?? 0, item.Count);
+					int minCount = item.Count - (diff ?? 0);
+					if (minCount <= 0)
+					{
+						item.MinCount = 0;
+						item.CanDelete = true;
+					}
+					else
+					{
+						item.MinCount = minCount;
+						item.CanDelete = false;
+					}
+				}
+				if (!_prevCounts.ContainsKey(item.MainCatId ?? 1))
+				{
+					_prevCounts.Add(item.MainCatId ?? 1, item.Count);
 				}
 				else
 				{
-					prevCounts[item.MainCatId ?? 0] += item.Count;
+					_prevCounts[item.MainCatId ?? 1] += item.Count;
 				}
 			}
-			if (_currencies.Where(x => x.Id == _zakupkaMainGroup.CurrencyId).Any())
+			
+
+			
+			if (_currencies.Any(x => x.Id == _zakupkaMainGroup.CurrencyId))
 				SelectedCurrency = _currencies.First(x => x.Id == _zakupkaMainGroup.CurrencyId);
-			if (_agents.Where(x => x.Id == _zakupkaMainGroup.AgentId).Any())
+			if (_agents.Any(x => x.Id == _zakupkaMainGroup.AgentId))
 				SelectedAgent = _agents.First(x => x.Id == _zakupkaMainGroup.AgentId);
 			TotalSum = Math.Round(_zakupka.Sum(x => x.PriceSum), 2);
 
 			IsDirty = false;
+		}
+
+		partial void OnCommentChanged(string value)
+		{
+			IsDirty = true;
 		}
 		private void OnItemAdded(object recipient, AddedMessage message)
 		{
@@ -131,9 +156,9 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				{
 					if (SelectedZakupka != null)
 					{
-						if (SelectedZakupka.Id != null && !deletedIds.Contains(SelectedZakupka.Id ?? 0))
+						if (SelectedZakupka.Id != null && !_deletedIds.Contains(SelectedZakupka.Id ?? 0))
 						{
-							deletedIds.Add(SelectedZakupka.Id ?? 0);
+							_deletedIds.Add(SelectedZakupka.Id ?? 0);
 						}
 						SelectedZakupka.Id = null;
 						SelectedZakupka.MainCatId = what.MainCatId;
@@ -176,27 +201,46 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			await _dialogueServices.OpenDialogue(new CatalogueItemWindow(), new CatalogueItemViewModel(Messenger, _dataStore, 0), parent);
 		}
 		[RelayCommand]
-		private void DeletePart()
+		private async Task DeletePart(Window parent)
 		{
 			if (SelectedZakupka != null)
 			{
-				if (SelectedZakupka.Id != null)
+				if (SelectedZakupka.CanDelete)
 				{
-					deletedIds.Add(SelectedZakupka.Id ?? 0);
+					if (SelectedZakupka.Id != null)
+					{
+						_deletedIds.Add(SelectedZakupka.Id ?? 0);
+					}
+					_zakupka.Remove(SelectedZakupka);
+					IsDirty = true;
+					
 				}
-				_zakupka.Remove(SelectedZakupka);
-				IsDirty = true;
+				else
+					await MessageBoxManager.GetMessageBoxStandard("?",
+						$"Данную запчасть нельзя поменять.").ShowWindowDialogAsync(parent);
 			}
-				TotalSum = Math.Round(_zakupka.Sum(x => x.PriceSum), 2);
+			TotalSum = Math.Round(_zakupka.Sum(x => x.PriceSum), 2);
 		}
 		[RelayCommand]
 		private async Task ChangePart(Window parent)
 		{
-			await _dialogueServices.OpenDialogue(new CatalogueItemWindow(), new CatalogueItemViewModel(Messenger, _dataStore, 1), parent);
+			if (SelectedZakupka != null)
+			{
+				if (SelectedZakupka.CanDelete)
+					await _dialogueServices.OpenDialogue(new CatalogueItemWindow(), new CatalogueItemViewModel(Messenger, _dataStore, 1), parent);
+				else
+					await MessageBoxManager.GetMessageBoxStandard("?",
+						$"Данную запчасть нельзя поменять.").ShowWindowDialogAsync(parent);
+			}
 			
 		}
 		public void RemoveWhereZero(IEnumerable<ZakupkaAltModel> altModels)
 		{
+			foreach (var item in altModels)
+			{
+				if (item.Id != null)
+					_deletedIds.Add(item.Id ?? 0);
+			}
 			_zakupka.RemoveMany(altModels);
 		}
 		[RelayCommand]
@@ -204,7 +248,8 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		{
 			if (SelectedCurrency != null)
 			{
-				var catas = await _topModel.EditZakupkaAsync(deletedIds, Zakupka, prevCounts, SelectedCurrency, TotalSum, Converters.ToDateTimeSqlite(PurchaseDate.Date.ToString("dd.MM.yyyy")), _zakupkaMainGroup.TransactionId);
+				var catas = await _topModel.EditZakupkaAsync(_deletedIds, Zakupka, _prevCounts, SelectedCurrency, TotalSum, 
+					Converters.ToDateTimeSqlite(PurchaseDate.Date.ToString("dd.MM.yyyy")), _zakupkaMainGroup.TransactionId, Comment);
 				Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
 				Messenger.Send(new ActionMessage("Update"));
 			}
@@ -212,9 +257,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 		[RelayCommand]
 		private async Task DeleteAll()
 		{
-			IEnumerable<CatalogueModel> catas = new List<CatalogueModel>();
-				
-			catas = await _topModel.DeleteZakupkaWithPricesReCount(_zakupkaMainGroup.TransactionId, prevCounts.Select(x => new ZakupkaAltModel { MainCatId = x.Key, Count = x.Value}));
+			var catas = await _topModel.DeleteZakupkaWithPricesReCount(_zakupkaMainGroup.TransactionId, _prevCounts.Select(x => new ZakupkaAltModel { MainCatId = x.Key, Count = x.Value}));
 
 			Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
 			Messenger.Send(new ActionMessage("Update"));

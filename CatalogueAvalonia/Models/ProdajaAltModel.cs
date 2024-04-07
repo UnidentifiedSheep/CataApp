@@ -1,9 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CatalogueAvalonia.Models
 {
@@ -28,7 +24,7 @@ namespace CatalogueAvalonia.Models
 		private int _count;
 		[ObservableProperty]
 		private double _priceSum;
-
+		
 		partial void OnPriceChanged(double value)
 		{
 			PriceSum = Math.Round(Math.Round(Price, 2) * Count, 2);

@@ -130,7 +130,7 @@ namespace CatalogueAvalonia.ViewModels
 		[RelayCommand]
 		private async Task NewProdaja(Window parent)
 		{
-			await _dialogueService.OpenDialogue(new NewProdajaWindow(), new NewProdajaViewModel(Messenger, _topModel, _dataStore, _dialogueService), parent);
+			await _dialogueService.OpenDialogue(new NewProdajaWindow("NewProdajaViewModel"), new NewProdajaViewModel(Messenger, _topModel, _dataStore, _dialogueService), parent);
 		}
 		[RelayCommand]
 		private async Task DeleteProdaja(Window parent)
@@ -161,7 +161,10 @@ namespace CatalogueAvalonia.ViewModels
 		[RelayCommand]
 		private async Task EditProdaja(Window parent)
 		{
-
+			if (SelectedProdaja != null) 
+			{
+				await _dialogueService.OpenDialogue(new NewProdajaWindow("EditProdajaViewModel"), new EditProdajaViewModel(Messenger, _dataStore, _topModel, _dialogueService, SelectedProdaja), parent);
+			}
 		}
 	}
 }

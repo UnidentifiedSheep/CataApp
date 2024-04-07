@@ -91,12 +91,15 @@ namespace CatalogueAvalonia.ViewModels
 		private void OnDataBaseAdded(object recipient, AddedMessage message)
 		{
 			if (message.Value.Where == "Catalogue")
-			{
-				var what = message.Value.What as CatalogueModel;
+			{ 
+				var what = message.Value.What as CatalogueModel; 
 				if (what != null)
 				{
-					_catalogueModels.Add(what);
-					CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+					Dispatcher.UIThread.Post(() =>
+					{
+						_catalogueModels.Add(what);
+						CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+					});
 				}
 			}
 		}
@@ -105,25 +108,29 @@ namespace CatalogueAvalonia.ViewModels
 		{
 			var where = message.Value.Where;
 			if (where == "PartCatalogue")
-			{
-				_catalogueModels.Remove(_catalogueModels.Single(x => x.UniId == message.Value.Id));
+			{ 
+				Dispatcher.UIThread.Post(() => _catalogueModels.Remove(_catalogueModels.Single(x => x.UniId == message.Value.Id)));
 			}
+
 		}
 
 		private void OnEditedIdDataBase(object recipient, EditedMessage message)
 		{
 			var where = message.Value.Where;
 			if (where == "PartCatalogue")
-			{
+			{ 
 				var uniId = message.Value.Id;
 				var model = (CatalogueModel?)message.Value.What;
 				if (model != null)
 				{
 					var item = _catalogueModels.SingleOrDefault(x => x.UniId == uniId);
 					if (item != null)
-					{
-						_catalogueModels.ReplaceOrAdd(item, model);
-						CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+					{ 
+						Dispatcher.UIThread.Post(() =>
+						{
+							_catalogueModels.ReplaceOrAdd(item, model); 
+							CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+						});
 					}
 				}
 			}
@@ -239,7 +246,7 @@ namespace CatalogueAvalonia.ViewModels
 		}
 		private bool CanEditCatalogue()
 		{
-			_selecteditem = CatalogueModels.RowSelection.SelectedItem;
+			_selecteditem = CatalogueModels.RowSelection!.SelectedItem;
 
 			return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
 		}

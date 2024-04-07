@@ -74,16 +74,31 @@ namespace CatalogueAvalonia.ViewModels
 			int? id = message.Value.Id;
 			if (where == "AgentEdited") 
 			{
-				if (id != null)
+				if (id != null) 
 				{
 					var agent = _dataStore.AgentModels.SingleOrDefault(x => x.Id == id);
-					if (agent != null) 
+					if (agent != null)
 					{
-						bool isZak = Convert.ToBoolean(agent.IsZak);
-						if (isZak) 
-							_agents.Add(agent);
+						var inModel = _agents.FirstOrDefault(x => x.Id == agent.Id);
+						if (Convert.ToBoolean(agent.IsZak))
+						{ 
+							Dispatcher.UIThread.Post(() =>
+							{
+								if (inModel != null) 
+									_agents.ReplaceOrAdd(inModel, agent);
+								else
+									_agents.Add(agent);
+							});
+						}
 						else
-							_agents.Remove(agent);
+						{
+							Dispatcher.UIThread.Post(() =>
+							{
+								if (inModel != null)
+									_agents.Remove(inModel);
+							});
+						}
+						
 					}
 				}
 			}
@@ -154,15 +169,52 @@ namespace CatalogueAvalonia.ViewModels
 		{
 			if (SelectedZakupki != null)
 			{
-				var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку?",
-						$"Вы уверенны что хотите удалить закупку с номером {SelectedZakupki.Id}?",
-						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
-				if (res == ButtonResult.Yes)
+				bool canDelete = false;
+				var tfList = new List<bool>();
+				ZakupkaAltModel? model = null;
+				foreach (var item in _altGroup)
 				{
-					IEnumerable<CatalogueModel> catas = new List<CatalogueModel>();
-					catas = await _topModel.DeleteZakupkaWithPricesReCount(SelectedZakupki.TransactionId, _altGroup);
-					Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
-					Messenger.Send(new ActionMessage("Update"));
+					int? diff = await _topModel.CanDeleteProdaja(item.MainCatId);
+					if (diff != null)
+					{
+						int itog = (diff ?? 0) - item.Count;
+						if (itog >= 0)
+							tfList.Add(true);
+						else
+						{
+							tfList.Add(false);
+							model = item;
+							break;
+						}
+					}
+				}
+				if (tfList.All(x => x ))
+					canDelete = true;
+				
+
+				if (canDelete)
+				{
+					var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку?",
+						$"Вы уверенны что хотите удалить закупку с номером \"{SelectedZakupki.Id}\"?",
+						ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+					if (res == ButtonResult.Yes)
+					{
+						var catas = await _topModel.DeleteZakupkaWithPricesReCount(SelectedZakupki.TransactionId, _altGroup);
+						Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
+						Messenger.Send(new ActionMessage("Update"));
+					}
+				}
+				else
+				{
+					if (model != null)
+						await MessageBoxManager.GetMessageBoxStandard("Нельзя удалить закупку",
+							$"Нельзя удалить закупку т.к зачасть с номером \"{model.UniValue}\" " +
+							$"и названием \"{model.MainName}\", продана в большем кол-ве чем присутствует на данный момент на складе." +
+							$"\n Для начала удалите или отредактируйте продажу с данным номером/ами.").ShowWindowDialogAsync(parent);
+					else
+						await MessageBoxManager.GetMessageBoxStandard("Нельзя удалить закупку",
+							$"Нельзя удалить закупку т.к какая-то запчасть, продана в большем кол-ве чем присутствует на данный момент на складе. " +
+							$"\n Для начала удалите или отредактируйте продажу с данным номером/ами.").ShowWindowDialogAsync(parent);
 				}
 			}
 		}

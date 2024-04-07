@@ -12,14 +12,12 @@ using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using MsBox.Avalonia.Enums;
 using MsBox.Avalonia;
-using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 
 namespace CatalogueAvalonia.ViewModels
 {
@@ -88,16 +86,19 @@ namespace CatalogueAvalonia.ViewModels
 
 		private void OnDataBaseEdited(object recipient, EditedMessage message)
 		{
-			string where = message.Value.Where;
-			if (where == "Currencies")
-			{
-				var what = message.Value.What as IEnumerable<CurrencyModel>;
-				if (what != null)
+				string where = message.Value.Where;
+				if (where == "Currencies")
 				{
-					_currencyModels.Clear();
-					_currencyModels.AddRange(what);
+					var what = message.Value.What as IEnumerable<CurrencyModel>;
+					if (what != null)
+					{
+						Dispatcher.UIThread.Post(() =>
+						{
+							_currencyModels.Clear();
+							_currencyModels.AddRange(what);
+						});
+					}
 				}
-			}
 		}
 
 		private void OnAction(object recipient, ActionMessage message)
@@ -122,14 +123,15 @@ namespace CatalogueAvalonia.ViewModels
 			{
 				var what = (AgentModel?)message.Value.What;
 				if (what != null)
-					_agents.Add(what);
+					Dispatcher.UIThread.Post(() => _agents.Add(what));
+				
 			}
 		}
 		[RelayCommand]
 		private async Task FilterAgent(string value)
 		{
 			_agents.Clear();
-			await foreach (var agent in DataFiltering.FilterAgents(_dataStore.AgentModels, value))
+			await foreach (var agent in DataFiltering.FilterAgents(_dataStore.AgentModels.Where(x => x.Id != 1), value))
 				_agents.Add(agent);
 		}
 		partial void OnAgentSearchFieldChanged(string value)
@@ -143,7 +145,7 @@ namespace CatalogueAvalonia.ViewModels
 				if (_dataStore.AgentModels.Count() != _agents.Count)
 				{
 					_agents.Clear();
-					_agents.AddRange(_dataStore.AgentModels);
+					_agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 1));
 				}
 			}
 
@@ -224,7 +226,24 @@ namespace CatalogueAvalonia.ViewModels
 		{
 			if (SelectedAgent != null)
 			{
-				await _dialogueService.OpenDialogue(new AddNewTransactionWindow(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, SelectedAgent.Name, SelectedAgent.Id), parent);
+				await _dialogueService.OpenDialogue(new AddNewTransactionWindow(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, SelectedAgent.Name, SelectedAgent.Id, 0), parent);
+			}
+		}
+
+		[RelayCommand(CanExecute = nameof(canDoWithAgent))]
+		private async Task AddNewConsumption(Window parent)
+		{
+			if (SelectedAgent != null)
+			{
+				await _dialogueService.OpenDialogue(new AddNewTransactionWindow(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, SelectedAgent.Name, SelectedAgent.Id, 2), parent);
+			}
+		}
+		[RelayCommand(CanExecute = nameof(canDoWithAgent))]
+		private async Task AddNewInCome(Window parent)
+		{
+			if (SelectedAgent != null)
+			{
+				await _dialogueService.OpenDialogue(new AddNewTransactionWindow(), new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, SelectedAgent.Name, SelectedAgent.Id, 3), parent);
 			}
 		}
 		private bool canDoWithTransaction() => SelectedTransaction != null;
@@ -238,8 +257,7 @@ namespace CatalogueAvalonia.ViewModels
 					if (SelectedTransaction.TransactionStatus == 2 || SelectedTransaction.TransactionStatus == 4)
 					{
 						var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку/продажу",
-							$"Нельзя удалить транзакцию закупки/продажу.\n Для удаления транзакции нужно удалить закупку.",
-							ButtonEnum.Ok).ShowWindowDialogAsync(parent);
+							$"Нельзя удалить транзакцию закупки/продажу.\n Для удаления транзакции нужно удалить закупку.").ShowWindowDialogAsync(parent);
 					}
 					else
 					{
