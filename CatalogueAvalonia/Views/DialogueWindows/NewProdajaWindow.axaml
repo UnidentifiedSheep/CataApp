@@ -4,219 +4,219 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" MinHeight="600" MinWidth="1000" Height="600" Width="1000"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.NewProdajaWindow"
-		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
         Title="Новая Реализация"
-		x:CompileBindings="False">
-	<Design.DataContext>
-		<vm:NewProdajaViewModel/>
-	</Design.DataContext>
-	<Grid Margin="5"
-	      RowDefinitions="55,55,*,30,50"
-	      ColumnDefinitions="1.4*,3*,2.4*,2*,3*,3*">
-		<Label Grid.Row="0"
-		       Grid.Column="0"
-		       VerticalAlignment="Center"
-		       FontSize="15"
-		       Foreground="#505050"
-		       Content="Дата"/>
-		<CalendarDatePicker Grid.Row="0" 
-							HorizontalAlignment="Stretch"
-							VerticalAlignment="Center"
-		                    Grid.Column="1"
-		                    SelectedDate="{Binding ProdajaDate}"/>
-		<Label Grid.Row="1"
-		       Grid.Column="0"
-		       FontSize="15"
-		       VerticalAlignment="Center"
-		       Foreground="#505050"
-		       Content="Поставщик"/>
-		<ComboBox Grid.Row="1" 
-				  VerticalAlignment="Center"
-		          Grid.Column="1"
-		          IsEnabled="{Binding IsVisibleConverter}"
-		          SelectedItem="{Binding SelectedAgent}"
-		          HorizontalAlignment="Stretch"
-		          ItemsSource="{Binding Agents}">
-			<ComboBox.ItemTemplate>
-				<DataTemplate>
-					<TextBlock Text="{Binding Name}"/>
-				</DataTemplate>
-			</ComboBox.ItemTemplate>
-		</ComboBox>
-		<Label Grid.Row="0" 
-		       Grid.Column="2"
-			   Content="Валюта накладной"
-		       FontSize="15"
-		       HorizontalAlignment="Center"
-		       Foreground="#505050"
-		       VerticalAlignment="Center"/>
-		<ComboBox Grid.Row="0" 
-			      Grid.Column="3"
-		          VerticalAlignment="Center"
-		          SelectedItem="{Binding SelectedCurrency}"
-		          ItemsSource="{Binding Currencies}"
-		          HorizontalAlignment="Stretch">
-			<ComboBox.ItemTemplate>
-				<DataTemplate>
-					<TextBlock Text="{Binding CurrencyName}"/>
-				</DataTemplate>
-			</ComboBox.ItemTemplate>
-		</ComboBox>
-		<StackPanel Grid.Row="0"
-		            Margin="20,0,0,0"
-		            Grid.Column="4"
-		            Orientation="Horizontal">
-			<Label FontSize="15"
-			       VerticalAlignment="Center"
-			       Foreground="#505050"
-			       Content="Наценка %"/>
-			<NumericUpDown Value="{Binding OverPrice}"
-			               Maximum="100"
-			               Minimum="0" 
-			               HorizontalAlignment="Center"
-			               VerticalAlignment="Center"
-			               ShowButtonSpinner="False"/>
-			<Button Content="Коментарий"
-			        Margin="20,0,0,0"
-			        Width="120"
-			        HorizontalContentAlignment="Center">
-				<Button.Flyout>
-					<Flyout>
-						<TextBox Text="{Binding Comment}"
-						         MaxLength="50"/>
-					</Flyout>
-				</Button.Flyout>
-			</Button>
-		</StackPanel>
-		<Button Grid.Row="1" 
-				Grid.Column="2"
-		        Content="Добавить"
-		        VerticalAlignment="Center"
-		        HorizontalContentAlignment="Center"
-		        HorizontalAlignment="Center"
-		        Width="120"
-		        CommandParameter="{Binding $parent[Window]}"
-		        Command="{Binding AddNewPartCommand}"/>
-		<Button Grid.Row="1" 
-		        Grid.Column="3"
-		        HorizontalContentAlignment="Center"
-		        Content="Изменить"
-		        Width="120"
-		        Command="{Binding ChangePartCommand}"
-		        CommandParameter="{Binding $parent[Window]}"
-		        VerticalAlignment="Center"/>
-		<Button Grid.Row="1"
-		        Grid.Column="4"
-		        HorizontalContentAlignment="Center"
-		        Content="Удалить"
-		        Margin="20,0,0,0"
-		        Width="120"
-		        Command="{Binding DeletePartCommand}"
-		        VerticalAlignment="Center"/>
-		<DataGrid Grid.Row="2"
-		          Grid.Column="0"
-		          Grid.ColumnSpan="6"
+        x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:NewProdajaViewModel />
+    </Design.DataContext>
+    <Grid Margin="5"
+          RowDefinitions="55,55,*,30,50"
+          ColumnDefinitions="1.4*,3*,2.4*,2*,3*,3*">
+        <Label Grid.Row="0"
+               Grid.Column="0"
+               VerticalAlignment="Center"
+               FontSize="15"
+               Foreground="#505050"
+               Content="Дата" />
+        <CalendarDatePicker Grid.Row="0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            Grid.Column="1"
+                            SelectedDate="{Binding ProdajaDate}" />
+        <Label Grid.Row="1"
+               Grid.Column="0"
+               FontSize="15"
+               VerticalAlignment="Center"
+               Foreground="#505050"
+               Content="Покупатель" />
+        <ComboBox Grid.Row="1"
+                  VerticalAlignment="Center"
+                  Grid.Column="1"
+                  IsEnabled="{Binding IsVisibleConverter}"
+                  SelectedItem="{Binding SelectedAgent}"
+                  HorizontalAlignment="Stretch"
+                  ItemsSource="{Binding Agents}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Name}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Label Grid.Row="0"
+               Grid.Column="2"
+               Content="Валюта накладной"
+               FontSize="15"
+               HorizontalAlignment="Center"
+               Foreground="#505050"
+               VerticalAlignment="Center" />
+        <ComboBox Grid.Row="0"
+                  Grid.Column="3"
+                  VerticalAlignment="Center"
+                  SelectedItem="{Binding SelectedCurrency}"
+                  ItemsSource="{Binding Currencies}"
+                  HorizontalAlignment="Stretch">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding CurrencyName}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <StackPanel Grid.Row="0"
+                    Margin="20,0,0,0"
+                    Grid.Column="4"
+                    Orientation="Horizontal">
+            <Label FontSize="15"
+                   VerticalAlignment="Center"
+                   Foreground="#505050"
+                   Content="Наценка %" />
+            <NumericUpDown Value="{Binding OverPrice}"
+                           Maximum="100"
+                           Minimum="0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           ShowButtonSpinner="False" />
+            <Button Content="Коментарий"
+                    Margin="20,0,0,0"
+                    Width="120"
+                    HorizontalContentAlignment="Center">
+                <Button.Flyout>
+                    <Flyout>
+                        <TextBox Text="{Binding Comment}"
+                                 MaxLength="50" />
+                    </Flyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
+        <Button Grid.Row="1"
+                Grid.Column="2"
+                Content="Добавить"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Center"
+                HorizontalAlignment="Center"
+                Width="120"
+                CommandParameter="{Binding $parent[Window]}"
+                Command="{Binding AddNewPartCommand}" />
+        <Button Grid.Row="1"
+                Grid.Column="3"
+                HorizontalContentAlignment="Center"
+                Content="Изменить"
+                Width="120"
+                Command="{Binding ChangePartCommand}"
+                CommandParameter="{Binding $parent[Window]}"
+                VerticalAlignment="Center" />
+        <Button Grid.Row="1"
+                Grid.Column="4"
+                HorizontalContentAlignment="Center"
+                Content="Удалить"
+                Margin="20,0,0,0"
+                Width="120"
+                Command="{Binding DeletePartCommand}"
+                VerticalAlignment="Center" />
+        <DataGrid Grid.Row="2"
+                  Grid.Column="0"
+                  Grid.ColumnSpan="6"
                   SelectionMode="Single"
                   SelectedItem="{Binding SelectedProdaja}"
-				  CanUserReorderColumns="True"
-				  CanUserResizeColumns="True"
-				  CanUserSortColumns="False"
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="False"
                   ItemsSource="{Binding Prodaja}">
-			<DataGrid.Columns>
-				<DataGridTextColumn Header="Номер запчасти"
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Номер запчасти"
                                     Binding="{Binding UniValue}"
                                     Width="*"
-                                    IsReadOnly="True"/>
-				<DataGridTextColumn Header="Название оригинала"
+                                    IsReadOnly="True" />
+                <DataGridTextColumn Header="Название оригинала"
                                     Width="2*"
                                     IsReadOnly="True"
-                                    Binding="{Binding MainName}"/>
-				<DataGridTextColumn Header="Название неориг."
+                                    Binding="{Binding MainName}" />
+                <DataGridTextColumn Header="Название неориг."
                                     Width="2*"
                                     IsReadOnly="True"
-                                    Binding="{Binding MainCatName}"/>
-				<DataGridTemplateColumn Header="Цена"
-										Width="*">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<NumericUpDown Value="{Binding Price}"
-										   BorderThickness="0"
-										   ValueChanged="NumericUpDownPrice_ValueChanged"
-										   Minimum="0"
-										   FormatString="{}{0:#,0.00}"
-										   ShowButtonSpinner="False"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Количество"
-										Width="*">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<NumericUpDown Value="{Binding Count}"
-										   FormatString="#"
-										   ValueChanged="NumericUpDownCount_ValueChanged"
-										   BorderThickness="0"
-										   Minimum="0"
-										   Maximum="{Binding MaxCount}"
-										   ShowButtonSpinner="False"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTextColumn Header="Сумма"
-									Width="*"
-									IsReadOnly="True"
-									Binding="{Binding PriceSum}"/>
-			</DataGrid.Columns>
-			<DataGrid.ContextMenu>
-				<ContextMenu>
-					<MenuItem Header="Добавить"
+                                    Binding="{Binding MainCatName}" />
+                <DataGridTemplateColumn Header="Цена"
+                                        Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <NumericUpDown Value="{Binding Price}"
+                                           BorderThickness="0"
+                                           ValueChanged="NumericUpDownPrice_ValueChanged"
+                                           Minimum="0"
+                                           FormatString="{}{0:#,0.00}"
+                                           ShowButtonSpinner="False" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Количество"
+                                        Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <NumericUpDown Value="{Binding Count}"
+                                           FormatString="#"
+                                           ValueChanged="NumericUpDownCount_ValueChanged"
+                                           BorderThickness="0"
+                                           Minimum="0"
+                                           Maximum="{Binding MaxCount}"
+                                           ShowButtonSpinner="False" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Сумма"
+                                    Width="*"
+                                    IsReadOnly="True"
+                                    Binding="{Binding PriceSum}" />
+            </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Добавить"
                               CommandParameter="{Binding $parent[Window]}"
-							  Command="{Binding AddNewPartCommand}"/>
-					<MenuItem Header="Изменить"
+                              Command="{Binding AddNewPartCommand}" />
+                    <MenuItem Header="Изменить"
                               Command="{Binding ChangePartCommand}"
-							  CommandParameter="{Binding $parent[Window]}"/>
-					<MenuItem Header="Удалить"
-                              Command="{Binding DeletePartCommand}"/>
-				</ContextMenu>
-			</DataGrid.ContextMenu>
-		</DataGrid>
-		<StackPanel Grid.Column="0" 
-		            Grid.Row="3"
-		            Grid.ColumnSpan="6"
-		            Orientation="Horizontal"
-		            HorizontalAlignment="Right"
-		            VerticalAlignment="Center">
-			<Label Content="Общая сумма:"
-			       FontSize="18"
-			       Foreground="#404040"/>
-			<TextBlock Text=""
-			           FontSize="18"
-			           Foreground="#404040"/>
-			<TextBlock Text="{Binding TotalSum}"
-			           FontSize="18"
-			           VerticalAlignment="Center"
-			           Foreground="#404040"/>
-			<TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
-			           FontSize="18"
-			           VerticalAlignment="Center"
-			           Foreground="#404040"/>
-		</StackPanel>
-		<Grid Grid.Row="4"
-		      Grid.Column="0"
-		      Grid.ColumnSpan="6">
-			<StackPanel Orientation="Horizontal"
-			            HorizontalAlignment="Center"
-			            VerticalAlignment="Center">
-				<Button Content="Сохранить"
-				        Width="110"
-				        HorizontalContentAlignment="Center"
-				        Click="SaveButt_Clicked"/>
-				<Button Content="Отмена"
-				        Width="110"
-				        HorizontalContentAlignment="Center"
-				        Click="CancleButt_Clicked"
-				        Margin="25,0,0,0"/>
-			</StackPanel>
-		</Grid>
-	</Grid>
+                              CommandParameter="{Binding $parent[Window]}" />
+                    <MenuItem Header="Удалить"
+                              Command="{Binding DeletePartCommand}" />
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+        <StackPanel Grid.Column="0"
+                    Grid.Row="3"
+                    Grid.ColumnSpan="6"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+            <Label Content="Общая сумма:"
+                   FontSize="18"
+                   Foreground="#404040" />
+            <TextBlock Text=""
+                       FontSize="18"
+                       Foreground="#404040" />
+            <TextBlock Text="{Binding TotalSum}"
+                       FontSize="18"
+                       VerticalAlignment="Center"
+                       Foreground="#404040" />
+            <TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
+                       FontSize="18"
+                       VerticalAlignment="Center"
+                       Foreground="#404040" />
+        </StackPanel>
+        <Grid Grid.Row="4"
+              Grid.Column="0"
+              Grid.ColumnSpan="6">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                <Button Content="Сохранить"
+                        Width="110"
+                        HorizontalContentAlignment="Center"
+                        Click="SaveButt_Clicked" />
+                <Button Content="Отмена"
+                        Width="110"
+                        HorizontalContentAlignment="Center"
+                        Click="CancleButt_Clicked"
+                        Margin="25,0,0,0" />
+            </StackPanel>
+        </Grid>
+    </Grid>
 </Window>

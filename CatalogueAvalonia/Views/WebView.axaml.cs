@@ -2,9 +2,9 @@ using Avalonia.Controls;
 
 namespace CatalogueAvalonia.Views;
 
-public partial class MainWindow : Window
+public partial class WebView : UserControl
 {
-    public MainWindow()
+    public WebView()
     {
         InitializeComponent();
     }

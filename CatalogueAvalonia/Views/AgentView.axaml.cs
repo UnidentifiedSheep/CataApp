@@ -1,23 +1,19 @@
 using Avalonia.Controls;
 using CatalogueAvalonia.ViewModels;
 
-namespace CatalogueAvalonia.Views
+namespace CatalogueAvalonia.Views;
+
+public partial class AgentView : UserControl
 {
-	public partial class AgentView : UserControl
-	{
-		public AgentView()
-		{
-			InitializeComponent();
-		}
-		public void Agents_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
-		{
-			var dc = (AgentViewModel?)DataContext;
+    public AgentView()
+    {
+        InitializeComponent();
+    }
 
-			if (dc != null)
-			{
-				dc.EditAgentCommand.Execute(null);
-			}
-		}
-	}
+    public void Agents_CellEditEnded(object sender, DataGridCellEditEndedEventArgs e)
+    {
+        var dc = (AgentViewModel?)DataContext;
+
+        if (dc != null) dc.EditAgentCommand.Execute(null);
+    }
 }
-

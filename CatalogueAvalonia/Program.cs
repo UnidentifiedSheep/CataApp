@@ -1,26 +1,28 @@
-﻿using Avalonia;
-using System;
+﻿using System;
+using Avalonia;
+using QuestPDF;
 using QuestPDF.Infrastructure;
 
-namespace CatalogueAvalonia
-{
-	internal sealed class Program
-	{
-		// Initialization code. Don't use any Avalonia, third-party APIs or any
-		// SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-		// yet and stuff might break.
-		[STAThread]
-		public static void Main(string[] args)
-		{
-			QuestPDF.Settings.License = LicenseType.Community;
-			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-		}
+namespace CatalogueAvalonia;
 
-		// Avalonia configuration, don't remove; also used by visual designer.
-		public static AppBuilder BuildAvaloniaApp()
-			=> AppBuilder.Configure<App>()
-				.UsePlatformDetect()
-				.WithInterFont()
-				.LogToTrace();
-	}
+internal sealed class Program
+{
+    // Initialization code. Don't use any Avalonia, third-party APIs or any
+    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
+    // yet and stuff might break.
+    [STAThread]
+    public static void Main(string[] args)
+    {
+        Settings.License = LicenseType.Community;
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
+
+    // Avalonia configuration, don't remove; also used by visual designer.
+    public static AppBuilder BuildAvaloniaApp()
+    {
+        return AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace();
+    }
 }

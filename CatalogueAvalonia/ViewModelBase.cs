@@ -1,12 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 
-namespace CatalogueAvalonia
+namespace CatalogueAvalonia;
+
+public class ViewModelBase : ObservableRecipient
 {
-    public class ViewModelBase : ObservableRecipient
+    public ViewModelBase()
     {
-        public ViewModelBase() { }  
-        public ViewModelBase(IMessenger messenger) : base(messenger) 
-        { }
+    }
+
+    public ViewModelBase(IMessenger messenger) : base(messenger)
+    {
     }
 }

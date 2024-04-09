@@ -1,10 +1,8 @@
-﻿namespace CatalogueAvalonia.Models
+﻿namespace CatalogueAvalonia.Models;
+
+public class ProducerModel
 {
-	public class ProducerModel 
-	{
+    public int Id { get; set; }
 
-		public int Id { get; set; }
-
-		public string ProducerName { get; set; } = string.Empty;
-	}
+    public string ProducerName { get; set; } = string.Empty;
 }

@@ -1,13 +1,11 @@
 using Avalonia.Controls;
 
-namespace CatalogueAvalonia.Views
+namespace CatalogueAvalonia.Views;
+
+public partial class CatalogueView : UserControl
 {
-	public partial class CatalogueView : UserControl
-	{
-		public CatalogueView()
-		{
-			InitializeComponent();
-		}
-		
-	}
+    public CatalogueView()
+    {
+        InitializeComponent();
+    }
 }

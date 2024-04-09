@@ -2,253 +2,247 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-			 xmlns:vm="using:CatalogueAvalonia.ViewModels"
+             xmlns:vm="using:CatalogueAvalonia.ViewModels"
              mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="750"
-			 xmlns:ui="using:FluentAvalonia.UI.Controls"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:con="using:CatalogueAvalonia.Core.ConverterV"
              x:Class="CatalogueAvalonia.Views.AgentView"
-			 x:CompileBindings="False">
-	<Design.DataContext>
-		<vm:AgentViewModel/>
-	</Design.DataContext>
-	<UserControl.Resources>
-		<con:FromStatusToActionConverter x:Key="StatusToActionConverter"/>
-	</UserControl.Resources>
-	<Grid>
-		<Grid.ColumnDefinitions>
-			<ColumnDefinition MaxWidth="250"/>
-			<ColumnDefinition Width="4*"/>
-		</Grid.ColumnDefinitions>
-		<Grid Grid.Column="0"
+             x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:AgentViewModel />
+    </Design.DataContext>
+    <UserControl.Resources>
+        <con:FromStatusToActionConverter x:Key="StatusToActionConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition MaxWidth="250" />
+            <ColumnDefinition Width="4*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0"
               Margin="5"
-			  RowDefinitions="5, 151*, 309*,263*, 113*">
-			<StackPanel Grid.Row="1"
+              RowDefinitions="5, 151*, 309*,263*, 113*">
+            <StackPanel Grid.Row="1"
                         Orientation="Vertical">
-				<Label Content="Поиск по имени"
+                <Label Content="Поиск по имени"
                        FontSize="15"
-                       Foreground="#505050"/>
-				<TextBox HorizontalAlignment="Stretch"
+                       Foreground="#505050" />
+                <TextBox HorizontalAlignment="Stretch"
                          FontSize="16"
-                         Text="{Binding AgentSearchField}"/>
-			</StackPanel>
-			<StackPanel Grid.Row="2">
-				<StackPanel HorizontalAlignment="Stretch">
-					<Label Content="С даты"
+                         Text="{Binding AgentSearchField}" />
+            </StackPanel>
+            <StackPanel Grid.Row="2">
+                <StackPanel HorizontalAlignment="Stretch">
+                    <Label Content="С даты"
                            FontSize="15"
-                           Foreground="#505050"/>
-					<CalendarDatePicker Height="25"
-									    SelectedDate="{Binding StartDate}"
-										HorizontalAlignment="Stretch"
-										HorizontalContentAlignment="Center"/>
-				</StackPanel>
-				<StackPanel HorizontalAlignment="Stretch"
+                           Foreground="#505050" />
+                    <CalendarDatePicker Height="25"
+                                        SelectedDate="{Binding StartDate}"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center" />
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Stretch"
                             Margin="0, 15, 0, 0">
-					<Label Content="По дату"
+                    <Label Content="По дату"
                            FontSize="15"
-                           Foreground="#505050"/>
-					<CalendarDatePicker Height="25"
-									    SelectedDate="{Binding EndDate}"
-										HorizontalAlignment="Stretch"
-										HorizontalContentAlignment="Center"/>
-				</StackPanel>
-				<StackPanel HorizontalAlignment="Stretch"
+                           Foreground="#505050" />
+                    <CalendarDatePicker Height="25"
+                                        SelectedDate="{Binding EndDate}"
+                                        HorizontalAlignment="Stretch"
+                                        HorizontalContentAlignment="Center" />
+                </StackPanel>
+                <StackPanel HorizontalAlignment="Stretch"
                             Margin="0, 15, 0, 0">
-					<Label Content="Валюта"
+                    <Label Content="Валюта"
                            FontSize="15"
-                           Foreground="#505050"/>
-					<ComboBox ItemsSource="{Binding Currencies}"
+                           Foreground="#505050" />
+                    <ComboBox ItemsSource="{Binding Currencies}"
                               SelectedItem="{Binding SelectedCurrency}"
                               HorizontalAlignment="Stretch">
-						<ComboBox.ItemTemplate>
-							<DataTemplate>
-								<TextBlock Text="{Binding CurrencyName}"/>
-							</DataTemplate>
-						</ComboBox.ItemTemplate>
-					</ComboBox>
-				</StackPanel>
-			</StackPanel>
-			<Button Grid.Row="4"
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding CurrencyName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+            </StackPanel>
+            <Button Grid.Row="4"
                     Content="Новый Контрагент"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Command="{Binding AddNewAgentCommand}"
-					CommandParameter="{Binding $parent[Window]}"
-                    FontSize="16"/>
-		</Grid>
-		<Grid Grid.Column="1"
-			  RowDefinitions="203*,auto">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="450*"
-                                  MinWidth="100"/>
-				<ColumnDefinition Width="1"/>
-				<ColumnDefinition Width="733*"
-                                  MinWidth="100"/>
-			</Grid.ColumnDefinitions>
-			<ui:ProgressRing Grid.Column="0"
-							 Grid.Row="0"
-							 BorderThickness="3"
-							 Height="30"
-							 Width="30"
-							 IsEnabled="{Binding IsLoaded}"
-							 IsVisible="{Binding IsLoaded}"
-							 IsIndeterminate="True"/>
-			<DataGrid Grid.Column="0"
+                    CommandParameter="{Binding $parent[Window]}"
+                    FontSize="16" />
+        </Grid>
+        <Grid Grid.Column="1"
+              RowDefinitions="203*,auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="450*"
+                                  MinWidth="100" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="733*"
+                                  MinWidth="100" />
+            </Grid.ColumnDefinitions>
+            <ui:ProgressRing Grid.Column="0"
+                             Grid.Row="0"
+                             BorderThickness="3"
+                             Height="30"
+                             Width="30"
+                             IsEnabled="{Binding IsLoaded}"
+                             IsVisible="{Binding IsLoaded}"
+                             IsIndeterminate="True" />
+            <DataGrid Grid.Column="0"
                       Grid.Row="0"
                       Grid.RowSpan="2"
                       ItemsSource="{Binding Agents}"
                       SelectedItem="{Binding SelectedAgent}"
-					  CellEditEnded="Agents_CellEditEnded"
-					  CanUserResizeColumns="True"
-					  CanUserReorderColumns="True"
+                      CellEditEnded="Agents_CellEditEnded"
+                      CanUserResizeColumns="True"
+                      CanUserReorderColumns="True"
                       SelectionMode="Single">
-				<DataGrid.Columns>
-					<DataGridTextColumn Header="Имя контрагента"
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Имя контрагента"
                                         Binding="{Binding Name}"
                                         Width="6*"
-                                        IsReadOnly="False"/>
-					<DataGridCheckBoxColumn Header="Закупки"
+                                        IsReadOnly="False" />
+                    <DataGridCheckBoxColumn Header="Закупки"
                                             Binding="{Binding IsZak}"
                                             Width="2*"
-                                            IsReadOnly="False"/>
-				</DataGrid.Columns>
-				<DataGrid.ContextMenu>
-					<ContextMenu>
-						<MenuItem Header="Новая транзакция"
+                                            IsReadOnly="False" />
+                </DataGrid.Columns>
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Новая транзакция"
                                   Command="{Binding AddNewTransactionCommand}"
-								  CommandParameter="{Binding $parent[Window]}"/>
-						<MenuItem Header="Новая Расход"
-						          Command="{Binding AddNewConsumptionCommand}"
-						          CommandParameter="{Binding $parent[Window]}"/>
-						<MenuItem Header="Новая Приход"
-						          Command="{Binding AddNewInComeCommand}"
-						          CommandParameter="{Binding $parent[Window]}"/>
-						<MenuItem Header="Удалить контрагента"
-                                  Command="{Binding DeleteAgentCommand}"/>
-					</ContextMenu>
-				</DataGrid.ContextMenu>
-			</DataGrid>
-			<GridSplitter Grid.Row="0"
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Новый Расход"
+                                  Command="{Binding AddNewConsumptionCommand}"
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Новый Приход"
+                                  Command="{Binding AddNewInComeCommand}"
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Удалить контрагента"
+                                  Command="{Binding DeleteAgentCommand}" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+            </DataGrid>
+            <GridSplitter Grid.Row="0"
                           Grid.Column="1"
-						  BorderBrush="#20202020"
+                          BorderBrush="#20202020"
                           Grid.RowSpan="2"
-						  BorderThickness="1.5,0,0,0"
-                          HorizontalAlignment="Stretch"/>
-			<Grid Column="2"
-			      RowDefinitions="*,50">
-				
-				<DataGrid Grid.Row="0"
-	                      SelectedItem="{Binding SelectedTransaction}"
-	                      SelectionMode="Single"
-						  CanUserResizeColumns="True"
-						  CanUserReorderColumns="True"
-						  CanUserSortColumns="False"
-	                      IsReadOnly="True"
-	                      ItemsSource="{Binding AgentTransactions}">
-					<DataGrid.Columns>
-						<DataGridTextColumn Header="Дата"
-											Binding="{Binding TransactionDatatime}"
-											Width="*"/>
-						<DataGridTemplateColumn Header="Номер операции"
-						                        Width="*">
-							<DataTemplate>
-								<TextBlock Text="{Binding Id}"
-								           HorizontalAlignment="Left"
-								           VerticalAlignment="Center"
-					 			           ToolTip.Tip="{Binding TransactionStatus, Converter={StaticResource StatusToActionConverter}}"/>
-							</DataTemplate>
-						</DataGridTemplateColumn>
-						
-						<DataGridTextColumn Header="Сумма (-)"
-	                                        Binding="{Binding Summa}"
-	                                        Width="*"/>
-						<DataGridTextColumn Header="Сумма платежа (+)"
-	                                        Binding="{Binding SummaPlateja}"
-	                                        Width="*"/>
-						<DataGridTextColumn Header="Сальдо"
-	                                        Binding="{Binding Balance}"
-	                                        Width="*"/>
-						<DataGridTextColumn Header="Валюта"
-											Binding="{Binding CurrencySign}"
-											Width="auto"
-											IsVisible="{Binding IsCurrencyVisible}"/>
-					</DataGrid.Columns>
-					
-					<DataGrid.ContextMenu>
-						<ContextMenu>
-							<MenuItem Header="Удалить транзакцию"
-	                                  Command="{Binding DeleteTransactionCommand}"
-									  CommandParameter="{Binding $parent[Window]}"/>
-						</ContextMenu>
-					</DataGrid.ContextMenu>
-				</DataGrid>
-				<Grid Grid.Row="1"
-				      IsVisible="{Binding IsDebtCreditVisible}">
-					<Border BorderBrush="#20202020"
-					        BorderThickness="0,1,0,0">
-						<Grid Grid.Column="0"
-						      ColumnDefinitions="*,1,*">
-							<Grid Grid.Column="0"
-							      RowDefinitions="*,*">
-								<Border Grid.Row="0"
-								        BorderBrush="#20202020"
-								        BorderThickness="0,0,0,1">
-										<TextBlock Text="Мы должны"
-										           FontSize="16"
-										           HorizontalAlignment="Center"
-										           VerticalAlignment="Center"
-										           Foreground="Gray"/>
-										
-								</Border>
-								<Grid Grid.Row="1"
-								      HorizontalAlignment="Center"
-								      VerticalAlignment="Center">
-									<StackPanel Orientation="Horizontal">
-										<TextBlock Grid.Row="1" 
-										           Text="{Binding TotalCredit, StringFormat={}{0:0.##}}"
-										           FontSize="16"
-										           Foreground="Gray"/>
-										<TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
-										           FontSize="16"
-										           Foreground="Gray"/>		
-									</StackPanel>
-									
-									
-								</Grid>
-							</Grid>
-							<GridSplitter Grid.Column="1" 
-							              BorderBrush="#20202020"
-							              BorderThickness="1,0,0,0"
-							              Width="1"/>
-							<Grid Grid.Column="2"
-							      RowDefinitions="*,*">
-								<Border Grid.Row="0"
-								        BorderBrush="#20202020"
-								        BorderThickness="0,0,0,1">
-									<TextBlock Text="Нам должны"
-									           FontSize="16"
-									           HorizontalAlignment="Center"
-									           VerticalAlignment="Center"
-									           Foreground="Gray"/>
-								</Border>
-								<Grid Grid.Row="1"
-								      HorizontalAlignment="Center"
-								      VerticalAlignment="Center">
-									<StackPanel 
-									            Orientation="Horizontal">
-										<TextBlock Grid.Row="1" 
-										           Text="{Binding TotalDebt, StringFormat={}{0:0.##}}"
-										           FontSize="16"
-										           Foreground="Gray"/>
-										<TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
-										           FontSize="16"
-										           Foreground="Gray"/>		
-									</StackPanel>
-								</Grid>
-							</Grid>
-						</Grid>
-					</Border>
-				</Grid>
-			</Grid>
-		</Grid>
-	</Grid>
+                          BorderThickness="1.5,0,0,0"
+                          HorizontalAlignment="Stretch" />
+            <Grid Column="2"
+                  RowDefinitions="*,50">
+
+                <DataGrid Grid.Row="0"
+                          SelectedItem="{Binding SelectedTransaction}"
+                          SelectionMode="Single"
+                          CanUserResizeColumns="True"
+                          CanUserReorderColumns="True"
+                          CanUserSortColumns="False"
+                          IsReadOnly="True"
+                          ItemsSource="{Binding AgentTransactions}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Дата"
+                                            Binding="{Binding TransactionDatatime}"
+                                            Width="*" />
+                        <DataGridTemplateColumn Header="Номер операции"
+                                                Width="*">
+                        </DataGridTemplateColumn>
+
+                        <DataGridTextColumn Header="Сумма (-)"
+                                            Binding="{Binding Summa}"
+                                            Width="*" />
+                        <DataGridTextColumn Header="Сумма платежа (+)"
+                                            Binding="{Binding SummaPlateja}"
+                                            Width="*" />
+                        <DataGridTextColumn Header="Сальдо"
+                                            Binding="{Binding Balance}"
+                                            Width="*" />
+                        <DataGridTextColumn Header="Валюта"
+                                            Binding="{Binding CurrencySign}"
+                                            Width="auto"
+                                            IsVisible="{Binding IsCurrencyVisible}" />
+                    </DataGrid.Columns>
+
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Удалить транзакцию"
+                                      Command="{Binding DeleteTransactionCommand}"
+                                      CommandParameter="{Binding $parent[Window]}" />
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
+                </DataGrid>
+                <Grid Grid.Row="1"
+                      IsVisible="{Binding IsDebtCreditVisible}">
+                    <Border BorderBrush="#20202020"
+                            BorderThickness="0,1,0,0">
+                        <Grid
+                            ColumnDefinitions="*,1,*">
+                            <Grid Grid.Column="0"
+                                  RowDefinitions="*,*">
+                                <Border Grid.Row="0"
+                                        BorderBrush="#20202020"
+                                        BorderThickness="0,0,0,1">
+                                    <TextBlock Text="Мы должны"
+                                               FontSize="16"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="Gray" />
+
+                                </Border>
+                                <Grid Grid.Row="1"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock
+                                            Text="{Binding TotalCredit, StringFormat={}{0:0.##}}"
+                                            FontSize="16"
+                                            Foreground="Gray" />
+                                        <TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
+                                                   FontSize="16"
+                                                   Foreground="Gray" />
+                                    </StackPanel>
+
+
+                                </Grid>
+                            </Grid>
+                            <GridSplitter Grid.Column="1"
+                                          BorderBrush="#20202020"
+                                          BorderThickness="1,0,0,0"
+                                          Width="1" />
+                            <Grid Grid.Column="2"
+                                  RowDefinitions="*,*">
+                                <Border Grid.Row="0"
+                                        BorderBrush="#20202020"
+                                        BorderThickness="0,0,0,1">
+                                    <TextBlock Text="Нам должны"
+                                               FontSize="16"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="Gray" />
+                                </Border>
+                                <Grid Grid.Row="1"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center">
+                                    <StackPanel
+                                        Orientation="Horizontal">
+                                        <TextBlock
+                                            Text="{Binding TotalDebt, StringFormat={}{0:0.##}}"
+                                            FontSize="16"
+                                            Foreground="Gray" />
+                                        <TextBlock Text="{Binding SelectedCurrency.CurrencySign}"
+                                                   FontSize="16"
+                                                   Foreground="Gray" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
 </UserControl>

@@ -18,6 +18,7 @@
         <entry key="CatalogueAvalonia/Views/DialogueWindows/NewPurchaseWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/MainWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ProdajaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/WebView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ZakupkaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
       </map>
     </option>

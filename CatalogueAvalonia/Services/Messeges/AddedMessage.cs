@@ -1,11 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
 
-namespace CatalogueAvalonia.Services.Messeges
+namespace CatalogueAvalonia.Services.Messeges;
+
+public class AddedMessage : ValueChangedMessage<ChangedItem>
 {
-	public class AddedMessage : ValueChangedMessage<ChangedItem>
-	{
-		public AddedMessage(ChangedItem value) : base(value)
-		{
-		}
-	}
+    public AddedMessage(ChangedItem value) : base(value)
+    {
+    }
 }

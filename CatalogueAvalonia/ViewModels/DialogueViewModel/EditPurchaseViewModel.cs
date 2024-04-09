@@ -1,267 +1,273 @@
-﻿using Avalonia.Controls;
-using CatalogueAvalonia.Models;
-using CatalogueAvalonia.Services.DataStore;
-using CatalogueAvalonia.Services.DialogueServices;
-using CatalogueAvalonia.Services.Messeges;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using DynamicData;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CatalogueAvalonia.Core;
+using CatalogueAvalonia.Models;
+using CatalogueAvalonia.Services.DataStore;
+using CatalogueAvalonia.Services.DialogueServices;
+using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.Views.DialogueWindows;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using DynamicData;
 using MsBox.Avalonia;
 
-namespace CatalogueAvalonia.ViewModels.DialogueViewModel
+namespace CatalogueAvalonia.ViewModels.DialogueViewModel;
+
+public partial class EditPurchaseViewModel : ViewModelBase
 {
-	public partial class EditPurchaseViewModel : ViewModelBase
-	{
-		private readonly TopModel _topModel;
-		private readonly DataStore _dataStore;
-		private readonly IDialogueService _dialogueServices;
-		private readonly ObservableCollection<CurrencyModel> _currencies;
-		private readonly ObservableCollection<AgentModel> _agents;
-		private readonly ObservableCollection<ZakupkaAltModel> _zakupka;
-		private readonly ZakupkiModel _zakupkaMainGroup;
+    private readonly ObservableCollection<AgentModel> _agents;
+    private readonly ObservableCollection<CurrencyModel> _currencies;
+    private readonly DataStore _dataStore;
+    private readonly IDialogueService _dialogueServices;
+    private readonly TopModel _topModel;
+    private readonly ObservableCollection<ZakupkaAltModel> _zakupka;
+    private readonly ZakupkiModel _zakupkaMainGroup;
 
-		private List<int> _deletedIds = new List<int>();
-		private Dictionary<int, int> _prevCounts = new Dictionary<int, int>();
+    [ObservableProperty] private bool _canEditUsd;
 
-		public IEnumerable<CurrencyModel> Currencies => _currencies;
-		public IEnumerable<AgentModel> Agents => _agents;
-		public IEnumerable<ZakupkaAltModel> Zakupka => _zakupka;
-		public bool IsDirty = false;
+    [ObservableProperty] private string _comment = string.Empty;
 
-		[ObservableProperty]
-		private DateTime _purchaseDate;
-		[ObservableProperty]
-		private double _toUsd;
-		[ObservableProperty]
-		private bool _convertToUsd = true;
-		[ObservableProperty]
-		private bool _canEditUsd;
-		[ObservableProperty]
-		private double _totalSum;
-		[ObservableProperty]
-		private AgentModel? _selectedAgent;
-		[ObservableProperty]
-		private CurrencyModel? _selectedCurrency;
-		[ObservableProperty]
-		private ZakupkaAltModel? _selectedZakupka;
-		[ObservableProperty]
-		private bool _isVisibleConverter = false;
-		[ObservableProperty] 
-		private string _comment = string.Empty;
-		public EditPurchaseViewModel()
-		{
-			_purchaseDate = DateTime.Now.Date;
-			_currencies = new ObservableCollection<CurrencyModel>();
-			_agents = new ObservableCollection<AgentModel>();
-			_zakupka = new ObservableCollection<ZakupkaAltModel>();
-			_canEditUsd = !ConvertToUsd;
-		}
-		public EditPurchaseViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel, IDialogueService dialogueService, ZakupkiModel zakupkaMainGroup) : base(messenger)
-		{
-			_zakupkaMainGroup = zakupkaMainGroup;
-			_dataStore = dataStore;
-			_topModel = topModel;
-			_dialogueServices = dialogueService;
-			_comment = zakupkaMainGroup.Comment ?? String.Empty;
-			DateTime.TryParse(zakupkaMainGroup.Datetime, out _purchaseDate);
-			_canEditUsd = !ConvertToUsd;
-			_currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
-			_agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.IsZak == 1 && x.Id != 1));
-			_zakupka = new ObservableCollection<ZakupkaAltModel>();
-			Messenger.Register<AddedMessage>(this, OnItemAdded);
+    [ObservableProperty] private bool _convertToUsd = true;
 
-			LoadZakupkiCommand.Execute(null);
-		}
-		[RelayCommand]
-		private async Task LoadZakupki()
-		{
-			_zakupka.AddRange(await _topModel.GetZakAltGroup(_zakupkaMainGroup.Id));
-			
-			foreach (var item in _zakupka)
-			{
-				int? diff = await _topModel.CanDeleteProdaja(item.MainCatId ?? 1);
-				if (diff != null)
-				{
-					int minCount = item.Count - (diff ?? 0);
-					if (minCount <= 0)
-					{
-						item.MinCount = 0;
-						item.CanDelete = true;
-					}
-					else
-					{
-						item.MinCount = minCount;
-						item.CanDelete = false;
-					}
-				}
-				if (!_prevCounts.ContainsKey(item.MainCatId ?? 1))
-				{
-					_prevCounts.Add(item.MainCatId ?? 1, item.Count);
-				}
-				else
-				{
-					_prevCounts[item.MainCatId ?? 1] += item.Count;
-				}
-			}
-			
+    private readonly List<int> _deletedIds = new();
 
-			
-			if (_currencies.Any(x => x.Id == _zakupkaMainGroup.CurrencyId))
-				SelectedCurrency = _currencies.First(x => x.Id == _zakupkaMainGroup.CurrencyId);
-			if (_agents.Any(x => x.Id == _zakupkaMainGroup.AgentId))
-				SelectedAgent = _agents.First(x => x.Id == _zakupkaMainGroup.AgentId);
-			TotalSum = Math.Round(_zakupka.Sum(x => x.PriceSum), 2);
+    [ObservableProperty] private bool _isVisibleConverter;
 
-			IsDirty = false;
-		}
+    private readonly Dictionary<int, int> _prevCounts = new();
 
-		partial void OnCommentChanged(string value)
-		{
-			IsDirty = true;
-		}
-		private void OnItemAdded(object recipient, AddedMessage message)
-		{
-			var where = message.Value.Where;
-			if (where == "CataloguePartItemSelected")
-			{
-				var what = (CatalogueModel?)message.Value.What;
-				string mainName = message.Value.MainName;
-				if (what != null)
-				{
-					_zakupka.Add(new ZakupkaAltModel
-					{
-						Id = null,
-						MainCatId = what.MainCatId,
-						MainCatName = what.Name,
-						MainName = mainName,
-						UniValue = what.UniValue,
-						ZakupkaId = _zakupkaMainGroup.Id
-					}) ;
-					IsDirty = true;
-				}
-			}
-			else if (where == "ZakupkaPartItemEdited")
-			{
-				var what = (CatalogueModel?)message.Value.What;
-				string mainName = message.Value.MainName;
-				if (what != null)
-				{
-					if (SelectedZakupka != null)
-					{
-						if (SelectedZakupka.Id != null && !_deletedIds.Contains(SelectedZakupka.Id ?? 0))
-						{
-							_deletedIds.Add(SelectedZakupka.Id ?? 0);
-						}
-						SelectedZakupka.Id = null;
-						SelectedZakupka.MainCatId = what.MainCatId;
-						SelectedZakupka.MainCatName = what.Name;
-						SelectedZakupka.MainName = mainName;
-						SelectedZakupka.UniValue = what.UniValue;
-					}
-					IsDirty = true;
-				}
-			}
-		}
-		partial void OnPurchaseDateChanged(DateTime value)
-		{
-			IsDirty = true;
-		}
-		partial void OnSelectedCurrencyChanged(CurrencyModel? value)
-		{
-			if (value != null)
-			{
-				ToUsd = value.ToUsd;
-				IsDirty = true;
-			}
-		}
-		partial void OnToUsdChanged(double value)
-		{
-			if (SelectedCurrency != null && SelectedCurrency.Id == 2)
-			{
-				ToUsd = 1;
-			}
-		}
-		partial void OnConvertToUsdChanged(bool value)
-		{
-			CanEditUsd = !ConvertToUsd;
-			IsDirty = true;
-		}
-		[RelayCommand]
-		private async Task AddNewPart(Window parent)
-		{
-			SelectedZakupka = null;
-			await _dialogueServices.OpenDialogue(new CatalogueItemWindow(), new CatalogueItemViewModel(Messenger, _dataStore, 0), parent);
-		}
-		[RelayCommand]
-		private async Task DeletePart(Window parent)
-		{
-			if (SelectedZakupka != null)
-			{
-				if (SelectedZakupka.CanDelete)
-				{
-					if (SelectedZakupka.Id != null)
-					{
-						_deletedIds.Add(SelectedZakupka.Id ?? 0);
-					}
-					_zakupka.Remove(SelectedZakupka);
-					IsDirty = true;
-					
-				}
-				else
-					await MessageBoxManager.GetMessageBoxStandard("?",
-						$"Данную запчасть нельзя поменять.").ShowWindowDialogAsync(parent);
-			}
-			TotalSum = Math.Round(_zakupka.Sum(x => x.PriceSum), 2);
-		}
-		[RelayCommand]
-		private async Task ChangePart(Window parent)
-		{
-			if (SelectedZakupka != null)
-			{
-				if (SelectedZakupka.CanDelete)
-					await _dialogueServices.OpenDialogue(new CatalogueItemWindow(), new CatalogueItemViewModel(Messenger, _dataStore, 1), parent);
-				else
-					await MessageBoxManager.GetMessageBoxStandard("?",
-						$"Данную запчасть нельзя поменять.").ShowWindowDialogAsync(parent);
-			}
-			
-		}
-		public void RemoveWhereZero(IEnumerable<ZakupkaAltModel> altModels)
-		{
-			foreach (var item in altModels)
-			{
-				if (item.Id != null)
-					_deletedIds.Add(item.Id ?? 0);
-			}
-			_zakupka.RemoveMany(altModels);
-		}
-		[RelayCommand]
-		private async Task SaveZakupka()
-		{
-			if (SelectedCurrency != null)
-			{
-				var catas = await _topModel.EditZakupkaAsync(_deletedIds, Zakupka, _prevCounts, SelectedCurrency, TotalSum, 
-					Converters.ToDateTimeSqlite(PurchaseDate.Date.ToString("dd.MM.yyyy")), _zakupkaMainGroup.TransactionId, Comment);
-				Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
-				Messenger.Send(new ActionMessage("Update"));
-			}
-		}
-		[RelayCommand]
-		private async Task DeleteAll()
-		{
-			var catas = await _topModel.DeleteZakupkaWithPricesReCount(_zakupkaMainGroup.TransactionId, _prevCounts.Select(x => new ZakupkaAltModel { MainCatId = x.Key, Count = x.Value}));
+    [ObservableProperty] private DateTime _purchaseDate;
 
-			Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
-			Messenger.Send(new ActionMessage("Update"));
-			
-		}
-	}
+    [ObservableProperty] private AgentModel? _selectedAgent;
+
+    [ObservableProperty] private CurrencyModel? _selectedCurrency;
+
+    [ObservableProperty] private ZakupkaAltModel? _selectedZakupka;
+
+    [ObservableProperty] private decimal _totalSum;
+
+    [ObservableProperty] private decimal _toUsd;
+
+    public bool IsDirty;
+
+    public EditPurchaseViewModel()
+    {
+        _purchaseDate = DateTime.Now.Date;
+        _currencies = new ObservableCollection<CurrencyModel>();
+        _agents = new ObservableCollection<AgentModel>();
+        _zakupka = new ObservableCollection<ZakupkaAltModel>();
+        _canEditUsd = !ConvertToUsd;
+    }
+
+    public EditPurchaseViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel,
+        IDialogueService dialogueService, ZakupkiModel zakupkaMainGroup) : base(messenger)
+    {
+        _zakupkaMainGroup = zakupkaMainGroup;
+        _dataStore = dataStore;
+        _topModel = topModel;
+        _dialogueServices = dialogueService;
+        _comment = zakupkaMainGroup.Comment ?? string.Empty;
+        DateTime.TryParse(zakupkaMainGroup.Datetime, out _purchaseDate);
+        _canEditUsd = !ConvertToUsd;
+        _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
+        _agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.IsZak == 1 && x.Id != 1));
+        _zakupka = new ObservableCollection<ZakupkaAltModel>();
+        Messenger.Register<AddedMessage>(this, OnItemAdded);
+
+        LoadZakupkiCommand.Execute(null);
+    }
+
+    public IEnumerable<CurrencyModel> Currencies => _currencies;
+    public IEnumerable<AgentModel> Agents => _agents;
+    public IEnumerable<ZakupkaAltModel> Zakupka => _zakupka;
+
+    [RelayCommand]
+    private async Task LoadZakupki()
+    {
+        _zakupka.AddRange(await _topModel.GetZakAltGroup(_zakupkaMainGroup.Id));
+
+        foreach (var item in _zakupka)
+        {
+            var diff = await _topModel.CanDeleteProdaja(item.MainCatId ?? 1);
+            if (diff != null)
+            {
+                var minCount = item.Count - (diff ?? 0);
+                if (minCount <= 0)
+                {
+                    item.MinCount = 0;
+                    item.CanDelete = true;
+                }
+                else
+                {
+                    item.MinCount = minCount;
+                    item.CanDelete = false;
+                }
+            }
+
+            if (!_prevCounts.ContainsKey(item.MainCatId ?? 1))
+                _prevCounts.Add(item.MainCatId ?? 1, item.Count);
+            else
+                _prevCounts[item.MainCatId ?? 1] += item.Count;
+        }
+
+
+        if (_currencies.Any(x => x.Id == _zakupkaMainGroup.CurrencyId))
+            SelectedCurrency = _currencies.First(x => x.Id == _zakupkaMainGroup.CurrencyId);
+        if (_agents.Any(x => x.Id == _zakupkaMainGroup.AgentId))
+            SelectedAgent = _agents.First(x => x.Id == _zakupkaMainGroup.AgentId);
+        TotalSum = _zakupka.Sum(x => x.PriceSum);
+
+        IsDirty = false;
+    }
+
+    partial void OnCommentChanged(string value)
+    {
+        IsDirty = true;
+    }
+
+    private void OnItemAdded(object recipient, AddedMessage message)
+    {
+        var where = message.Value.Where;
+        if (where == "CataloguePartItemSelected")
+        {
+            var what = (CatalogueModel?)message.Value.What;
+            var mainName = message.Value.MainName;
+            if (what != null)
+            {
+                _zakupka.Add(new ZakupkaAltModel
+                {
+                    Id = null,
+                    MainCatId = what.MainCatId,
+                    MainCatName = what.Name,
+                    MainName = mainName,
+                    UniValue = what.UniValue,
+                    ZakupkaId = _zakupkaMainGroup.Id
+                });
+                IsDirty = true;
+            }
+        }
+        else if (where == "ZakupkaPartItemEdited")
+        {
+            var what = (CatalogueModel?)message.Value.What;
+            var mainName = message.Value.MainName;
+            if (what != null)
+            {
+                if (SelectedZakupka != null)
+                {
+                    if (SelectedZakupka.Id != null && !_deletedIds.Contains(SelectedZakupka.Id ?? 0))
+                        _deletedIds.Add(SelectedZakupka.Id ?? 0);
+                    SelectedZakupka.Id = null;
+                    SelectedZakupka.MainCatId = what.MainCatId;
+                    SelectedZakupka.MainCatName = what.Name;
+                    SelectedZakupka.MainName = mainName;
+                    SelectedZakupka.UniValue = what.UniValue;
+                }
+
+                IsDirty = true;
+            }
+        }
+    }
+
+    partial void OnPurchaseDateChanged(DateTime value)
+    {
+        IsDirty = true;
+    }
+
+    partial void OnSelectedCurrencyChanged(CurrencyModel? value)
+    {
+        if (value != null)
+        {
+            ToUsd = value.ToUsd;
+            IsDirty = true;
+        }
+    }
+
+    partial void OnToUsdChanged(decimal value)
+    {
+        if (SelectedCurrency != null && SelectedCurrency.Id == 2) ToUsd = 1;
+    }
+
+    partial void OnConvertToUsdChanged(bool value)
+    {
+        CanEditUsd = !ConvertToUsd;
+        IsDirty = true;
+    }
+
+    [RelayCommand]
+    private async Task AddNewPart(Window parent)
+    {
+        SelectedZakupka = null;
+        await _dialogueServices.OpenDialogue(new CatalogueItemWindow(),
+            new CatalogueItemViewModel(Messenger, _dataStore, 0, _topModel, _dialogueServices), parent);
+    }
+
+    [RelayCommand]
+    private async Task DeletePart(Window parent)
+    {
+        if (SelectedZakupka != null)
+        {
+            if (SelectedZakupka.CanDelete)
+            {
+                if (SelectedZakupka.Id != null) _deletedIds.Add(SelectedZakupka.Id ?? 0);
+                _zakupka.Remove(SelectedZakupka);
+                IsDirty = true;
+            }
+            else
+            {
+                await MessageBoxManager.GetMessageBoxStandard("?",
+                    "Данную запчасть нельзя поменять.").ShowWindowDialogAsync(parent);
+            }
+        }
+
+        TotalSum = _zakupka.Sum(x => x.PriceSum);
+    }
+
+    [RelayCommand]
+    private async Task ChangePart(Window parent)
+    {
+        if (SelectedZakupka != null)
+        {
+            if (SelectedZakupka.CanDelete)
+                await _dialogueServices.OpenDialogue(new CatalogueItemWindow(),
+                    new CatalogueItemViewModel(Messenger, _dataStore, 1, _topModel, _dialogueServices), parent);
+            else
+                await MessageBoxManager.GetMessageBoxStandard("?",
+                    "Данную запчасть нельзя поменять.").ShowWindowDialogAsync(parent);
+        }
+    }
+
+    public void RemoveWhereZero(IEnumerable<ZakupkaAltModel> altModels)
+    {
+        foreach (var item in altModels)
+            if (item.Id != null)
+                _deletedIds.Add(item.Id ?? 0);
+        _zakupka.RemoveMany(altModels);
+    }
+
+    [RelayCommand]
+    private async Task SaveZakupka()
+    {
+        if (SelectedCurrency != null)
+        {
+            var catas = await _topModel.EditZakupkaAsync(_deletedIds, Zakupka, _prevCounts, SelectedCurrency, TotalSum,
+                Converters.ToDateTimeSqlite(PurchaseDate.Date.ToString("dd.MM.yyyy")), _zakupkaMainGroup.TransactionId,
+                Comment);
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
+            Messenger.Send(new ActionMessage("Update"));
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeleteAll()
+    {
+        var catas = await _topModel.DeleteZakupkaWithPricesReCount(_zakupkaMainGroup.TransactionId,
+            _prevCounts.Select(x => new ZakupkaAltModel { MainCatId = x.Key, Count = x.Value }));
+
+        Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
+        Messenger.Send(new ActionMessage("Update"));
+    }
 }

@@ -1,12 +1,11 @@
 using Avalonia.Controls;
 
-namespace CatalogueAvalonia.Views
+namespace CatalogueAvalonia.Views;
+
+public partial class ZakupkaView : UserControl
 {
-	public partial class ZakupkaView : UserControl
-	{
-		public ZakupkaView()
-		{
-			InitializeComponent();
-		}
-	}
+    public ZakupkaView()
+    {
+        InitializeComponent();
+    }
 }

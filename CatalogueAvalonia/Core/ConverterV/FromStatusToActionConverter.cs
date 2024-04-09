@@ -8,25 +8,21 @@ public class FromStatusToActionConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        int? status = (int?)value;
+        var status = (int?)value;
         if (status != null)
         {
             if (status == 0)
                 return "Выплата нам";
-            else if (status == 1)
+            if (status == 1)
                 return "Выплата контрагенту";
-            else if (status == 2)
+            if (status == 2)
                 return "Закупка";
-            else if (status == 4)
+            if (status == 4)
                 return "Продажа";
-            else
-            {
-                return value;
-            }
-            
-        }
-        else
             return value;
+        }
+
+        return value;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)

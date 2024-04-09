@@ -5,116 +5,116 @@
         mc:Ignorable="d" Height="450" Width="200" MinHeight="450" MinWidth="400"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewPayment"
         Title="Выплата"
-		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
-		x:CompileBindings="False">
-	<Design.DataContext>
-		<vm:AddNewTransactionViewModel/>
-	</Design.DataContext>
-	<Grid Margin="10"
-		  RowDefinitions="40, 200*, 10*, 90">
-		<StackPanel Grid.Row="0"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:AddNewTransactionViewModel />
+    </Design.DataContext>
+    <Grid Margin="10"
+          RowDefinitions="40, 200*, 10*, 90">
+        <StackPanel Grid.Row="0"
                     Orientation="Horizontal">
-			<TextBlock Text="Оплата:"
+            <TextBlock Text="Оплата:"
                        FontSize="22"
                        HorizontalAlignment="Left"
                        VerticalAlignment="Center"
-                       FontWeight="Bold"/>
-			<TextBlock Text="{Binding NameOfAgent}"
+                       FontWeight="Bold" />
+            <TextBlock Text="{Binding NameOfAgent}"
                        FontSize="22"
                        VerticalAlignment="Center"
-                       FontWeight="Bold"/>
-		</StackPanel>
-		<Grid Grid.Row="1"
+                       FontWeight="Bold" />
+        </StackPanel>
+        <Grid Grid.Row="1"
               Margin="0, 10, 0, 0"
-			  ColumnDefinitions="100,*"
-			  RowDefinitions="*,*,*,*, *">
-			<Label Content="Сумма"
+              ColumnDefinitions="100,*"
+              RowDefinitions="*,*,*,*, *">
+            <Label Content="Сумма"
                    Grid.Column="0"
                    FontSize="17"
                    HorizontalAlignment="Left"
-                   VerticalAlignment="Center"/>
-			<NumericUpDown Grid.Column="1"
+                   VerticalAlignment="Center" />
+            <NumericUpDown Grid.Column="1"
                            Grid.ColumnSpan="2"
-						   FormatString="{}{0:#,0.00}"
+                           FormatString="{}{0:#,0.00}"
                            Value="{Binding TransactionSum}"
-						   ShowButtonSpinner="False"
+                           ShowButtonSpinner="False"
                            Grid.Row="0"
-                     Height="20"/>
-			<Label Content="Дата"
+                           Height="20" />
+            <Label Content="Дата"
                    Grid.Row="1"
                    FontSize="17"
                    HorizontalAlignment="Left"
-                   VerticalAlignment="Center"/>
-			<CalendarDatePicker Grid.Column="1"
-                        Grid.ColumnSpan="2"
-					    SelectedDate="{Binding Date}"
-                        MinWidth="170"
-                        Grid.Row="1"/>
-			<Label Content="Валюта"
+                   VerticalAlignment="Center" />
+            <CalendarDatePicker Grid.Column="1"
+                                Grid.ColumnSpan="2"
+                                SelectedDate="{Binding Date}"
+                                MinWidth="170"
+                                Grid.Row="1" />
+            <Label Content="Валюта"
                    Grid.Row="2"
                    FontSize="17"
                    HorizontalAlignment="Left"
-                   VerticalAlignment="Center"/>
-			<ComboBox Grid.Column="1"
+                   VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1"
                       Grid.ColumnSpan="2"
                       MinWidth="170"
                       ItemsSource="{Binding Currencies}"
                       SelectedItem="{Binding SelectedCurrency}"
                       Grid.Row="2"
-					  IsEnabled="{Binding IsEnb}"
+                      IsEnabled="{Binding IsEnb}"
                       VerticalAlignment="Center">
-				<ComboBox.ItemTemplate>
-					<DataTemplate>
-						<TextBlock Text="{Binding CurrencyName}"/>
-					</DataTemplate>
-				</ComboBox.ItemTemplate>
-			</ComboBox>
-			<CheckBox Content="Перевести из другой валюты"
-					  Grid.Row="3"
-					  IsChecked="{Binding ConvertFromCurr}"
-					  Grid.ColumnSpan="2"
-					  FontSize="16"/>
-			<Label Content="Из валюты"
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding CurrencyName}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <CheckBox Content="Перевести из другой валюты"
+                      Grid.Row="3"
+                      IsChecked="{Binding ConvertFromCurr}"
+                      Grid.ColumnSpan="2"
+                      FontSize="16" />
+            <Label Content="Из валюты"
                    Grid.Row="4"
-				   IsEnabled="{Binding IsVisAndEnb}"
-				   IsVisible="{Binding IsVisAndEnb}"
+                   IsEnabled="{Binding IsVisAndEnb}"
+                   IsVisible="{Binding IsVisAndEnb}"
                    FontSize="17"
                    HorizontalAlignment="Left"
-                   VerticalAlignment="Center"/>
-			<ComboBox Grid.Column="1"
+                   VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1"
                       Grid.ColumnSpan="2"
                       MinWidth="170"
-					  IsEnabled="{Binding IsVisAndEnb}"
-					  IsVisible="{Binding IsVisAndEnb}"
+                      IsEnabled="{Binding IsVisAndEnb}"
+                      IsVisible="{Binding IsVisAndEnb}"
                       ItemsSource="{Binding Currencies}"
                       SelectedItem="{Binding SelectedConvertCurrency}"
                       Grid.Row="4"
                       VerticalAlignment="Center">
-				<ComboBox.ItemTemplate>
-					<DataTemplate>
-						<TextBlock Text="{Binding CurrencyName}"/>
-					</DataTemplate>
-				</ComboBox.ItemTemplate>
-			</ComboBox>
-		</Grid>
-		<Grid Grid.Row="3"
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding CurrencyName}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </Grid>
+        <Grid Grid.Row="3"
               Margin="5"
-			  ColumnDefinitions="5*,10*, 5*">
-			<Button Grid.Column="0"
+              ColumnDefinitions="5*,10*, 5*">
+            <Button Grid.Column="0"
                     Content="Оплатить"
-					Click="SaveButt_Click"
-					HorizontalContentAlignment="Center"
-                    HorizontalAlignment="Center"/>
-			<Button Grid.Column="1"
+                    Click="SaveButt_Click"
+                    HorizontalContentAlignment="Center"
+                    HorizontalAlignment="Center" />
+            <Button Grid.Column="1"
                     Content="Оплатить полностью"
-					Click="PayAll_Click"
-					HorizontalContentAlignment="Center"
-                    HorizontalAlignment="Center"/>
-			<Button Grid.Column="2"
+                    Click="PayAll_Click"
+                    HorizontalContentAlignment="Center"
+                    HorizontalAlignment="Center" />
+            <Button Grid.Column="2"
                     Content="Отмена"
-					Click="CancleButt_Click"
-					HorizontalContentAlignment="Center"
-                    HorizontalAlignment="Center"/>
-		</Grid>
-	</Grid>
+                    Click="CancleButt_Click"
+                    HorizontalContentAlignment="Center"
+                    HorizontalAlignment="Center" />
+        </Grid>
+    </Grid>
 </Window>

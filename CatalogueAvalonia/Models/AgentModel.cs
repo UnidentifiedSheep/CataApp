@@ -1,11 +1,10 @@
-﻿namespace CatalogueAvalonia.Models
+﻿namespace CatalogueAvalonia.Models;
+
+public class AgentModel
 {
-	public class AgentModel
-	{
-		public int Id { get; set; }
+    public int Id { get; set; }
 
-		public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-		public int IsZak { get; set; }
-	}
+    public int IsZak { get; set; }
 }

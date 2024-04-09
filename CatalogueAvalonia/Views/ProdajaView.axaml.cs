@@ -1,12 +1,11 @@
 using Avalonia.Controls;
 
-namespace CatalogueAvalonia.Views
+namespace CatalogueAvalonia.Views;
+
+public partial class ProdajaView : UserControl
 {
-	public partial class ProdajaView : UserControl
-	{
-		public ProdajaView()
-		{
-			InitializeComponent();
-		}
-	}
+    public ProdajaView()
+    {
+        InitializeComponent();
+    }
 }
