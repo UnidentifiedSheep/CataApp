@@ -75,6 +75,14 @@
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Номер накладной"
                                             Width="*">
+                        <DataTemplate>
+                            <Grid Margin="10,0,0,0"
+                                  HorizontalAlignment="Stretch">
+                                <TextBlock Text="{Binding Id}"
+                                           VerticalAlignment="Center"
+                                           ToolTip.Tip="{Binding Comment}"/>
+                            </Grid>
+                        </DataTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Дата"
                                         Width="*"

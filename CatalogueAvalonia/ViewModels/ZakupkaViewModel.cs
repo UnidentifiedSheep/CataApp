@@ -65,6 +65,22 @@ public partial class ZakupkaViewModel : ViewModelBase
 
         Messenger.Register<ActionMessage>(this, OnDataBaseAction);
         Messenger.Register<EditedMessage>(this, OnDataBaseEdited);
+        Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+    }
+
+    private void OnDataBaseAdded(object recipient, AddedMessage message)
+    {
+        string where = message.Value.Where;
+        if (where == "Agent")
+        {
+            AgentModel? what = (AgentModel?)message.Value.What;
+            if (what != null)
+            {
+                if (what.IsZak == 1)
+                    _agents.Add(what);
+                
+            }
+        }
     }
 
     public IEnumerable<ZakupkiModel> ZakupkiMainGroup => _zakupkiMainGroup;

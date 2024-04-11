@@ -134,45 +134,48 @@
                 <DataGridTextColumn Header="Название неориг."
                                     Width="2*"
                                     IsReadOnly="True"
-                                    Binding="{Binding MainCatName}" />
-                <DataGridTemplateColumn Header="Цена"
-                                        Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <NumericUpDown Value="{Binding Price}"
-                                           BorderThickness="0"
-                                           ValueChanged="NumericUpDownPrice_ValueChanged"
-                                           Minimum="0"
-                                           FormatString="{}{0:#,0.00}"
-                                           ShowButtonSpinner="False" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Количество"
-                                        Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <NumericUpDown Value="{Binding Count}"
-                                           FormatString="#"
-                                           ValueChanged="NumericUpDownCount_ValueChanged"
-                                           BorderThickness="0"
-                                           Minimum="0"
-                                           Maximum="{Binding MaxCount}"
-                                           ShowButtonSpinner="False" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Сумма"
-                                    Width="*"
-                                    IsReadOnly="True"
-                                    Binding="{Binding PriceSum}" />
-            </DataGrid.Columns>
-            <DataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Добавить"
-                              CommandParameter="{Binding $parent[Window]}"
-                              Command="{Binding AddNewPartCommand}" />
-                    <MenuItem Header="Изменить"
+                                    Binding="{Binding MainCatName}"/>
+				<DataGridTemplateColumn Header="Цена"
+										Width="*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding Price}"
+										   BorderThickness="0"
+										   ValueChanged="NumericUpDownPrice_ValueChanged"
+										   Minimum="0"
+										   FormatString="{}{0:#,0.00}"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Количество"
+										Width="*">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<NumericUpDown Value="{Binding Count}"
+										   FormatString="#"
+										   ValueChanged="NumericUpDownCount_ValueChanged"
+										   BorderThickness="0"
+										   Minimum="0"
+										   Maximum="{Binding MaxCount}"
+										   ShowButtonSpinner="False"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="Сумма"
+									Width="*"
+									IsReadOnly="True"
+									Binding="{Binding PriceSum}"/>
+			</DataGrid.Columns>
+			<DataGrid.ContextMenu>
+				<ContextMenu>
+					<MenuItem Header="Посмотреть цены"
+					          Command="{Binding LookForPricesCommand}"
+					          CommandParameter="{Binding $parent[Window]}"/>
+					<MenuItem Header="Добавить"
+					          CommandParameter="{Binding $parent[Window]}"
+					          Command="{Binding AddNewPartCommand}"/>
+					<MenuItem Header="Изменить"
                               Command="{Binding ChangePartCommand}"
                               CommandParameter="{Binding $parent[Window]}" />
                     <MenuItem Header="Удалить"

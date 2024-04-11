@@ -14,6 +14,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using MsBox.Avalonia;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel;
 
@@ -143,6 +144,21 @@ public partial class NewProdajaViewModel : ViewModelBase
     public void RemoveWhereZero(IEnumerable<ProdajaAltModel> models)
     {
         _prodajaAlts.RemoveMany(models);
+    }
+    [RelayCommand]
+    private async Task LookForPrices(Window parent)
+    {
+        if (SelectedProdaja != null)
+        {
+            await _dialogueService.OpenDialogue(new EditPricesWindow(),
+                new EditPricesViewModel(Messenger, _topModel, _dataStore, SelectedProdaja.MainCatId ?? 0,
+                    SelectedProdaja.UniValue ?? ""), parent);
+        }
+        else
+        {
+            await MessageBoxManager.GetMessageBoxStandard("Цены",
+                $"Для начала выбирите запчасть").ShowWindowDialogAsync(parent);
+        }
     }
 
     [RelayCommand]

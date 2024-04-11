@@ -150,6 +150,12 @@
                                             Width="*" />
                         <DataGridTemplateColumn Header="Номер операции"
                                                 Width="*">
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Id}"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           ToolTip.Tip="{Binding TransactionStatus, Converter={StaticResource StatusToActionConverter}}"/>
+                            </DataTemplate>
                         </DataGridTemplateColumn>
 
                         <DataGridTextColumn Header="Сумма (-)"

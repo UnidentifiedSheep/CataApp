@@ -143,7 +143,7 @@ public partial class AgentViewModel : ViewModelBase
         }
         else
         {
-            if (_dataStore.AgentModels.Count() != _agents.Count)
+            if (_dataStore.AgentModels.Count != _agents.Count)
             {
                 _agents.Clear();
                 _agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 1));

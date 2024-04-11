@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
@@ -32,6 +33,8 @@ public partial class ProdajaViewModel : ViewModelBase
     private readonly TopModel _topModel;
 
     [ObservableProperty] private DateTime _endDate;
+    [ObservableProperty] private string _searchFiled = string.Empty;
+    [ObservableProperty] private bool _isAgentsDown;
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(NewProdajaCommand))]
     private bool _isLoaded;
@@ -130,6 +133,31 @@ public partial class ProdajaViewModel : ViewModelBase
     {
         LoadProdajaAltGroupCommand.Execute(null);
     }
+    [RelayCommand]
+    private async Task FilterAgent(string value)
+    {
+        _agents.Clear();
+        await foreach (var agent in DataFiltering.FilterAgents(_dataStore.AgentModels, value))
+            _agents.Add(agent);
+    }
+
+    partial void OnSearchFiledChanged(string value)
+    {
+        if (value.Length >= 1)
+        {
+            IsAgentsDown = true;
+            FilterAgentCommand.Execute(value);
+        }
+        else
+        {
+            IsAgentsDown = false;
+            if (_dataStore.AgentModels.Count != _agents.Count)
+            {
+                _agents.Clear();
+                _agents.AddRange(_dataStore.AgentModels);
+            }
+        }
+    }
 
     [RelayCommand]
     private async Task NewProdaja(Window parent)
@@ -143,7 +171,7 @@ public partial class ProdajaViewModel : ViewModelBase
     {
         if (SelectedProdaja != null)
         {
-            var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку?",
+            var res = await MessageBoxManager.GetMessageBoxStandard("Удалить продажу?",
                 $"Вы уверенны что хотите удалить закупку с номером {SelectedProdaja.Id}?",
                 ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
             if (res == ButtonResult.Yes)

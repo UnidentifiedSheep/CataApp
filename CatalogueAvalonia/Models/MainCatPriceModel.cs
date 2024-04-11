@@ -1,8 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CatalogueAvalonia.Models;
 
-public class MainCatPriceModel
+public partial class MainCatPriceModel : ObservableObject
 {
     private int _count;
     private decimal _price;
@@ -34,6 +35,9 @@ public class MainCatPriceModel
             IsDirty = true;
         }
     }
+
+    [ObservableProperty] 
+    private bool _isEnabled;
 
     public CurrencyModel? SelectedCurrency
     {
