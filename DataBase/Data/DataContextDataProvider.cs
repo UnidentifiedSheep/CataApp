@@ -111,6 +111,7 @@ public partial class DataContextDataProvider : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Count).HasColumnName("count");
+            entity.Property(e => e.Img).HasColumnName("img");
             entity.Property(e => e.Name)
                 .HasDefaultValue("  ")
                 .HasColumnName("name");

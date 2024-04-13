@@ -17,6 +17,8 @@ public partial class MainCat
 
     public int Count { get; set; }
 
+    public byte[]? Img { get; set; }
+
     public virtual ICollection<MainCatPrice> MainCatPrices { get; set; } = new List<MainCatPrice>();
 
     public virtual ICollection<PartInGroup> PartInGroups { get; set; } = new List<PartInGroup>();

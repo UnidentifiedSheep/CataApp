@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using DataBase.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace DataBase.Data;
 
@@ -114,6 +111,7 @@ public partial class DataContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Count).HasColumnName("count");
+            entity.Property(e => e.Img).HasColumnName("img");
             entity.Property(e => e.Name)
                 .HasDefaultValue("  ")
                 .HasColumnName("name");
@@ -326,7 +324,7 @@ public partial class DataContext : DbContext
             {
                 Id = 2, CurrencyName = "Доллары", CurrencySign = "$", ToUsd = 1, CanDelete = 0
             });
-
+        
         OnModelCreatingPartial(modelBuilder);
     }
 

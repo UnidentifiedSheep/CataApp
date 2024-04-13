@@ -1,8 +1,12 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
+using Avalonia.Controls.Selection;
+using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -20,6 +24,7 @@ using MsBox.Avalonia.Enums;
 
 namespace CatalogueAvalonia.ViewModels;
 
+//Если не использовать Deselct для treegrid то приложение может крашнутся.
 public partial class CatalogueViewModel : ViewModelBase
 {
     private readonly ObservableCollection<CatalogueModel> _catalogueModels;
@@ -30,7 +35,6 @@ public partial class CatalogueViewModel : ViewModelBase
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddNewPartCommand))]
     private bool _isDataBaseLoaded;
-
     private bool _isFilteringByUniValue;
 
     [ObservableProperty] private bool _isLoaded = !false;
@@ -39,8 +43,11 @@ public partial class CatalogueViewModel : ViewModelBase
 
     [ObservableProperty] private string _partUniValue = string.Empty;
 
-    private CatalogueModel? _selecteditem;
-
+    [ObservableProperty] private CatalogueModel? _selecteditem;
+    
+    [ObservableProperty] private Bitmap? _itemsImg;
+    [ObservableProperty] private bool _isImgVisible;
+    [ObservableProperty] private bool _isImgLoading;
     public CatalogueViewModel()
     {
     }
@@ -73,6 +80,76 @@ public partial class CatalogueViewModel : ViewModelBase
         Messenger.Register<EditedMessage>(this, OnEditedIdDataBase);
         Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
         Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
+        
+        CatalogueModels.RowSelection!.SelectionChanged += CatalogueModelSelectionChanged;
+    }
+
+    private void CatalogueModelSelectionChanged(object? sender, TreeSelectionModelSelectionChangedEventArgs<CatalogueModel> e)
+    {
+        Selecteditem = CatalogueModels.RowSelection!.SelectedItem;
+        if (Selecteditem != null && Selecteditem.MainCatId != null)
+        {
+            GetImageCommand.Execute(null);
+        }
+        else
+        {
+            if (ItemsImg != null)
+                ItemsImg.Dispose();
+            
+        }
+    }
+
+    [RelayCommand]
+    private async Task GetImage()
+    {
+        IsImgLoading = true;
+        
+        if (Selecteditem != null && Selecteditem.MainCatId != null)
+        {
+            if (ItemsImg != null)
+                ItemsImg.Dispose();
+            
+            ItemsImg = await _topModel.GetPartsImg(Selecteditem.MainCatId);
+            if (ItemsImg != null)
+                IsImgVisible = true;
+            else
+                IsImgVisible = false;
+        }
+        else
+        {
+            if (ItemsImg != null)
+            {
+                ItemsImg.Dispose();
+                IsImgVisible = false;
+                ItemsImg = null;
+            }
+            else
+            {
+                IsImgVisible = false;
+                ItemsImg = null;
+            }
+        }
+
+        IsImgLoading = false;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanDeletePart))]
+    private async Task SetImgsPart(Window parent)
+    {
+        if (Selecteditem != null && Selecteditem.MainCatId != null)
+        {
+            await _dialogueService.OpenDialogue(new ImgDragAndDropWindow(),
+                new ImgDragAndDropViewModel(Messenger, _topModel, Selecteditem.MainCatId), parent);
+        }
+        GetImageCommand.Execute(null);
+    }
+
+    [RelayCommand]
+    private async Task OpenImageInDialogue(Window parent)
+    {
+        if (ItemsImg != null)   
+            await _dialogueService.OpenDialogue(new ImageViewerWindow(), new ImageViewerViewModel(ItemsImg), parent);
+        
     }
 
     public HierarchicalTreeDataGridSource<CatalogueModel> CatalogueModels { get; }
@@ -97,7 +174,6 @@ public partial class CatalogueViewModel : ViewModelBase
                 Dispatcher.UIThread.Post(() =>
                 {
                     _catalogueModels.Add(what);
-                    CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
                 });
         }
     }
@@ -124,7 +200,6 @@ public partial class CatalogueViewModel : ViewModelBase
                     Dispatcher.UIThread.Post(() =>
                     {
                         _catalogueModels.ReplaceOrAdd(item, model);
-                        CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
                     });
             }
         }
@@ -176,87 +251,87 @@ public partial class CatalogueViewModel : ViewModelBase
 
     private bool CanDeleteGroup()
     {
-        _selecteditem = CatalogueModels.RowSelection?.SelectedItem;
-        return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.MainCatId == null &&
-               _selecteditem.UniId != 5923;
+        return Selecteditem != null && Selecteditem.UniId != null && Selecteditem.MainCatId == null &&
+               Selecteditem.UniId != 5923;
     }
 
     [RelayCommand(CanExecute = nameof(CanDeleteGroup))]
     private async Task DeleteGroup(Window parent)
     {
-        if (_selecteditem != null)
+        if (Selecteditem != null)
         {
             var res = await MessageBoxManager.GetMessageBoxStandard("Удалить группу запчастей",
-                $"Вы уверенны что хотите удалить: \n\"{_selecteditem.Name}\"?",
+                $"Вы уверенны что хотите удалить: \n\"{Selecteditem.Name}\"?",
                 ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
             if (res == ButtonResult.Yes)
             {
-                _catalogueModels.Remove(_selecteditem);
-                _dataStore.CatalogueModels.Remove(_selecteditem);
-                await _topModel.DeleteGroupFromCatalogue(_selecteditem.UniId);
+                await _topModel.DeleteGroupFromCatalogue(Selecteditem.UniId);
+                _catalogueModels.Remove(Selecteditem);
+                _dataStore.CatalogueModels.Remove(Selecteditem);
             }
         }
     }
 
-    private bool CanDeletePart()
-    {
-        _selecteditem = CatalogueModels.RowSelection!.SelectedItem;
-
-        return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != null &&
-               _selecteditem.UniId != 5923;
-    }
+    private bool CanDeletePart() => Selecteditem != null && Selecteditem.MainCatId != null && Selecteditem.UniId != null &&
+                                    Selecteditem.UniId != 5923;
+    
 
     [RelayCommand(CanExecute = nameof(CanDeletePart))]
     private async Task DeleteSolo(Window parent)
     {
-        if (_selecteditem != null)
+        if (Selecteditem != null)
         {
             var res = await MessageBoxManager.GetMessageBoxStandard("Удалить запчасть",
-                $"Вы уверенны что хотите удалить: \n\"{_selecteditem.UniValue}\"?",
+                $"Вы уверенны что хотите удалить: \n\"{Selecteditem.UniValue}\"?",
                 ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
             if (res == ButtonResult.Yes)
             {
-                var model = _catalogueModels.SingleOrDefault(x => x.UniId == _selecteditem.UniId);
+                var model = _catalogueModels.SingleOrDefault(x => x.UniId == Selecteditem.UniId);
 
                 if (model != null)
                 {
-                    await _topModel.DeleteSoloFromCatalogue(_selecteditem.MainCatId);
-                    var item = _dataStore.CatalogueModels.SingleOrDefault(x => x.UniId == _selecteditem.UniId);
-                    if (item != null && item.Children != null) item.Children.Remove(_selecteditem);
+                    await _topModel.DeleteSoloFromCatalogue(Selecteditem.MainCatId);
+                    var item = _dataStore.CatalogueModels.SingleOrDefault(x => x.UniId == Selecteditem.UniId);
+                    if (item != null && item.Children != null)
+                    {
+                        item.Children.Remove(Selecteditem);
+                    }
+                    GetImageCommand.Execute(null);
                 }
             }
         }
     }
 
-    private bool CanEditPrices()
-    {
-        _selecteditem = CatalogueModels.RowSelection!.SelectedItem;
-
-        return _selecteditem != null && _selecteditem.MainCatId != null && _selecteditem.UniId != 5923;
-    }
+    private bool CanEditPrices() => Selecteditem != null && Selecteditem.MainCatId != null && Selecteditem.UniId != 5923;
+    
 
     [RelayCommand(CanExecute = nameof(CanEditPrices))]
     private async Task EditPrices(Window parent)
     {
-        if (_selecteditem != null)
+        if (Selecteditem != null)
+        {
             await _dialogueService.OpenDialogue(new EditPricesWindow(),
-                new EditPricesViewModel(Messenger, _topModel, _selecteditem.MainCatId ?? default, _dataStore,
-                    _selecteditem.UniValue), parent);
+                new EditPricesViewModel(Messenger, _topModel, Selecteditem.MainCatId ?? default, _dataStore,
+                    Selecteditem.UniValue), parent);
+            CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+            GetImageCommand.Execute(null);
+        }
     }
 
-    private bool CanEditCatalogue()
-    {
-        _selecteditem = CatalogueModels.RowSelection!.SelectedItem;
-
-        return _selecteditem != null && _selecteditem.UniId != null && _selecteditem.UniId != 5923;
-    }
+    private bool CanEditCatalogue() => Selecteditem != null && Selecteditem.UniId != null && Selecteditem.UniId != 5923;
+    
 
     [RelayCommand(CanExecute = nameof(CanEditCatalogue))]
     private async Task EditCatalogue(Window parent)
     {
-        if (_selecteditem != null)
+        if (Selecteditem != null)
+        {
             await _dialogueService.OpenDialogue(new EditCatalogueWindow(),
-                new EditCatalogueViewModel(Messenger, _dataStore, _selecteditem.UniId, _topModel), parent);
+                new EditCatalogueViewModel(Messenger, _dataStore, Selecteditem.UniId, _topModel), parent);
+            CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+            GetImageCommand.Execute(null);
+        }
+        
     }
 
     [RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]
@@ -264,5 +339,7 @@ public partial class CatalogueViewModel : ViewModelBase
     {
         await _dialogueService.OpenDialogue(new AddNewPartView(),
             new AddNewPartViewModel(Messenger, _dataStore, _topModel), parent);
+        CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
+        GetImageCommand.Execute(null);
     }
 }

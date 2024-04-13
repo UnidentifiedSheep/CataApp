@@ -41,4 +41,5 @@ public interface IDataBaseAction
         string date, decimal totalSum, int transactionId, string comment);
 
     Task<int?> CheckCanDeleteProdaja(int? mainCatId);
+    Task SetMainCatImg(int? mainCatId, byte[]? img);
 }

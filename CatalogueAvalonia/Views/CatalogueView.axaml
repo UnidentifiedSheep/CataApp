@@ -16,7 +16,7 @@
             <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0"
-              RowDefinitions="5, 119*, 360*, 75*"
+              RowDefinitions="5, 119*, 160*, 160*, 75*"
               Margin="10">
             <StackPanel Grid.Row="1" Orientation="Vertical">
                 <StackPanel>
@@ -37,7 +37,34 @@
                              FontSize="16" />
                 </StackPanel>
             </StackPanel>
-            <Button Grid.Row="3"
+            <Border Grid.Row="2"
+                    BorderBrush="#50505020"
+                    BorderThickness="1">
+                <Grid>
+                    <TextBlock Text="Изабражение не выбрано/установленно"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="10"
+                               IsVisible="{Binding !IsImgVisible}"
+                               Foreground="#505050"/>
+                    <Image Source="{Binding ItemsImg}"/>
+                    <Button HorizontalAlignment="Right"
+                            VerticalAlignment="Top"
+                            CommandParameter="{Binding $parent[Window]}"
+                            Command="{Binding OpenImageInDialogueCommand}"
+                            Background="Transparent"
+                            Height="40"
+                            Width="40">
+                        <Image Source="../Assets/fullscreen.png"/>
+                    </Button>
+                    <ui:ProgressRing BorderThickness="3"
+                                     Height="20"
+                                     IsEnabled="{Binding IsImgLoading}"
+                                     IsVisible="{Binding IsImgLoading}"
+                                     IsIndeterminate="True" />
+                </Grid>
+            </Border>
+            <Button Grid.Row="4"
                     Command="{Binding AddNewPartCommand}"
                     CommandParameter="{Binding $parent[Window]}"
                     Content="Добавить запчасть"
@@ -66,13 +93,20 @@
             <TreeDataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Редактировать Запчасти"
-                              Command="{Binding EditCatalogueCommand}" CommandParameter="{Binding $parent[Window]}" />
+                              Command="{Binding EditCatalogueCommand}" 
+                              CommandParameter="{Binding $parent[Window]}" />
                     <MenuItem Header="Редактировать Цены"
-                              Command="{Binding EditPricesCommand}" CommandParameter="{Binding $parent[Window]}" />
+                              Command="{Binding EditPricesCommand}" 
+                              CommandParameter="{Binding $parent[Window]}" />
+                    <MenuItem Header="Редактировать картинку"
+                              Command="{Binding SetImgsPartCommand}" 
+                              CommandParameter="{Binding $parent[Window]}" />
                     <MenuItem Header="Удалить запчасть"
-                              Command="{Binding DeleteSoloCommand}" CommandParameter="{Binding $parent[Window]}" />
+                              Command="{Binding DeleteSoloCommand}"
+                              CommandParameter="{Binding $parent[Window]}" />
                     <MenuItem Header="Удалить группу запчастей"
-                              Command="{Binding DeleteGroupCommand}" CommandParameter="{Binding $parent[Window]}" />
+                              Command="{Binding DeleteGroupCommand}" 
+                              CommandParameter="{Binding $parent[Window]}" />
                 </ContextMenu>
             </TreeDataGrid.ContextMenu>
         </TreeDataGrid>

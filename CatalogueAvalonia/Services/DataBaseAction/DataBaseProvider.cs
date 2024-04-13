@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using DataBase.Data;
@@ -393,5 +395,26 @@ public class DataBaseProvider : IDataBaseProvider
             TransactionSum = x.TransactionSum,
             CurrencySign = x.CurrencyNavigation.CurrencySign
         });
+    }
+
+    public async Task<Bitmap?> GetPartsImg(int? mainCatId)
+    {
+        var part = await _context.MainCats.FindAsync(mainCatId);
+        if (part != null)
+        {
+            if (part.Img != null)
+            {
+                Bitmap? img;
+                using (var ms = new MemoryStream(part.Img))
+                    img = new Bitmap(ms);
+                
+
+                return img;
+            }
+            else
+                return null;
+        }
+        else
+            return null;
     }
 }

@@ -4,6 +4,7 @@
     <option name="projectPerEditor">
       <map>
         <entry key="CatalogueAvalonia/App.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/ViewModels/DialogueViewModel/ImgDragAndDropWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/AgentView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/CatalogueView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/AddNewAgentWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
@@ -14,6 +15,8 @@
         <entry key="CatalogueAvalonia/Views/DialogueWindows/CurrencySettingsWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/EditCatalogueWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/EditPricesWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/ImageViewerWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/ImgDragAndDropWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/NewProdajaWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/NewPurchaseWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/MainWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using DataBase.Data;
@@ -1189,5 +1190,18 @@ public class DataBaseAction : IDataBaseAction
         }
 
         return transaction;
+    }
+
+    public async Task SetMainCatImg(int? mainCatId, byte[]? img)
+    {
+        if (mainCatId != null)
+        {
+            var part = await _context.MainCats.FindAsync(mainCatId);
+            if (part != null)
+            {
+                part.Img = img;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

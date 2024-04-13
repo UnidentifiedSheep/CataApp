@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Services.DataBaseAction;
 using MsBox.Avalonia;
@@ -703,6 +704,37 @@ public class TopModel
             await MessageBoxManager.GetMessageBoxStandard("Ошибка",
                 $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
             return 0;
+        }
+    }
+
+    public async Task<Bitmap?> GetPartsImg(int? mainCatId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider
+                .GetPartsImg(mainCatId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return null;
+        }
+    }
+
+    public async Task SetPartsImg(int? mainCatId, byte[]? img)
+    {
+        try
+        {
+            await _taskQueue.Enqueue(async () => await _dataBaseAction
+                .SetMainCatImg(mainCatId, img));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
         }
     }
 }

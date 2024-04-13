@@ -1,0 +1,26 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        mc:Ignorable="d" Height="500" Width="500"
+        MinHeight="500" MinWidth="500"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.ImageViewerWindow"
+        Title="ImageViewerWindow"
+        x:CompileBindings="False">
+        <Design.DataContext>
+                <vm:ImageViewerViewModel />
+        </Design.DataContext>
+        <Border Margin="5"
+                BorderBrush="#50505050"
+                BorderThickness="1">
+                <Grid >
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontSize="15"
+                                   Foreground="#50505050"
+                                   Text="Что то пошло не так..."/>
+                        <Image Source="{Binding VisibleImg}"/>
+                </Grid>
+        </Border>
+</Window>

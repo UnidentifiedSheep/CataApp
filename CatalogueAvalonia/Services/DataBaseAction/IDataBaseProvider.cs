@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Models;
 
 namespace CatalogueAvalonia.Services.DataBaseAction;
@@ -24,4 +25,5 @@ public interface IDataBaseProvider
     Task<IEnumerable<ZakupkaAltModel>> GetZakupkiAltModel(int zakMainGroupId);
     Task<IEnumerable<ProdajaModel>> GetProdajaMainGroup(string _startD, string _endD, int agentId);
     Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId);
+    Task<Bitmap?> GetPartsImg(int? mainCatId);
 }

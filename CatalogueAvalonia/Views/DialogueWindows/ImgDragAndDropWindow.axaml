@@ -1,0 +1,77 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" MinWidth="400" MinHeight="250" Width="500" Height="450"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.ImgDragAndDropWindow"
+        Title="Добавление/Изменение изображения"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        x:CompileBindings="False">
+        <Design.DataContext>
+                <vm:ImgDragAndDropViewModel/>
+        </Design.DataContext>
+        <Grid RowDefinitions="*,50, 50"
+              Margin="5">
+                <Border Grid.Row="0"
+                        BorderBrush="#505050"
+                        Name="BorderFile"
+                        BorderThickness="1"
+                        DragDrop.AllowDrop="True">
+                        <Grid>
+                                <TextBlock Text="Перетащите или выберите файл."
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           IsVisible="{Binding  !IsLoaded}"
+                                           Foreground="#505050"/>
+                                <Image HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch"
+                                       Source="{Binding Img}"/>
+                        </Grid>
+                        
+                </Border>
+                <Grid Grid.Row="1"
+                      ColumnDefinitions="*, 50, 50">
+                        <TextBox Grid.Column="0"
+                                 IsReadOnly="True"
+                                 HorizontalAlignment="Stretch"
+                                 VerticalAlignment="Stretch"
+                                 Height="30"
+                                 FontSize="16"
+                                 Text="{Binding FilePath}"
+                                 Foreground="#505020"/>
+                        <Button Grid.Column="1"
+                                Background="Transparent"
+                                ToolTip.Tip="Добавить или заменить файл."
+                                Command="{Binding OpenFilePickeCommand}"
+                                CommandParameter="{Binding $parent[Window]}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch">
+                                <Image Source="../../Assets/File_picker.png"/>
+                        </Button>
+                        <Button Grid.Column="2"
+                                ToolTip.Tip="Удалить текущую картинку"
+                                HorizontalAlignment="Stretch"
+                                Background="Transparent"
+                                VerticalAlignment="Stretch"
+                                Command="{Binding DeleteImgCommand}">
+                                <Image Source="../../Assets/DeleteCross.ico"/>
+                        </Button>
+                </Grid>
+                <StackPanel Grid.Row="2"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center">
+                        <Button Content="Приянять"
+                                Width="100"
+                                HorizontalContentAlignment="Center"
+                                CommandParameter="{Binding $parent[Window]}"
+                                Command="{Binding SaveChangesCommand}"/>
+                        <Button Content="Отмена"
+                                Margin="20,0,0,0"
+                                Width="100"
+                                HorizontalContentAlignment="Center"
+                                CommandParameter="{Binding $parent[Window]}"
+                                Command="{Binding CancleCommand}"/>
+                </StackPanel>
+        </Grid>
+</Window>
