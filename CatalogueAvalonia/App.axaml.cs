@@ -14,6 +14,7 @@ using CatalogueAvalonia.ViewModels;
 using CatalogueAvalonia.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using DataBase.Data;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -59,12 +60,28 @@ public class App : Application
             {
                 DataContext = GlobalHost.Services.GetRequiredService<MainWindowViewModel>()
             };
+            desktop.Exit += OnExit;
         }
 
         DataTemplates.Add(GlobalHost.Services.GetRequiredService<ViewLocator>());
-
+        
         base.OnFrameworkInitializationCompleted();
         await host.StartAsync();
+    }
+
+    private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    { 
+        DirectoryInfo di = new DirectoryInfo("../Documents");
+        foreach (FileInfo file in di.GetFiles())
+            file.Delete();
+        if (GlobalHost != null)
+        {
+            if (GlobalHost.Services.GetRequiredService<DataContext>().Database.GetDbConnection() is SqliteConnection conn)
+                SqliteConnection.ClearPool(conn);
+            if (GlobalHost.Services.GetRequiredService<DataContextDataProvider>().Database.GetDbConnection() is SqliteConnection conn2)
+                SqliteConnection.ClearPool(conn2);
+            
+        }
     }
 
     private static HostApplicationBuilder CreateHostBuilder()

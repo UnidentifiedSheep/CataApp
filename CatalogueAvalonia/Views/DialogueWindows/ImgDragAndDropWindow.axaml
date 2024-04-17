@@ -5,6 +5,7 @@
         mc:Ignorable="d" MinWidth="400" MinHeight="250" Width="500" Height="450"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.ImgDragAndDropWindow"
         Title="Добавление/Изменение изображения"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
         xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
         x:CompileBindings="False">
         <Design.DataContext>
@@ -12,6 +13,8 @@
         </Design.DataContext>
         <Grid RowDefinitions="*,50, 50"
               Margin="5">
+                
+                
                 <Border Grid.Row="0"
                         BorderBrush="#505050"
                         Name="BorderFile"
@@ -27,6 +30,15 @@
                                 <Image HorizontalAlignment="Stretch"
                                        VerticalAlignment="Stretch"
                                        Source="{Binding Img}"/>
+                                <Grid Opacity="0.5"
+                                      IsVisible="{Binding IsLoading}"
+                                      Background="Gray">
+                                        <ui:ProgressRing BorderThickness="3"
+                                                         Width="70"
+                                                         IsEnabled="{Binding IsLoading}"
+                                                         IsVisible="{Binding IsLoading}"
+                                                         IsIndeterminate="True" />
+                                </Grid>
                         </Grid>
                         
                 </Border>

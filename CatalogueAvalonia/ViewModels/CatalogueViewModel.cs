@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -144,15 +145,26 @@ public partial class CatalogueViewModel : ViewModelBase
         GetImageCommand.Execute(null);
     }
 
+    private int _imgCount = 0;
     [RelayCommand]
     private async Task OpenImageInDialogue(Window parent)
     {
+        if (_imgCount >= 10)
+        {
+            _imgCount = 0;
+            DirectoryInfo di = new DirectoryInfo("../Documents");
+            var files = di.GetFiles();
+            files[0].Delete();
+        }
         if (ItemsImg != null)
         {
-            ItemsImg.Save("../Documents/PartImg.png");
+            var dt = DateTime.Now.ToString("h.mm");
+            IsImgLoading = true;
+            await Task.Run(() => ItemsImg.Save($"../Documents/PartImg({dt}).png"));
+            IsImgLoading = false;
             var a = System.Reflection.Assembly.GetExecutingAssembly().Location;
             var path = a.Substring(0, a.LastIndexOf('\\'));
-            path = path.Substring(0, path.LastIndexOf('\\')) + @"\Documents\PartImg.png";
+            path = path.Substring(0, path.LastIndexOf('\\')) + $@"\Documents\PartImg({dt}).png";
             
             try
             {
@@ -163,6 +175,8 @@ public partial class CatalogueViewModel : ViewModelBase
                 await MessageBoxManager.GetMessageBoxStandard("Не удалось открыть изображение",
                     $"{e}").ShowWindowDialogAsync(parent);
             }
+
+            _imgCount++;
         }
     }
 

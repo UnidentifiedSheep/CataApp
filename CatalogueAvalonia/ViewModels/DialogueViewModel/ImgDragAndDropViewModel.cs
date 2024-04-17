@@ -22,6 +22,7 @@ public partial class ImgDragAndDropViewModel : ViewModelBase
     [ObservableProperty] private string _filePath = string.Empty;
     [ObservableProperty] private Bitmap? _img;
     [ObservableProperty] private bool _isLoaded;
+    [ObservableProperty] private bool _isLoading;
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(DeleteImgCommand))]
     private bool _canDelete;
@@ -58,9 +59,11 @@ public partial class ImgDragAndDropViewModel : ViewModelBase
     {
         if (_mainCatId != null)
         {
+            IsLoading = true;
             Img = await _topModel.GetPartsImg(_mainCatId);
             if (Img != null)
                 IsLoaded = true;
+            IsLoading = false;
         }
     }
 
@@ -125,13 +128,15 @@ public partial class ImgDragAndDropViewModel : ViewModelBase
         {
             if (IsDirty)
             {
+                IsLoading = true;
                 if (Img != null)
                 {
-                    Img.Save(stream, 100);
+                    await Task.Run(() => Img.Save(stream, 100));
                     await _topModel.SetPartsImg(_mainCatId, stream.ToArray());
                 }
                 else
                     await _topModel.SetPartsImg(_mainCatId, null);
+                IsLoading = false;
             }
         }
 

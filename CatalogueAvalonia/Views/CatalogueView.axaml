@@ -57,11 +57,16 @@
                             Width="40">
                         <Image Source="../Assets/fullscreen.png"/>
                     </Button>
-                    <ui:ProgressRing BorderThickness="3"
-                                     Height="20"
-                                     IsEnabled="{Binding IsImgLoading}"
-                                     IsVisible="{Binding IsImgLoading}"
-                                     IsIndeterminate="True" />
+                    <Grid Background="Gray"
+                          Opacity="0.5"
+                          IsVisible="{Binding IsImgLoading}">
+                        <ui:ProgressRing BorderThickness="3"
+                                         Height="20"
+                                         IsEnabled="{Binding IsImgLoading}"
+                                         IsVisible="{Binding IsImgLoading}"
+                                         IsIndeterminate="True" 
+                                         Background="LightGray"/>
+                    </Grid>
                 </Grid>
             </Border>
             <Button Grid.Row="4"
