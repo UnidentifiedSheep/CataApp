@@ -11,16 +11,41 @@
         <Design.DataContext>
                 <vm:ImageViewerViewModel />
         </Design.DataContext>
-        <Border Margin="5"
-                BorderBrush="#50505050"
-                BorderThickness="1">
-                <Grid >
-                        <TextBlock HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   FontSize="15"
-                                   Foreground="#50505050"
-                                   Text="Что то пошло не так..."/>
-                        <Image Source="{Binding VisibleImg}"/>
-                </Grid>
-        </Border>
+        
+        <Grid x:Name="MainContainer"
+              PointerWheelChanged="MainContainer_OnPointerWheelChanged">
+                        <Grid Height="{Binding GridHeight}"
+                              x:Name="ImgGrid"
+                              Width="{Binding GridWidth}"
+                              Background="#10101010">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           IsVisible="{Binding  !IsImgVisible}"
+                                           FontSize="15"
+                                           Foreground="#50505050"
+                                           Text="Что то пошло не так..."/>
+                                <Image Source="{Binding VisibleImg}"
+                                       x:Name="ImageItm"/>
+                        </Grid>
+                <Border x:Name="MiniMap"
+                        Background="#10101010"
+                        Margin="10"
+                        BorderBrush="Black"
+                        PointerPressed="MiniMap_OnPointerPressed"
+                        MinWidth="100" Width="100"
+                        MinHeight="100" Height="100"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        BorderThickness="1">
+                        <Grid x:Name="MiniMapGrid">
+                                <Image x:Name="MiniMapImage" 
+                                       Source="{Binding VisibleImg}"/>
+                                <Border x:Name="MiniMapBorder"
+                                        BorderBrush="Crimson"
+                                        BorderThickness="1"
+                                        Height="100"
+                                        Width="100"/>
+                        </Grid>
+                </Border>
+        </Grid>
 </Window>

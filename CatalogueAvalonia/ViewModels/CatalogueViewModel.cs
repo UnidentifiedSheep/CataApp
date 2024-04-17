@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Drawing;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
@@ -147,9 +147,23 @@ public partial class CatalogueViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenImageInDialogue(Window parent)
     {
-        if (ItemsImg != null)   
-            await _dialogueService.OpenDialogue(new ImageViewerWindow(), new ImageViewerViewModel(ItemsImg), parent);
-        
+        if (ItemsImg != null)
+        {
+            ItemsImg.Save("../Documents/PartImg.png");
+            var a = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            var path = a.Substring(0, a.LastIndexOf('\\'));
+            path = path.Substring(0, path.LastIndexOf('\\')) + @"\Documents\PartImg.png";
+            
+            try
+            {
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            }
+            catch (Exception e)
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Не удалось открыть изображение",
+                    $"{e}").ShowWindowDialogAsync(parent);
+            }
+        }
     }
 
     public HierarchicalTreeDataGridSource<CatalogueModel> CatalogueModels { get; }

@@ -90,7 +90,7 @@ public partial class ImgDragAndDropWindow : Window
                                     }
                                     else
                                     {
-                                        dc.Img = tempImg;
+                                        dc.Img = tempImg.CreateScaledBitmap(tempImg.PixelSize);
                                     }
                                 }
 
