@@ -737,4 +737,63 @@ public class TopModel
                 $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
         }
     }
+
+    public async Task<ProducerModel?> GetProducerById(int producerId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.GetProducerById(producerId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return null;
+        }
+    }
+
+    public async Task EditProducerAsync(int producerId, string newName)
+    {
+        try
+        {
+            await _taskQueue.Enqueue(async () => await _dataBaseAction.EditProducerById(producerId, newName));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+        }
+    }
+
+    public async Task<ProducerModel?> AddNewProducer(string newProducersName)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewProducer(newProducersName));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return null;
+        }
+    }
+
+    public async Task<bool> DeleteProducer(int producerId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseAction.DeleteProducer(producerId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return false;
+        }
+    }
 }

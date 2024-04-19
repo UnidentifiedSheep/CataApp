@@ -417,4 +417,13 @@ public class DataBaseProvider : IDataBaseProvider
         else
             return null;
     }
+
+    public async Task<ProducerModel?> GetProducerById(int producerId)
+    {
+        var producer = await _context.Producers.FindAsync(producerId);
+        if (producer != null)
+            return new ProducerModel { Id = producer.Id, ProducerName = producer.ProducerName };
+        else
+            return null;
+    }
 }

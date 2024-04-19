@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -54,6 +55,12 @@ public class DataStore : ObservableRecipient
             if (what != null)
                 AgentModels.Add(what);
         }
+        else if(message.Value.Where == "Producer")
+        {
+            var what = (ProducerModel?)message.Value.What;
+            if (what != null)
+                ProducerModels.Add(what);
+        }
     }
 
     private void OnDataBaseDeleted(object recipient, DeletedMessage message)
@@ -89,6 +96,32 @@ public class DataStore : ObservableRecipient
                 }
             }
         }
+        else if(where == "Producer")
+        {
+            int? id = message.Value.Id;
+            if (message.Value.Id != null)
+            {
+                var producer = ProducerModels.FirstOrDefault(x => x.Id == id);
+                foreach (var item in CatalogueModels)
+                {
+                    if (item.Children != null)
+                    {
+                        var part = item.Children;
+                        foreach (var pr in part)
+                        {
+                            if (pr.ProducerId == id)
+                            {
+                                pr.ProducerId = 1;
+                                pr.ProducerName = "Неизвестный";
+                            }
+                        }
+                    }
+                }
+
+                if (producer != null)
+                    ProducerModels.Remove(producer);
+            }
+        }
     }
 
     private void OnDataBaseEdited(object recipient, EditedMessage message)
@@ -100,7 +133,7 @@ public class DataStore : ObservableRecipient
             var model = (CatalogueModel?)message.Value.What;
             if (model != null)
             {
-                var item = CatalogueModels.Where(x => x.UniId == uniId).SingleOrDefault();
+                var item = CatalogueModels.SingleOrDefault(x => x.UniId == uniId);
                 if (item != null) CatalogueModels.ReplaceOrAdd(item, model);
             }
         }
@@ -139,6 +172,23 @@ public class DataStore : ObservableRecipient
                         if (mainCats != null) mainName.Children.ReplaceOrAdd(mainCats, item);
                     }
                 }
+        }
+        else if (where == "Producer")
+        {
+            var id = message.Value.Id;
+            var newName = message.Value.MainName;
+            
+            foreach (var item in CatalogueModels)
+            {
+                if (item.Children != null)
+                {
+                    foreach (var chld in item.Children)
+                    {
+                        if (chld.ProducerId == id)
+                            chld.ProducerName = newName;
+                    }
+                }
+            }
         }
     }
 

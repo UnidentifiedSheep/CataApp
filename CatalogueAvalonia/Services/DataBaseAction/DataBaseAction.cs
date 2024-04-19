@@ -1204,4 +1204,43 @@ public class DataBaseAction : IDataBaseAction
             }
         }
     }
+
+    public async Task EditProducerById(int producerId, string newName)
+    {
+        var producer = await _context.Producers.FindAsync(producerId);
+        if (producer != null)
+        {
+            producer.ProducerName = newName;
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<ProducerModel?> AddNewProducer(string producerName)
+    {
+        var producer = new Producer { ProducerName = producerName };
+        await _context.Producers.AddAsync(producer);
+        await _context.SaveChangesAsync();
+        
+        return new ProducerModel { Id = producer.Id, ProducerName = producerName };
+    }
+
+    public async Task<bool> DeleteProducer(int producerId)
+    {
+        var producer = await _context.Producers.FindAsync(producerId);
+        if (producer != null)
+        {
+            var parts = await _context.MainCats.Where(x => x.ProducerId == producerId).ToListAsync();
+            if (parts.Any())
+            {
+                foreach (var item in parts)
+                    item.ProducerId = 1;
+            }
+
+            _context.Producers.Remove(producer);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        else
+            return false;
+    }
 }

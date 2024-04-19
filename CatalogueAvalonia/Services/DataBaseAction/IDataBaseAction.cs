@@ -42,4 +42,7 @@ public interface IDataBaseAction
 
     Task<int?> CheckCanDeleteProdaja(int? mainCatId);
     Task SetMainCatImg(int? mainCatId, byte[]? img);
+    Task EditProducerById(int producerId, string newName);
+    Task<ProducerModel?> AddNewProducer(string producerName);
+    Task<bool> DeleteProducer(int producerId);
 }

@@ -20,7 +20,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly IDialogueService _dialogueService;
     private readonly TopModel _topModel;
 
-    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(OpenCurrencySettingsCommand))]
+    [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(OpenCurrencySettingsCommand))] [NotifyCanExecuteChangedFor(nameof(OpenProducersSettingsCommand))]
     private bool _isDataBaseLoaded;
 
     public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel,
@@ -54,5 +54,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         await _dialogueService.OpenDialogue(new CurrencySettingsWindow(),
             new CurrencySettingsViewModel(Messenger, _dataStore, _topModel), parent);
+    }
+
+    [RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]
+    private async Task OpenProducersSettings(Window parent)
+    {
+        await _dialogueService.OpenDialogue(new ProducerWindow(),
+            new ProducerViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
     }
 }

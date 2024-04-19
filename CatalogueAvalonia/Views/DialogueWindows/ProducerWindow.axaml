@@ -1,0 +1,68 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Width="500" Height="600"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.ProducerWindow"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Title="Производители"
+        x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:ProducerViewModel/>
+    </Design.DataContext>
+    <Grid RowDefinitions="50, 50, *, 50"
+          Margin="10">
+        <Grid Grid.Row="0"
+              Grid.RowSpan="4"
+              Background="DarkGray"
+              Opacity="0.4"
+              IsEnabled="{Binding !ActionEnded}"
+              IsVisible="{Binding !ActionEnded}">
+            <ui:ProgressRing BorderThickness="3"
+                             Height="50"
+                             Width="50"
+                             IsEnabled="{Binding !ActionEnded}"
+                             IsVisible="{Binding !ActionEnded}"
+                             IsIndeterminate="True" />
+        </Grid>
+        
+        <TextBlock Grid.Row="0"
+                   Text="Производители"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontSize="24"
+                   FontWeight="Bold"/>
+        <TextBox Grid.Row="1"
+                 Margin="0,5,0,8"
+                 Text="{Binding SearchField}"/>
+        <DataGrid Grid.Row="2"
+                  CellEditEnded="DataGrid_OnCellEditEnded"
+                  SelectedItem ="{Binding SelectedProducer}"
+                  ItemsSource="{Binding Producers}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Название производителя"
+                                    Width="*"
+                                    Binding="{Binding ProducerName}"/>
+            </DataGrid.Columns>
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Добавить"
+                              CommandParameter="{Binding $parent[Window]}"
+                              Command="{Binding AddProducerCommand}"/>
+                    <MenuItem Header="Удалить"
+                              Command="{Binding DeleteProducerCommand}"
+                              CommandParameter="{Binding $parent[Window]}"/>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
+        <Button Grid.Row="3"
+                Command="{Binding CancleCommand}"
+                Content="Ок"
+                Width="100"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                HorizontalContentAlignment="Center"
+                CommandParameter="{Binding $parent[Window]}"/>
+    </Grid>
+</Window>

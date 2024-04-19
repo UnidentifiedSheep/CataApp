@@ -1,0 +1,49 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Width="330" Height="180"
+        CanResize="False"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.AddNewProducerWindow"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Title="Добавить производителя"
+        x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:AddNewProducerViewModel/>
+    </Design.DataContext>
+    <Grid RowDefinitions="50, *, 50"
+          Margin="5">
+        <TextBlock Grid.Row="0"
+                   Text="Новый производитель"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   FontWeight="Bold"/>
+        <StackPanel Grid.Row="1">
+            <Label Content="Имя производителя"
+                   FontSize="12"
+                   Foreground="#909090"/>
+            <TextBox Text="{Binding ProducerName}"/>
+        </StackPanel>
+        <Grid Grid.Row="2"
+              ColumnDefinitions="*,*">
+            <Button Grid.Column="0"
+                    Content="Добавить"
+                    Width="100"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Command="{Binding SaveProducerCommand}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center"/>
+            <Button Grid.Column="1"
+                    Content="Отмена"
+                    Width="100"
+                    CommandParameter="{Binding $parent[Window]}"
+                    Command="{Binding CancleCommand}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    HorizontalContentAlignment="Center"/>
+        </Grid>
+    </Grid>
+</Window>

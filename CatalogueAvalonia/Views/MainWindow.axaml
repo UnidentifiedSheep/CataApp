@@ -15,6 +15,9 @@
                 <MenuItem Header="Валюта"
                           CommandParameter="{Binding $parent[Window]}"
                           Command="{Binding OpenCurrencySettingsCommand}" />
+                <MenuItem Header="Производители"
+                          CommandParameter="{Binding $parent[Window]}"
+                          Command="{Binding OpenProducersSettingsCommand}" />
             </MenuItem>
         </Menu>
         <TabControl Grid.Row="1"
