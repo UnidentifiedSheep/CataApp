@@ -1,0 +1,39 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" 
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        Height="100" Width="100" MinHeight="100" MinWidth="150"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.EditColorWindow"
+        Title="Редактировать цвет"
+        x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:EditColorViewModel />
+    </Design.DataContext>
+    <Grid RowDefinitions="50, *"
+          ColumnDefinitions="50, *"
+          Margin="5">
+        <TextBlock Grid.Row="0"
+                   Grid.ColumnSpan="2"
+                   Grid.Column="0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   Text="{Binding UniValue}"
+                   FontWeight="Bold"
+                   FontSize="14"/>
+        <Grid Grid.Row="1"
+              Grid.Column="0"
+              Grid.ColumnSpan="2"
+              ColumnDefinitions="*, *">
+            <ColorPicker Grid.Column="0"
+                Color="{Binding SelectedColor}"/>
+            <Button Grid.Column="1"
+                    Content="Ок"
+                    HorizontalAlignment="Stretch"
+                    Command="{Binding SaveChangesCommand}"
+                    CommandParameter="{Binding $parent[Window]}"
+                    HorizontalContentAlignment="Center"/>
+        </Grid>
+    </Grid>
+</Window>

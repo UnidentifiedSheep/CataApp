@@ -16,6 +16,7 @@
         <entry key="CatalogueAvalonia/Views/DialogueWindows/CatalogueItemWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/CurrencySettingsWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/EditCatalogueWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/DialogueWindows/EditColorWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/EditPricesWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/ImageViewerWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/DialogueWindows/ImgDragAndDropWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />

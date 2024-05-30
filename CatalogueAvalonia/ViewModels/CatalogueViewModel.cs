@@ -370,4 +370,14 @@ public partial class CatalogueViewModel : ViewModelBase
         CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
         GetImageCommand.Execute(null);
     }
+
+    [RelayCommand(CanExecute = nameof(CanDeletePart))]
+    private async Task ChangeColor(Window parent)
+    {
+        if (Selecteditem != null)
+        {
+            await _dialogueService.OpenDialogue(new EditColorWindow(),
+                new EditColorViewModel(Messenger, Selecteditem.RowColor, Selecteditem.UniValue, Selecteditem.MainCatId ?? default, _topModel), parent);
+        }
+    }
 }

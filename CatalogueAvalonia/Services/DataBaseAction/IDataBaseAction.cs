@@ -45,4 +45,5 @@ public interface IDataBaseAction
     Task EditProducerById(int producerId, string newName);
     Task<ProducerModel?> AddNewProducer(string producerName);
     Task<bool> DeleteProducer(int producerId);
+    Task<CatalogueModel?> EditColor(string rowColor, int id);
 }

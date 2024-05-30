@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using DataBase.Data;
@@ -169,6 +168,8 @@ public class DataBaseAction : IDataBaseAction
     public async Task<CatalogueModel?> EditMainCatPrices(IEnumerable<MainCatPriceModel> mainCatPrices, int mainCatId,
         int endCount)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        
         var mainCat = await _context.MainCats.Include(x => x.MainCatPrices).ThenInclude(x => x.Currency)
             .Include(x => x.Producer).FirstOrDefaultAsync(x => x.Id == mainCatId);
         if (mainCat != null)
@@ -194,27 +195,7 @@ public class DataBaseAction : IDataBaseAction
                 mainCat.Count = mainCatPrices.Sum(x => x.Count);
                 await _context.SaveChangesAsync().ConfigureAwait(true);
 
-                if (mainCat.MainCatPrices.Any(x => x.Currency == null))
-                    return new CatalogueModel
-                    {
-                        UniId = mainCat.UniId,
-                        MainCatId = mainCat.Id,
-                        Name = mainCat.Name,
-                        Count = mainCat.Count,
-                        UniValue = mainCat.UniValue,
-                        ProducerId = mainCat.ProducerId,
-                        ProducerName = mainCat.Producer.ProducerName,
-                        Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
-                            new CatalogueModel
-                            {
-                                UniId = null,
-                                MainCatId = x.MainCatId,
-                                PriceId = x.Id,
-                                Count = x.Count,
-                                Price = x.Price,
-                                CurrencyId = x.CurrencyId
-                            }))
-                    };
+                await transaction.CommitAsync();
                 return new CatalogueModel
                 {
                     UniId = mainCat.UniId,
@@ -224,6 +205,7 @@ public class DataBaseAction : IDataBaseAction
                     UniValue = mainCat.UniValue,
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
+                    RowColor = mainCat.RowColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -242,9 +224,12 @@ public class DataBaseAction : IDataBaseAction
             mainCat.Count = 0;
             await _context.SaveChangesAsync().ConfigureAwait(true);
 
+            await transaction.CommitAsync();
+            
             return new CatalogueModel
             {
                 UniId = mainCat.UniId,
+                RowColor = mainCat.RowColor,
                 MainCatId = mainCat.Id,
                 Name = mainCat.Name,
                 Count = mainCat.Count,
@@ -255,12 +240,13 @@ public class DataBaseAction : IDataBaseAction
             };
         }
 
+        await transaction.CommitAsync();
         return null;
     }
 
     public async Task DeleteMainCatPricesById(int mainCatId)
     {
-        var prices = await _context.MainCatPrices.Where(x => x.MainCatId == mainCatId).ToListAsync();
+        List<MainCatPrice>? prices = await _context.MainCatPrices.Where(x => x.MainCatId == mainCatId).ToListAsync();
 
         if (prices != null) _context.MainCatPrices.RemoveRange(prices);
         await _context.SaveChangesAsync();
@@ -384,6 +370,7 @@ public class DataBaseAction : IDataBaseAction
                     UniValue = mainCat.UniValue,
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
+                    RowColor = mainCat.RowColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -413,6 +400,8 @@ public class DataBaseAction : IDataBaseAction
     public async Task<IEnumerable<CatalogueModel>> DeleteZakupkaWithCountReCalc(int transactionId,
         IEnumerable<ZakupkaAltModel> zakupkaAltModels)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        
         var uniIds = new List<CatalogueModel>();
         foreach (var item in zakupkaAltModels)
         {
@@ -475,6 +464,7 @@ public class DataBaseAction : IDataBaseAction
                         UniValue = mainCat.UniValue,
                         ProducerId = mainCat.ProducerId,
                         ProducerName = mainCat.Producer.ProducerName,
+                        RowColor = mainCat.RowColor,
                         Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                             new CatalogueModel
                             {
@@ -496,6 +486,7 @@ public class DataBaseAction : IDataBaseAction
         await _context.SaveChangesAsync();
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
         return uniIds;
     }
 
@@ -504,6 +495,7 @@ public class DataBaseAction : IDataBaseAction
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
         string comment)
     {
+        await using var dBTransaction = await _context.Database.BeginTransactionAsync();
         var uniIds = new List<int>();
 
         foreach (var item in deletedIds)
@@ -730,6 +722,7 @@ public class DataBaseAction : IDataBaseAction
                     UniValue = mainCat.UniValue,
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
+                    RowColor = mainCat.RowColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -743,6 +736,7 @@ public class DataBaseAction : IDataBaseAction
                 });
         }
 
+        await dBTransaction.CommitAsync();
         return catas;
     }
 
@@ -751,6 +745,7 @@ public class DataBaseAction : IDataBaseAction
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
         string comment)
     {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
         var uniIds = new List<int>();
 
         foreach (var item in deletedIds)
@@ -947,6 +942,7 @@ public class DataBaseAction : IDataBaseAction
                     UniValue = mainCat.UniValue,
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
+                    RowColor = mainCat.RowColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -960,6 +956,7 @@ public class DataBaseAction : IDataBaseAction
                 });
         }
 
+        await dbTransaction.CommitAsync();
         return catas;
     }
 
@@ -1017,6 +1014,7 @@ public class DataBaseAction : IDataBaseAction
                     UniValue = mainCat.UniValue,
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
+                    RowColor = mainCat.RowColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -1058,6 +1056,7 @@ public class DataBaseAction : IDataBaseAction
     public async Task<IEnumerable<CatalogueModel>> DeleteProdajaCountReCalc(int transactionId,
         IEnumerable<ProdajaAltModel> prodajaAltModels, int currencyId)
     {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
         var catas = new List<CatalogueModel>();
 
         foreach (var model in prodajaAltModels)
@@ -1103,6 +1102,7 @@ public class DataBaseAction : IDataBaseAction
                         UniValue = mainCat.UniValue,
                         ProducerId = mainCat.ProducerId,
                         ProducerName = mainCat.Producer.ProducerName,
+                        RowColor = mainCat.RowColor,
                         Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                             new CatalogueModel
                             {
@@ -1122,6 +1122,7 @@ public class DataBaseAction : IDataBaseAction
             _context.AgentTransactions.Remove(transaction);
 
         await _context.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
         return catas;
     }
 
@@ -1168,7 +1169,7 @@ public class DataBaseAction : IDataBaseAction
             await _context.SaveChangesAsync();
             return transaction;
         }
-
+        
         return transaction;
     }
 
@@ -1188,7 +1189,7 @@ public class DataBaseAction : IDataBaseAction
             await _context.SaveChangesAsync();
             return transaction;
         }
-
+        
         return transaction;
     }
 
@@ -1242,5 +1243,42 @@ public class DataBaseAction : IDataBaseAction
         }
         else
             return false;
+    }
+
+    public async Task<CatalogueModel?> EditColor(string rowColor, int id)
+    {
+         var mainCat = await _context.MainCats.Include(x => x.MainCatPrices).ThenInclude(x => x.Currency)
+            .Include(x => x.Producer).FirstOrDefaultAsync(x => x.Id == id);
+
+         if (mainCat != null)
+         {
+             mainCat.RowColor = rowColor;
+             await _context.SaveChangesAsync();
+
+             return new CatalogueModel
+             {
+                 UniId = mainCat.UniId,
+                 MainCatId = mainCat.Id,
+                 Name = mainCat.Name,
+                 Count = mainCat.Count,
+                 UniValue = mainCat.UniValue,
+                 ProducerId = mainCat.ProducerId,
+                 ProducerName = mainCat.Producer.ProducerName,
+                 RowColor = mainCat.RowColor,
+                 Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
+                     new CatalogueModel
+                     {
+                         UniId = null,
+                         MainCatId = x.MainCatId,
+                         PriceId = x.Id,
+                         Count = x.Count,
+                         Price = x.Price,
+                         CurrencyId = x.CurrencyId,
+                         CurrencyName = x.Currency.CurrencyName
+                     }))
+             };
+         }
+         else
+             return null;
     }
 }

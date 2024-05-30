@@ -116,10 +116,10 @@
                         <MenuItem Header="Новая транзакция"
                                   Command="{Binding AddNewTransactionCommand}"
                                   CommandParameter="{Binding $parent[Window]}" />
-                        <MenuItem Header="Новый Расход"
+                        <MenuItem Header="Выплата нам"
                                   Command="{Binding AddNewConsumptionCommand}"
                                   CommandParameter="{Binding $parent[Window]}" />
-                        <MenuItem Header="Новый Приход"
+                        <MenuItem Header="Выплата контрагенту"
                                   Command="{Binding AddNewInComeCommand}"
                                   CommandParameter="{Binding $parent[Window]}" />
                         <MenuItem Header="Удалить контрагента"
@@ -158,12 +158,24 @@
                             </DataTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Header="Сумма (-)"
-                                            Binding="{Binding Summa}"
-                                            Width="*" />
-                        <DataGridTextColumn Header="Сумма платежа (+)"
-                                            Binding="{Binding SummaPlateja}"
-                                            Width="*" />
+                        <DataGridTextColumn Binding="{Binding Summa}"
+                                            Width="*">
+                            <DataGridTextColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Сумма (-)"
+                                               ToolTip.Tip="Выплата контрагента нам либо закупка у контрагента"/>
+                                </DataTemplate>
+                            </DataGridTextColumn.HeaderTemplate>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Binding="{Binding SummaPlateja}"
+                                            Width="*">
+                            <DataGridTextColumn.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="Сумма платежа (+)"
+                                               ToolTip.Tip="Наша выплата контрагенту либо продажа контрагенту."/>
+                                </DataTemplate>
+                            </DataGridTextColumn.HeaderTemplate>
+                        </DataGridTextColumn>
                         <DataGridTextColumn Header="Сальдо"
                                             Binding="{Binding Balance}"
                                             Width="*" />

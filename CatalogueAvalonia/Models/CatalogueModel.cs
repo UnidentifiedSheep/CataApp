@@ -19,6 +19,7 @@ public partial class CatalogueModel : ObservableObject
     [ObservableProperty] private string _uniValue = string.Empty;
 
     [ObservableProperty] private decimal _visiblePrice;
+    [ObservableProperty] private string _rowColor = "#FFFFFF"; 
 
     public int? UniId { get; set; }
     public int PriceId { get; set; }

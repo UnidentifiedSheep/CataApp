@@ -796,4 +796,19 @@ public class TopModel
             return false;
         }
     }
+
+    public async Task<CatalogueModel?> EditColor(string rowColor, int id)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseAction.EditColor(rowColor, id));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return null;
+        }
+    }
 }

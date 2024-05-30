@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CatalogueAvalonia", "Catalo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataBase", "DataBase\DataBase.csproj", "{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CatalogueTests", "CatalogueTests\CatalogueTests.csproj", "{DD398792-8601-4F40-B32D-465D90D515F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62A97701-1EF2-4484-8C2B-9B5EAE310C5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD398792-8601-4F40-B32D-465D90D515F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD398792-8601-4F40-B32D-465D90D515F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD398792-8601-4F40-B32D-465D90D515F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD398792-8601-4F40-B32D-465D90D515F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
