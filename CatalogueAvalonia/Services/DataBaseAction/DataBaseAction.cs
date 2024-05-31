@@ -214,8 +214,7 @@ public class DataBaseAction : IDataBaseAction
                             PriceId = x.Id,
                             Count = x.Count,
                             Price = x.Price,
-                            CurrencyId = x.CurrencyId,
-                            CurrencyName = x.Currency.CurrencyName
+                            CurrencyId = x.CurrencyId
                         }))
                 };
             }

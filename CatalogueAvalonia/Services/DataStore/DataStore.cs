@@ -151,8 +151,8 @@ public class DataStore : ObservableRecipient
             var what = (CatalogueModel?)message.Value.What;
             if (what != null)
             {
-                var mainName = CatalogueModels.Single(x => x.UniId == what.UniId);
-                if (mainName.Children != null)
+                var mainName = CatalogueModels.SingleOrDefault(x => x.UniId == what.UniId);
+                if (mainName != null && mainName.Children != null)
                 {
                     var mainCats = mainName.Children.SingleOrDefault(x => x.MainCatId == what.MainCatId);
                     if (mainCats != null) mainName.Children.ReplaceOrAdd(mainCats, what);
