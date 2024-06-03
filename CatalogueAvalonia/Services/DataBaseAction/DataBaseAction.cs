@@ -206,6 +206,7 @@ public class DataBaseAction : IDataBaseAction
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
                     RowColor = mainCat.RowColor,
+                    TextColor = mainCat.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -229,6 +230,7 @@ public class DataBaseAction : IDataBaseAction
             {
                 UniId = mainCat.UniId,
                 RowColor = mainCat.RowColor,
+                TextColor = mainCat.TextColor,
                 MainCatId = mainCat.Id,
                 Name = mainCat.Name,
                 Count = mainCat.Count,
@@ -370,6 +372,7 @@ public class DataBaseAction : IDataBaseAction
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
                     RowColor = mainCat.RowColor,
+                    TextColor = mainCat.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -464,6 +467,7 @@ public class DataBaseAction : IDataBaseAction
                         ProducerId = mainCat.ProducerId,
                         ProducerName = mainCat.Producer.ProducerName,
                         RowColor = mainCat.RowColor,
+                        TextColor = mainCat.TextColor,
                         Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                             new CatalogueModel
                             {
@@ -722,6 +726,7 @@ public class DataBaseAction : IDataBaseAction
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
                     RowColor = mainCat.RowColor,
+                    TextColor = mainCat.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -942,6 +947,7 @@ public class DataBaseAction : IDataBaseAction
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
                     RowColor = mainCat.RowColor,
+                    TextColor = mainCat.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -1014,6 +1020,7 @@ public class DataBaseAction : IDataBaseAction
                     ProducerId = mainCat.ProducerId,
                     ProducerName = mainCat.Producer.ProducerName,
                     RowColor = mainCat.RowColor,
+                    TextColor = mainCat.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
@@ -1102,6 +1109,7 @@ public class DataBaseAction : IDataBaseAction
                         ProducerId = mainCat.ProducerId,
                         ProducerName = mainCat.Producer.ProducerName,
                         RowColor = mainCat.RowColor,
+                        TextColor = mainCat.TextColor,
                         Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                             new CatalogueModel
                             {
@@ -1244,7 +1252,7 @@ public class DataBaseAction : IDataBaseAction
             return false;
     }
 
-    public async Task<CatalogueModel?> EditColor(string rowColor, int id)
+    public async Task<CatalogueModel?> EditColor(string rowColor, string textColor, int id)
     {
          var mainCat = await _context.MainCats.Include(x => x.MainCatPrices).ThenInclude(x => x.Currency)
             .Include(x => x.Producer).FirstOrDefaultAsync(x => x.Id == id);
@@ -1252,6 +1260,7 @@ public class DataBaseAction : IDataBaseAction
          if (mainCat != null)
          {
              mainCat.RowColor = rowColor;
+             mainCat.TextColor = textColor;
              await _context.SaveChangesAsync();
 
              return new CatalogueModel
@@ -1264,6 +1273,7 @@ public class DataBaseAction : IDataBaseAction
                  ProducerId = mainCat.ProducerId,
                  ProducerName = mainCat.Producer.ProducerName,
                  RowColor = mainCat.RowColor,
+                 TextColor = mainCat.TextColor,
                  Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                      new CatalogueModel
                      {
@@ -1276,8 +1286,7 @@ public class DataBaseAction : IDataBaseAction
                          CurrencyName = x.Currency.CurrencyName
                      }))
              };
-         }
-         else
-             return null;
+         } 
+         return null;
     }
 }

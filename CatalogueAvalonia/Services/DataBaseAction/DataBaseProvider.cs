@@ -54,6 +54,7 @@ public class DataBaseProvider : IDataBaseProvider
                 ProducerName = x.Producer.ProducerName,
                 MainCatId = x.Id,
                 RowColor = x.RowColor,
+                TextColor = x.TextColor,
                 Children = new ObservableCollection<CatalogueModel>(x.MainCatPrices.Select(x => new CatalogueModel
                 {
                     UniId = null,
@@ -91,6 +92,7 @@ public class DataBaseProvider : IDataBaseProvider
                     ProducerName = x.Producer.ProducerName,
                     MainCatId = x.Id,
                     RowColor = x.RowColor,
+                    TextColor = x.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(x.MainCatPrices.Select(x => new CatalogueModel
                     {
                         UniId = null,

@@ -797,11 +797,11 @@ public class TopModel
         }
     }
 
-    public async Task<CatalogueModel?> EditColor(string rowColor, int id)
+    public async Task<CatalogueModel?> EditColor(string rowColor, string textColor, int id)
     {
         try
         {
-            return await _taskQueue.Enqueue(async () => await _dataBaseAction.EditColor(rowColor, id));
+            return await _taskQueue.Enqueue(async () => await _dataBaseAction.EditColor(rowColor, textColor, id));
         }
         catch (Exception e)
         {

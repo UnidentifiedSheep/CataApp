@@ -377,7 +377,7 @@ public partial class CatalogueViewModel : ViewModelBase
         if (Selecteditem != null)
         {
             await _dialogueService.OpenDialogue(new EditColorWindow(),
-                new EditColorViewModel(Messenger, Selecteditem.RowColor, Selecteditem.UniValue, Selecteditem.MainCatId ?? default, _topModel), parent);
+                new EditColorViewModel(Messenger, Selecteditem.RowColor, Selecteditem.TextColor, Selecteditem.UniValue, Selecteditem.MainCatId ?? default, _topModel), parent);
         }
     }
 }

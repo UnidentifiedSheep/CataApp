@@ -4,36 +4,54 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" 
         xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
-        Height="100" Width="100" MinHeight="100" MinWidth="150"
+        Height="150" Width="225" MinHeight="125" MinWidth="200"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.EditColorWindow"
         Title="Редактировать цвет"
         x:CompileBindings="False">
     <Design.DataContext>
         <vm:EditColorViewModel />
     </Design.DataContext>
-    <Grid RowDefinitions="50, *"
-          ColumnDefinitions="50, *"
-          Margin="5">
-        <TextBlock Grid.Row="0"
-                   Grid.ColumnSpan="2"
-                   Grid.Column="0"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   Text="{Binding UniValue}"
-                   FontWeight="Bold"
-                   FontSize="14"/>
+    <Grid RowDefinitions="20, *, 30"
+          Margin="10">
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="0">
+            <TextBlock Text="Номер запчасти:"
+                       FontSize="14"
+                       FontWeight="Bold"/>
+            <TextBlock HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Text="{Binding UniValue}"
+                       FontWeight="Bold"
+                       FontSize="14"/>
+        </StackPanel>
         <Grid Grid.Row="1"
-              Grid.Column="0"
-              Grid.ColumnSpan="2"
+              RowDefinitions="*, *"
               ColumnDefinitions="*, *">
-            <ColorPicker Grid.Column="0"
-                Color="{Binding SelectedColor}"/>
-            <Button Grid.Column="1"
-                    Content="Ок"
-                    HorizontalAlignment="Stretch"
-                    Command="{Binding SaveChangesCommand}"
-                    CommandParameter="{Binding $parent[Window]}"
-                    HorizontalContentAlignment="Center"/>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Text="Цвет фона"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+            <ColorPicker Grid.Row="0"
+                         Grid.Column="1"
+                         Color="{Binding SelectedColor}"/>
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Text="Цвет текста"
+                       FontSize="14"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"/>
+            <ColorPicker Grid.Row="1"
+                         Grid.Column="1"
+                         Color="{Binding SelectedTextColor}"/>
         </Grid>
+        <Button Grid.Row="2"
+                Content="Ок"
+                Width="100"
+                HorizontalAlignment="Center"
+                Command="{Binding SaveChangesCommand}"
+                CommandParameter="{Binding $parent[Window]}"
+                HorizontalContentAlignment="Center"/>
     </Grid>
 </Window>

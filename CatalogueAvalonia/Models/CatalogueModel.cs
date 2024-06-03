@@ -19,7 +19,8 @@ public partial class CatalogueModel : ObservableObject
     [ObservableProperty] private string _uniValue = string.Empty;
 
     [ObservableProperty] private decimal _visiblePrice;
-    [ObservableProperty] private string _rowColor = "#FFFFFF"; 
+    [ObservableProperty] private string _rowColor = "#FFFFFF";
+    [ObservableProperty] private string _textColor = "#000000";
 
     public int? UniId { get; set; }
     public int PriceId { get; set; }
@@ -31,7 +32,7 @@ public partial class CatalogueModel : ObservableObject
 
     partial void OnNameChanged(string value)
     {
-        if (string.IsNullOrEmpty(value) || value == " ")
+        if (string.IsNullOrEmpty(value) || value == " " || value == "  ")
             Name = "Название не указано";
     }
 
