@@ -165,7 +165,7 @@ public partial class NewPurchaseViewModel : ViewModelBase
             };
             var transactionId = await _topModel.AddNewTransactionAsync(agentModel);
             await _dialogueServices.OpenDialogue(new AddNewPayment(),
-                new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name),
+                new AddNewPaymentViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name),
                 parent);
             parent.Close();
             var zakMain = new ZakupkiModel

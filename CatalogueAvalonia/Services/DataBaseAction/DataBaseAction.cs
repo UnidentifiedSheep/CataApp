@@ -7,11 +7,18 @@ using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using DataBase.Data;
 using Microsoft.EntityFrameworkCore;
+using Action = DataBase.Data.Action;
 
 namespace CatalogueAvalonia.Services.DataBaseAction;
 
 public class DataBaseAction : IDataBaseAction
 {
+    enum ActionsEnum
+    {
+        Write = 0,
+        Update = 1,
+        Delete = 2
+    }
     private readonly DataContext _context;
 
     public DataBaseAction(DataContext dataContext)
@@ -22,11 +29,20 @@ public class DataBaseAction : IDataBaseAction
     public async Task DeleteMainNameById(int? id)
     {
         var el = await _context.MainNames.FindAsync(id);
+        string mainName = "";
         if (el != null)
         {
+            mainName = el.Name;
             _context.MainNames.Remove(el);
             await _context.SaveChangesAsync();
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+                Values = mainName, 
+                Description = $"Удалено id={id}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
         }
+        
+
     }
 
     public async Task DeleteFromMainCatById(int? id)
@@ -34,8 +50,17 @@ public class DataBaseAction : IDataBaseAction
         var el = await _context.MainCats.FindAsync(id);
         if (el != null)
         {
+            var uniValue = el.UniValue;
+            var uniId = el.UniId;
+            
             _context.MainCats.Remove(el);
             await _context.SaveChangesAsync();
+            
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+                Values = uniValue, 
+                Description = $"Удалено id={id}, uni_id={uniId}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
         }
     }
 
@@ -52,7 +77,7 @@ public class DataBaseAction : IDataBaseAction
         if (mainName != null && catalogue.Children != null)
         {
             mainName.Name = catalogue.Name;
-
+            var name = mainName.Name;
             foreach (var child in catalogue.Children)
             {
                 var part = await _context.MainCats.FindAsync(child.MainCatId);
@@ -76,6 +101,11 @@ public class DataBaseAction : IDataBaseAction
             }
 
             await _context.SaveChangesAsync();
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+                Values = name, 
+                Description = $"Редактировано uni_id={uniId}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
         }
     }
 
@@ -96,6 +126,12 @@ public class DataBaseAction : IDataBaseAction
             await _context.MainNames.AddAsync(model);
             await _context.SaveChangesAsync();
 
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
+                Values = model.Name, 
+                Description = $"Добавлено uni_id={model.UniId}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
+            
             return model.UniId;
         }
 
@@ -109,6 +145,12 @@ public class DataBaseAction : IDataBaseAction
         {
             model.Name = agentModel.Name;
             model.IsZak = agentModel.IsZak;
+            
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+                Values = model.Name, 
+                Description = $"Редактировано id={model.Id}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
         }
 
         await _context.SaveChangesAsync();
@@ -120,6 +162,11 @@ public class DataBaseAction : IDataBaseAction
         await _context.Agents.AddAsync(model);
         await _context.SaveChangesAsync();
 
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
+            Values = model.Name, 
+            Description = $"Добавлено id={model.Id}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         return new AgentModel { Id = model.Id, IsZak = model.IsZak, Name = model.Name };
     }
 
@@ -128,7 +175,14 @@ public class DataBaseAction : IDataBaseAction
         var model = await _context.Agents.FindAsync(id);
         if (model != null)
         {
+            var name = model.Name;
             _context.Agents.Remove(model);
+            
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+                Values = name, 
+                Description = $"Удалено id={id}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
             await _context.SaveChangesAsync();
         }
     }
@@ -146,6 +200,11 @@ public class DataBaseAction : IDataBaseAction
         };
         await _context.AgentTransactions.AddAsync(model);
         await _context.SaveChangesAsync();
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
+            Values = model.TransactionSum.ToString(), 
+            Description = $"Новая транзакция id={model.Id}, agent_id={model.AgentId}, transaction_status={model.TransactionStatus}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         return model.Id;
     }
 
@@ -161,6 +220,12 @@ public class DataBaseAction : IDataBaseAction
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
             foreach (var tr in afterTransactions) tr.Balance = tr.Balance - transactionSum;
+            
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+                Values = transaction.Id.ToString(), 
+                Description = $"Удалено id={transaction.Id}, transaction_sum={transaction.TransactionSum}, transaction_datetime={transaction.TransactionDatatime}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
             await _context.SaveChangesAsync();
         }
     }
@@ -241,6 +306,12 @@ public class DataBaseAction : IDataBaseAction
             };
         }
 
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+            Values = mainCatId.ToString(), 
+            Description = $"Редактировано цены id={mainCatId}, ", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
+        
         await transaction.CommitAsync();
         return null;
     }
@@ -250,6 +321,11 @@ public class DataBaseAction : IDataBaseAction
         List<MainCatPrice>? prices = await _context.MainCatPrices.Where(x => x.MainCatId == mainCatId).ToListAsync();
 
         if (prices != null) _context.MainCatPrices.RemoveRange(prices);
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+            Values = mainCatId.ToString(), 
+            Description = $"Удалено цены id={mainCatId}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         await _context.SaveChangesAsync();
     }
 
@@ -317,7 +393,7 @@ public class DataBaseAction : IDataBaseAction
             await _context.SaveChangesAsync();
         }
 
-        await _context.ZakMainGroups.AddAsync(new ZakMainGroup
+        var a = new ZakMainGroup
         {
             TransactionId = zakMain.TransactionId,
             Datetime = Converters.ToDateTimeSqlite(zakMain.Datetime),
@@ -333,8 +409,15 @@ public class DataBaseAction : IDataBaseAction
                 MainName = x.MainName,
                 UniValue = x.UniValue
             }).ToList()
-        });
+        };
+        await _context.ZakMainGroups.AddAsync(a);
         await _context.SaveChangesAsync();
+        
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
+            Values = a.Id.ToString(), 
+            Description = $"Добавлена закупка id={a.Id}, agent_id={a.AgentId}, total_sum={a.TotalSum}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
     }
 
     public async Task<IEnumerable<CatalogueModel>> AddNewPricesForParts(IEnumerable<ZakupkaAltModel> parts,
@@ -384,8 +467,13 @@ public class DataBaseAction : IDataBaseAction
                             CurrencyId = x.CurrencyId
                         }))
                 });
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
+                Values = mainCat.UniValue, 
+                Description = $"Добавлена цена id={mainCat.Id}, uni_value={mainCat.UniValue}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
         }
-
+        
         return cata;
     }
 
@@ -396,6 +484,11 @@ public class DataBaseAction : IDataBaseAction
         {
             _context.AgentTransactions.Remove(transaction);
             await _context.SaveChangesAsync();
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+                Values = transactionId.ToString(), 
+                Description = $"Удалена закупка transaction_id={transactionId}", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
         }
     }
 
@@ -490,6 +583,11 @@ public class DataBaseAction : IDataBaseAction
 
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+            Values = transactionId.ToString(), 
+            Description = $"Удалена закупка transaction_id={transactionId}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         return uniIds;
     }
 
@@ -741,6 +839,11 @@ public class DataBaseAction : IDataBaseAction
         }
 
         await dBTransaction.CommitAsync();
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+            Values = transactionId.ToString(), 
+            Description = $"Редактирована закупка transaction_id={transactionId}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         return catas;
     }
 
@@ -962,6 +1065,11 @@ public class DataBaseAction : IDataBaseAction
         }
 
         await dbTransaction.CommitAsync();
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+            Values = transactionId.ToString(), 
+            Description = $"Редактирована продажа transaction_id={transactionId}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         return catas;
     }
 
@@ -1035,7 +1143,7 @@ public class DataBaseAction : IDataBaseAction
             }
         }
 
-        await _context.ProdMainGroups.AddAsync(new ProdMainGroup
+        var prod = new ProdMainGroup
         {
             AgentId = mainModel.AgentId,
             CurrencyId = mainModel.CurrencyId,
@@ -1053,9 +1161,16 @@ public class DataBaseAction : IDataBaseAction
                 InitialPrice = x.InitialPrice,
                 CurrencyId = x.CurrencyInitialId
             }).ToList()
-        });
+        };
+        await _context.ProdMainGroups.AddAsync(prod);
 
         await _context.SaveChangesAsync();
+        
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
+            Values = prod.Id.ToString(), 
+            Description = $"Добавлено продажа id={prod.Id}, agent_id={prod.AgentId}, total_sum={prod.TotalSum}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
         return catas;
     }
 
@@ -1130,6 +1245,13 @@ public class DataBaseAction : IDataBaseAction
 
         await _context.SaveChangesAsync();
         await dbTransaction.CommitAsync();
+        
+        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
+            Values = transactionId.ToString(), 
+            Description = $"Удалено продажи transaction_id={transactionId}", Seen = 0, 
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+            Time = DateTime.Now.ToShortTimeString()});
+        
         return catas;
     }
 
@@ -1288,5 +1410,14 @@ public class DataBaseAction : IDataBaseAction
              };
          } 
          return null;
+    }
+/*
+ * Возможно большое потребление памяти диска.
+ * Позже исправить.
+ */
+    private async Task AddRecordToLog(Action action)
+    {
+        var act = await _context.Actions.AddAsync(action);
+        await _context.SaveChangesAsync();
     }
 }

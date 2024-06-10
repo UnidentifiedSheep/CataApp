@@ -7,6 +7,7 @@ using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -26,7 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel,
         AgentViewModel agentViewModel, ZakupkaViewModel zakupkaViewModel, DataStore dataStore,
         IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel,
-        WebViewModel webViewModel) : base(messenger)
+        WebViewModel webViewModel, ServerStatusViewModel serverStatusViewModel) : base(messenger)
     {
         _dataStore = dataStore;
         _topModel = topModel;
@@ -37,7 +38,8 @@ public partial class MainWindowViewModel : ViewModelBase
             agentViewModel,
             zakupkaViewModel,
             prodajaViewModel,
-            webViewModel
+            webViewModel,
+            serverStatusViewModel
         ];
         Messenger.Register<ActionMessage>(this, OnDataBaseLoaded);
     }

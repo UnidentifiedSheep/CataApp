@@ -116,11 +116,6 @@ public partial class AddNewTransactionViewModel : ViewModelBase
         }
     }
 
-    partial void OnTransactionSumChanged(decimal value)
-    {
-        TransactionSum = TransactionSum;
-    }
-
     partial void OnConvertFromCurrChanged(bool value)
     {
         if (value)

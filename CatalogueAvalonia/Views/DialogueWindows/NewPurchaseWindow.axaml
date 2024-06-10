@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" MinHeight="600" MinWidth="1000" Height="600" Width="1000"
+        mc:Ignorable="d" MinHeight="500" MinWidth="500" Height="600" Width="1000"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.NewPurchaseWindow"
         xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
         Title="Новая закупка"
@@ -56,7 +56,6 @@
                 </ComboBox>
                 <Button Grid.Column="2"
                         Content="Коментарий"
-                        Width="120"
                         HorizontalContentAlignment="Center"
                         Margin="40,0,0,0">
                     <Button.Flyout>
@@ -113,13 +112,11 @@
                         VerticalAlignment="Center"
                         HorizontalContentAlignment="Center"
                         HorizontalAlignment="Center"
-                        Width="120"
                         CommandParameter="{Binding $parent[Window]}"
                         Command="{Binding AddNewPartCommand}" />
                 <Button Grid.Column="1"
                         HorizontalContentAlignment="Center"
                         Content="Изменить"
-                        Width="120"
                         Command="{Binding ChangePartCommand}"
                         CommandParameter="{Binding $parent[Window]}"
                         VerticalAlignment="Center"
@@ -127,7 +124,6 @@
                 <Button Grid.Column="2"
                         HorizontalContentAlignment="Center"
                         Content="Удалить"
-                        Width="120"
                         Command="{Binding DeletePartCommand}"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center" />

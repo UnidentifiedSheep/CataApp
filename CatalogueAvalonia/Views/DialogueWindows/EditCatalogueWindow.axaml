@@ -65,17 +65,22 @@
                           BorderBrush="#20202020"
                           Grid.Column="1"
                           Grid.Row="0" />
-            <DataGrid Grid.Column="2"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      SelectedItem="{Binding SelectedProducer}"
-                      ItemsSource="{Binding Producers}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Производитель"
-                                        Width="*"
-                                        Binding="{Binding ProducerName}" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <Grid Grid.Row="0" Grid.Column="2"
+                  RowDefinitions="33, *">
+                <TextBox Grid.Row="0"
+                         Text="{Binding ProducerSearch}"/>
+                <DataGrid Grid.Row="1" IsReadOnly="True"
+                          SelectionMode="Single"
+                          SelectedItem="{Binding SelectedProducer}"
+                          ItemsSource="{Binding Producers}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Производитель"
+                                            Width="*"
+                                            Binding="{Binding ProducerName}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+            
             <Button Grid.Column="2"
                     Grid.Row="1"
                     Content="Добавить запчасть"

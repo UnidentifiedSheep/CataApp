@@ -34,8 +34,8 @@
                    HorizontalAlignment="Left"
                    VerticalAlignment="Center" />
             <NumericUpDown Grid.Column="1"
-                           Grid.ColumnSpan="2"
                            FormatString="{}{0:#,0.00}"
+                           Minimum="0"
                            Value="{Binding TransactionSum}"
                            ShowButtonSpinner="False"
                            Grid.Row="0"

@@ -14,7 +14,7 @@ public partial class AddNewPayment : Window
 
     public async void SaveButt_Click(object sender, RoutedEventArgs e)
     {
-        var dc = (AddNewTransactionViewModel?)DataContext;
+        var dc = (AddNewPaymentViewModel?)DataContext;
         if (dc != null)
         {
             if (dc.TransactionSum != 0)
@@ -30,8 +30,8 @@ public partial class AddNewPayment : Window
                     {
                         if (dc.SelectedConvertCurrency != null)
                         {
-                            Close();
                             dc.AddTransactionCommand.Execute(null);
+                            Close();
                         }
                         else
                         {
@@ -61,12 +61,13 @@ public partial class AddNewPayment : Window
 
     public void PayAll_Click(object sender, RoutedEventArgs e)
     {
-        var dc = (AddNewTransactionViewModel?)DataContext;
+        var dc = (AddNewPaymentViewModel?)DataContext;
         if (dc != null)
             if (dc.TransactionData != null)
             {
                 dc.TransactionSum = dc.TransactionData.TransactionSum;
-                dc.AddNewTransactionNormalCommand.Execute(dc.TransactionSum * -1);
+                dc.ConvertFromCurr = false;
+                dc.AddTransactionCommand.Execute(null);
                 Close();
             }
     }

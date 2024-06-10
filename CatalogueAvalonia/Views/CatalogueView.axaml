@@ -11,6 +11,11 @@
         <vm:CatalogueViewModel />
     </Design.DataContext>
     <Grid>
+        <Button IsVisible="False"
+                HotKey="Ctrl+M"
+                Height="1"
+                Width="1"
+                Command="{Binding HotKeyCtrlMCommand}"/>
         <Grid.ColumnDefinitions>
             <ColumnDefinition MaxWidth="300" />
             <ColumnDefinition Width="4*" />

@@ -36,6 +36,7 @@ public partial class CatalogueViewModel : ViewModelBase
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddNewPartCommand))]
     private bool _isDataBaseLoaded;
+
     private bool _isFilteringByUniValue;
 
     [ObservableProperty] private bool _isLoaded = !false;
@@ -45,10 +46,11 @@ public partial class CatalogueViewModel : ViewModelBase
     [ObservableProperty] private string _partUniValue = string.Empty;
 
     [ObservableProperty] private CatalogueModel? _selecteditem;
-    
+
     [ObservableProperty] private Bitmap? _itemsImg;
     [ObservableProperty] private bool _isImgVisible;
     [ObservableProperty] private bool _isImgLoading;
+
     public CatalogueViewModel()
     {
     }
@@ -81,11 +83,12 @@ public partial class CatalogueViewModel : ViewModelBase
         Messenger.Register<EditedMessage>(this, OnEditedIdDataBase);
         Messenger.Register<DeletedMessage>(this, OnDataBaseDeleted);
         Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
-        
+
         CatalogueModels.RowSelection!.SelectionChanged += CatalogueModelSelectionChanged;
     }
 
-    private void CatalogueModelSelectionChanged(object? sender, TreeSelectionModelSelectionChangedEventArgs<CatalogueModel> e)
+    private void CatalogueModelSelectionChanged(object? sender,
+        TreeSelectionModelSelectionChangedEventArgs<CatalogueModel> e)
     {
         Selecteditem = CatalogueModels.RowSelection!.SelectedItem;
         if (Selecteditem != null && Selecteditem.MainCatId != null)
@@ -96,7 +99,7 @@ public partial class CatalogueViewModel : ViewModelBase
         {
             if (ItemsImg != null)
                 ItemsImg.Dispose();
-            
+
         }
     }
 
@@ -104,12 +107,12 @@ public partial class CatalogueViewModel : ViewModelBase
     private async Task GetImage()
     {
         IsImgLoading = true;
-        
+
         if (Selecteditem != null && Selecteditem.MainCatId != null)
         {
             if (ItemsImg != null)
                 ItemsImg.Dispose();
-            
+
             ItemsImg = await _topModel.GetPartsImg(Selecteditem.MainCatId);
             if (ItemsImg != null)
                 IsImgVisible = true;
@@ -142,10 +145,43 @@ public partial class CatalogueViewModel : ViewModelBase
             await _dialogueService.OpenDialogue(new ImgDragAndDropWindow(),
                 new ImgDragAndDropViewModel(Messenger, _topModel, Selecteditem.MainCatId), parent);
         }
+
         GetImageCommand.Execute(null);
     }
 
-    private int _imgCount = 0;
+    [RelayCommand]
+    private async Task HotKeyCtrlM()
+    {
+        if (Selecteditem != null)
+        {
+            if (Selecteditem.RowColor == "#FFFFFF" || Selecteditem.RowColor == "White") //from white to green
+            {
+                await _topModel.EditColor("#00cc00", "White", Selecteditem.MainCatId ?? default); 
+                Selecteditem.RowColor = "#00cc00";
+                Selecteditem.TextColor = "White";
+            }
+            else if(Selecteditem.RowColor == "#00cc00")
+            {
+                await _topModel.EditColor("#ff5050", "White", Selecteditem.MainCatId ?? default); 
+                Selecteditem.RowColor = "#ff5050";
+                Selecteditem.TextColor = "White";
+            }
+            else if (Selecteditem.RowColor == "#ff5050")
+            {
+                await _topModel.EditColor("#ff00ff", "White", Selecteditem.MainCatId ?? default); 
+                Selecteditem.RowColor = "#ff00ff";
+                Selecteditem.TextColor = "White";
+            }
+            else
+            {
+                await _topModel.EditColor("#FFFFFF", "Black", Selecteditem.MainCatId ?? default); 
+                Selecteditem.RowColor = "#FFFFFF";
+                Selecteditem.TextColor = "Black";
+            }
+        }
+    }
+
+private int _imgCount = 0;
     [RelayCommand]
     private async Task OpenImageInDialogue(Window parent)
     {

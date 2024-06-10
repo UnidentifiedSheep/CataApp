@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.Messeges;
@@ -25,6 +27,7 @@ public partial class EditCatalogueViewModel : ViewModelBase
     [ObservableProperty] private CatalogueModel? _selectedCatalogue;
 
     [ObservableProperty] private ProducerModel? _selectedProducer;
+    [ObservableProperty] private string _producerSearch = String.Empty;
 
     private readonly List<int> ids = new();
     public bool IsDirty;
@@ -70,7 +73,18 @@ public partial class EditCatalogueViewModel : ViewModelBase
         if (model != null)
             _catalogueModels.AddRange(model);
     }
+    [RelayCommand]
+    private async Task FilterProducers(string value)
+    {
+        await foreach (var item in DataFiltering.FilterProducer(_dataStore.ProducerModels, value))
+            _producers.Add(item);
+    }
 
+    partial void OnProducerSearchChanged(string value)
+    {
+        _producers.Clear();
+        FilterProducersCommand.Execute(value);
+    }
     partial void OnNameOfPartChanged(string value)
     {
         IsDirty = true;

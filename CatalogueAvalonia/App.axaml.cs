@@ -7,10 +7,12 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
+using CatalogueAvalonia.Services.BarcodeServer;
 using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels;
+using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using DataBase.Data;
@@ -108,10 +110,13 @@ public class App : Application
         builder.Services.AddSingleton<ZakupkaViewModel>();
         builder.Services.AddSingleton<ProdajaViewModel>();
         builder.Services.AddSingleton<WebViewModel>();
+        builder.Services.AddSingleton<ServerStatusViewModel>();
 
         builder.Services.AddSingleton<TopModel>();
         builder.Services.AddSingleton<DataStore>();
         builder.Services.AddSingleton<TaskQueue>();
+        builder.Services.AddSingleton<Listener>();
+        builder.Services.AddSingleton<TcpServer>();
         builder.Services.AddSingleton<IDataBaseProvider, DataBaseProvider>();
         builder.Services.AddSingleton<IDataBaseAction, DataBaseAction>();
         builder.Services.AddSingleton<IDialogueService, DialogueService>();
