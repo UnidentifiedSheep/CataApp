@@ -12,13 +12,13 @@ public partial class CatalogueModel : ObservableObject
 
     [ObservableProperty] private string _name = "Название не указано";
 
-    [ObservableProperty] private decimal _price;
+    [ObservableProperty] private decimal? _price;
 
     [ObservableProperty] private string _producerName = string.Empty;
 
     [ObservableProperty] private string _uniValue = string.Empty;
 
-    [ObservableProperty] private decimal _visiblePrice;
+    [ObservableProperty] private decimal? _visiblePrice;
     [ObservableProperty] private string _rowColor = "#FFFFFF";
     [ObservableProperty] private string _textColor = "#000000";
 
@@ -36,8 +36,15 @@ public partial class CatalogueModel : ObservableObject
             Name = "Название не указано";
     }
 
-    partial void OnPriceChanged(decimal value)
+    partial void OnPriceChanged(decimal? value)
     {
-        VisiblePrice = Math.Round(value, 2);
+        if (value != null)
+        {
+            VisiblePrice = Math.Round(value ?? 0, 2);
+        }
+        else
+        {
+            VisiblePrice = null;
+        }
     }
 }

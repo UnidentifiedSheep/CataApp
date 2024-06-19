@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using DataBase.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Action = DataBase.Data.Action;
 
 namespace CatalogueAvalonia.Services.DataBaseAction;
@@ -54,7 +56,9 @@ public class DataBaseAction : IDataBaseAction
             var uniId = el.UniId;
             
             _context.MainCats.Remove(el);
+            
             await _context.SaveChangesAsync();
+            await ReCallcMainCount(el.UniId);
             
             await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
                 Values = uniValue, 
@@ -253,14 +257,28 @@ public class DataBaseAction : IDataBaseAction
             {
                 mainCat.MainCatPrices = mainCatPrices.Select(x => new MainCatPrice
                 {
-                    Count = x.Count,
+                    Count = x.Count ?? 0,
                     CurrencyId = x.CurrencyId,
-                    Price = x.Price
+                    Price = x.Price ?? 0
                 }).ToList();
-                mainCat.Count = mainCatPrices.Sum(x => x.Count);
+                mainCat.Count = mainCatPrices.Sum(x => x.Count ?? 0);
                 await _context.SaveChangesAsync().ConfigureAwait(true);
 
+
+                var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+                if (mainName != null)
+                {
+                    mainName.Count = mainName.MainCats.Sum(x => x.Count);
+                }
+                
                 await transaction.CommitAsync();
+                
+                await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+                    Values = mainCatId.ToString(), 
+                    Description = $"Редактировано цены id={mainCatId}, ", Seen = 0, 
+                    Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                    Time = DateTime.Now.ToShortTimeString()});
+                
                 return new CatalogueModel
                 {
                     UniId = mainCat.UniId,
@@ -275,6 +293,7 @@ public class DataBaseAction : IDataBaseAction
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
+                            Name = "  Цена:",
                             UniId = null,
                             MainCatId = x.MainCatId,
                             PriceId = x.Id,
@@ -287,9 +306,20 @@ public class DataBaseAction : IDataBaseAction
 
             mainCat.MainCatPrices.Clear();
             mainCat.Count = 0;
-            await _context.SaveChangesAsync().ConfigureAwait(true);
+            
+            var main = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+            if (main != null)
+            {
+                main.Count = main.MainCats.Sum(x => x.Count);
+            }
 
             await transaction.CommitAsync();
+            
+            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
+                Values = mainCatId.ToString(), 
+                Description = $"Редактировано цены id={mainCatId}, ", Seen = 0, 
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
+                Time = DateTime.Now.ToShortTimeString()});
             
             return new CatalogueModel
             {
@@ -371,12 +401,14 @@ public class DataBaseAction : IDataBaseAction
 
     public async Task AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain)
     {
+        var transaction = await _context.Database.BeginTransactionAsync();
+        
         foreach (var model in zakupka)
         {
             var zakAndProd = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == model.MainCatId);
             if (zakAndProd != null)
             {
-                zakAndProd.BuyCount += model.Count;
+                zakAndProd.BuyCount += model.Count ?? 0;
             }
             else
             {
@@ -385,12 +417,10 @@ public class DataBaseAction : IDataBaseAction
                     await _context.ZakProdCounts.AddAsync(new ZakProdCount
                     {
                         MainCatId = model.MainCatId ?? 1,
-                        BuyCount = model.Count,
+                        BuyCount = model.Count ?? 0,
                         SellCount = 0
                     });
             }
-
-            await _context.SaveChangesAsync();
         }
 
         var a = new ZakMainGroup
@@ -403,15 +433,16 @@ public class DataBaseAction : IDataBaseAction
             Comment = zakMain.Comment,
             Zakupkas = zakupka.Select(x => new Zakupka
             {
-                Count = x.Count,
+                Count = x.Count ?? 0,
                 MainCatId = x.MainCatId,
-                Price = x.Price,
+                Price = x.Price ?? 0,
                 MainName = x.MainName,
                 UniValue = x.UniValue
             }).ToList()
         };
         await _context.ZakMainGroups.AddAsync(a);
-        await _context.SaveChangesAsync();
+
+        await transaction.CommitAsync();
         
         await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
             Values = a.Id.ToString(), 
@@ -426,10 +457,10 @@ public class DataBaseAction : IDataBaseAction
         var cata = new List<CatalogueModel>();
         await _context.MainCatPrices.AddRangeAsync(parts.Select(x => new MainCatPrice
         {
-            Count = x.Count,
+            Count = x.Count ?? 0,
             CurrencyId = currencyId,
             MainCatId = x.MainCatId ?? default,
-            Price = x.Price
+            Price = x.Price ?? 0
         }));
         await _context.SaveChangesAsync();
 
@@ -438,13 +469,18 @@ public class DataBaseAction : IDataBaseAction
             var item = await _context.MainCats.FindAsync(part.MainCatId);
             if (item != null)
             {
-                item.Count += part.Count;
+                item.Count += part.Count ?? 0;
                 await _context.SaveChangesAsync();
             }
 
-            var mainCat = await _context.MainCats.Include(x => x.Producer).Include(x => x.MainCatPrices)
+            var mainCat = await _context.MainCats.Include(x => x.Uni).Include(x => x.Producer).Include(x => x.MainCatPrices)
                 .ThenInclude(x => x.Currency).FirstOrDefaultAsync(x => x.Id == part.MainCatId);
             if (mainCat != null)
+            {
+                var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+                if (mainName != null)
+                    mainName.Count = mainName.MainCats.Sum(x => x.Count);
+                
                 cata.Add(new CatalogueModel
                 {
                     UniId = mainCat.UniId,
@@ -459,6 +495,7 @@ public class DataBaseAction : IDataBaseAction
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
+                            Name = "  Цена:",
                             UniId = null,
                             MainCatId = x.MainCatId,
                             PriceId = x.Id,
@@ -467,6 +504,8 @@ public class DataBaseAction : IDataBaseAction
                             CurrencyId = x.CurrencyId
                         }))
                 });
+            }
+                
             await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
                 Values = mainCat.UniValue, 
                 Description = $"Добавлена цена id={mainCat.Id}, uni_value={mainCat.UniValue}", Seen = 0, 
@@ -502,7 +541,7 @@ public class DataBaseAction : IDataBaseAction
         {
             var zakNprod = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == item.MainCatId);
             if (zakNprod != null)
-                zakNprod.BuyCount -= item.Count;
+                zakNprod.BuyCount -= item.Count ?? 0;
             await _context.SaveChangesAsync();
 
 
@@ -515,7 +554,10 @@ public class DataBaseAction : IDataBaseAction
                 if (cataCount <= count)
                 {
                     var prices = _context.MainCatPrices.Where(x => x.MainCatId == item.MainCatId);
-                    _context.MainCatPrices.RemoveRange(prices);
+                    foreach (var price in prices)
+                    {
+                        price.Count = 0;
+                    }
                     var partCatalogue = await _context.MainCats.FindAsync(item.MainCatId);
                     if (partCatalogue != null)
                         partCatalogue.Count = 0;
@@ -525,21 +567,21 @@ public class DataBaseAction : IDataBaseAction
                     count *= -1;
                     foreach (var price in cataPrices)
                     {
-                        price.Count += count;
+                        price.Count += count ?? 0;
                         count = price.Count;
                         if (count >= 0)
                             break;
                     }
 
                     foreach (var pr in cataPrices)
-                        if (pr.Count <= 0)
+                        if (pr.Count < 0)
                         {
                             var cataPrice = await _context.MainCatPrices.FindAsync(pr.Id);
                             if (cataPrice != null)
-                                _context.MainCatPrices.Remove(cataPrice);
+                                cataPrice.Count = 0;
                         }
 
-                    cataPrices.RemoveAll(x => x.Count <= 0);
+                    cataPrices.RemoveAll(x => x.Count < 0);
                 }
 
                 await _context.SaveChangesAsync();
@@ -550,6 +592,11 @@ public class DataBaseAction : IDataBaseAction
                 {
                     mainCat.Count = await _context.MainCatPrices.Where(x => x.MainCatId == item.MainCatId)
                         .SumAsync(x => x.Count);
+                    var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+                    if (mainName != null)
+                    {
+                        mainName.Count = mainName.MainCats.Sum(x => x.Count);
+                    }
                     uniIds.Add(new CatalogueModel
                     {
                         UniId = mainCat.UniId,
@@ -564,6 +611,7 @@ public class DataBaseAction : IDataBaseAction
                         Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                             new CatalogueModel
                             {
+                                Name = "  Цена:",
                                 UniId = null,
                                 MainCatId = x.MainCatId,
                                 PriceId = x.Id,
@@ -579,9 +627,7 @@ public class DataBaseAction : IDataBaseAction
         var tr = await ReCalcTransactions(transactionId);
         if (tr != null)
             _context.AgentTransactions.Remove(tr);
-        await _context.SaveChangesAsync();
-
-        await _context.SaveChangesAsync();
+        
         await transaction.CommitAsync();
         await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
             Values = transactionId.ToString(), 
@@ -591,6 +637,13 @@ public class DataBaseAction : IDataBaseAction
         return uniIds;
     }
 
+    private async Task ReCallcMainCount(int uniId)
+    {
+        var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == uniId);
+        if (mainName != null)
+            mainName.Count = mainName.MainCats.Sum(x => x.Count);
+        await _context.SaveChangesAsync();
+    }
     public async Task<IEnumerable<CatalogueModel>> EditZakupka(IEnumerable<int> deletedIds,
         IEnumerable<ZakupkaAltModel> zakupkaAlts,
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
@@ -619,7 +672,10 @@ public class DataBaseAction : IDataBaseAction
 
                 if (pricesTotalCount <= count)
                 {
-                    _context.MainCatPrices.RemoveRange(prices);
+                    foreach (var price in prices)
+                    {
+                        price.Count = 0;
+                    }
                     if (cataloguePart != null)
                     {
                         cataloguePart.Count = 0;
@@ -633,18 +689,22 @@ public class DataBaseAction : IDataBaseAction
                     {
                         price.Count += count;
                         count = price.Count;
+                        if (price.Count < 0)
+                            price.Count = 0;
                         if (count >= 0)
                             break;
                     }
 
-                    _context.MainCatPrices.RemoveRange(prices.Where(x => x.Count <= 0));
                     if (cataloguePart != null)
                     {
                         cataloguePart.Count = prices.Sum(x => x.Count);
                         uniIds.Add(cataloguePart.Id);
+                        await ReCallcMainCount(cataloguePart.UniId);
+
                     }
                 }
 
+                
                 _context.Zakupkas.Remove(zakupkaAltItem);
             }
         }
@@ -656,18 +716,20 @@ public class DataBaseAction : IDataBaseAction
                 var zaknProd = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == item.MainCatId);
                 if (zaknProd != null)
                 {
-                    zaknProd.BuyCount += item.Count;
+                    zaknProd.BuyCount += item.Count ?? 0;
                 }
                 else
                 {
                     var part = await _context.MainCats.FindAsync(item.MainCatId);
                     if (part != null)
+                    {
                         await _context.ZakProdCounts.AddAsync(new ZakProdCount
                         {
                             MainCatId = item.MainCatId ?? 1,
-                            BuyCount = item.Count,
+                            BuyCount = item.Count ?? 0,
                             SellCount = 0
                         });
+                    }
                 }
 
 
@@ -676,22 +738,23 @@ public class DataBaseAction : IDataBaseAction
                     MainCatId = item.MainCatId,
                     MainName = item.MainName,
                     UniValue = item.UniValue,
-                    Count = item.Count,
-                    Price = item.Price,
+                    Count = item.Count ?? 0,
+                    Price = item.Price ?? 0,
                     ZakId = item.ZakupkaId
                 });
                 await _context.MainCatPrices.AddAsync(new MainCatPrice
                 {
-                    Count = item.Count,
+                    Count = item.Count ?? 0,
                     CurrencyId = currency.Id ?? 0,
                     MainCatId = item.MainCatId ?? 0,
-                    Price = item.Price / currency.ToUsd
+                    Price = (item.Price ?? 0) / currency.ToUsd
                 });
                 var cata = await _context.MainCats.FindAsync(item.MainCatId);
                 if (cata != null)
                 {
-                    cata.Count = item.Count;
+                    cata.Count = item.Count ?? 0;
                     uniIds.Add(cata.Id);
+                    await ReCallcMainCount(cata.UniId);
                 }
 
                 await _context.SaveChangesAsync();
@@ -710,13 +773,13 @@ public class DataBaseAction : IDataBaseAction
 
                 if (zakupkaAlt != null)
                 {
-                    zakupkaAlt.Count = item.Count;
-                    zakupkaAlt.Price = item.Price;
+                    zakupkaAlt.Count = item.Count ?? 0;
+                    zakupkaAlt.Price = item.Price ?? 0;
                 }
 
                 var zakAndProd =
                     await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == item.MainCatId);
-                if (zakAndProd != null) zakAndProd.BuyCount += count;
+                if (zakAndProd != null) zakAndProd.BuyCount += count ?? 0;
 
 
                 await _context.SaveChangesAsync();
@@ -725,7 +788,9 @@ public class DataBaseAction : IDataBaseAction
                 {
                     if (count <= 0)
                     {
-                        _context.MainCatPrices.RemoveRange(cataPrice);
+                        foreach (var price in cataPrice)
+                            price.Count = 0;
+                        
                         if (mainCat != null)
                         {
                             mainCat.Count = 0;
@@ -736,14 +801,14 @@ public class DataBaseAction : IDataBaseAction
                     {
                         await _context.MainCatPrices.AddAsync(new MainCatPrice
                         {
-                            Count = count,
+                            Count = count ?? 0,
                             CurrencyId = currency.Id ?? 1,
                             MainCatId = item.MainCatId ?? 0,
-                            Price = item.Price / currency.ToUsd
+                            Price = (item.Price ?? 0) / currency.ToUsd
                         });
                         if (mainCat != null)
                         {
-                            mainCat.Count = count;
+                            mainCat.Count = count ?? 0;
                             uniIds.Add(mainCat.Id);
                         }
                     }
@@ -759,27 +824,27 @@ public class DataBaseAction : IDataBaseAction
                         {
                             foreach (var p in cataPrice)
                             {
-                                p.Count += count;
+                                p.Count += count ?? 0;
                                 count = p.Count;
-                                if (p.Count <= 0)
-                                    _context.MainCatPrices.Remove(p);
+                                if (p.Count < 0)
+                                    p.Count = 0;
                                 if (count >= 0)
                                     break;
                             }
 
+                            await _context.SaveChangesAsync();
                             if (mainCat != null)
                             {
-                                mainCat.Count = _context.MainCatPrices
-                                    .Where(x => x.MainCatId == item.MainCatId && x.Count > 0).Sum(x => x.Count);
+                                mainCat.Count = _context.MainCatPrices.Where(x => x.MainCatId == item.MainCatId && x.Count > 0).Sum(x => x.Count);
                                 uniIds.Add(mainCat.Id);
                             }
                         }
                         else
                         {
-                            price.Count += count;
+                            price.Count += count ?? 0;
                             if (mainCat != null)
                             {
-                                mainCat.Count += count;
+                                mainCat.Count += count ?? 0;
                                 uniIds.Add(mainCat.Id);
                             }
                         }
@@ -787,9 +852,14 @@ public class DataBaseAction : IDataBaseAction
                         await _context.SaveChangesAsync();
                     }
                 }
+
+                if (mainCat != null)
+                {
+                    await ReCallcMainCount(mainCat.UniId);
+                }
             }
 
-        var mainGroup = await _context.ZakMainGroups.FindAsync(zakupkaAlts.First().ZakupkaId);
+        var mainGroup = await _context.ZakMainGroups.FindAsync(zakupkaAlts.FirstOrDefault().ZakupkaId);
         if (mainGroup != null)
         {
             mainGroup.TotalSum = totalSum;
@@ -828,6 +898,7 @@ public class DataBaseAction : IDataBaseAction
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
+                            Name = "  Цена:",
                             UniId = null,
                             MainCatId = x.MainCatId,
                             PriceId = x.Id,
@@ -889,7 +960,10 @@ public class DataBaseAction : IDataBaseAction
                             Price = prodajaItem.InitialPrice
                         });
                     }
+
+                    await ReCallcMainCount(cataloguePart.UniId);
                 }
+                
             }
         }
 
@@ -899,20 +973,20 @@ public class DataBaseAction : IDataBaseAction
             if (item.Id == null)
             {
                 var zaknProd = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == item.MainCatId);
+                var part = await _context.MainCats.FindAsync(item.MainCatId);
                 if (zaknProd != null)
                 {
-                    zaknProd.SellCount += item.Count;
+                    zaknProd.SellCount += item.Count ?? 0;
                 }
                 else
                 {
-                    var part = await _context.MainCats.FindAsync(item.MainCatId);
                     if (part != null) ;
                     {
                         await _context.ZakProdCounts.AddAsync(new ZakProdCount
                         {
                             MainCatId = item.MainCatId ?? 1,
                             BuyCount = 0,
-                            SellCount = item.Count
+                            SellCount = item.Count ?? 0
                         });
                     }
                 }
@@ -923,8 +997,8 @@ public class DataBaseAction : IDataBaseAction
                     MainCatId = item.MainCatId,
                     MainName = item.MainName,
                     UniValue = item.UniValue,
-                    Count = item.Count,
-                    Price = item.Price,
+                    Count = item.Count ?? 0,
+                    Price = item.Price ?? 0,
                     ProdajaId = item.ProdajaId
                 });
                 await _context.SaveChangesAsync();
@@ -935,16 +1009,20 @@ public class DataBaseAction : IDataBaseAction
                     var count = item.Count * -1;
                     foreach (var pr in prices)
                     {
-                        pr.Count += count;
+                        pr.Count += count ?? 0;
                         count = pr.Count;
+                        if (pr.Count < 0)
+                            pr.Count = 0;
                         if (count >= 0)
                             break;
                     }
-
-                    foreach (var p in prices)
-                        if (item.Count <= 0)
-                            _context.MainCatPrices.Remove(p);
+                    
                     await _context.SaveChangesAsync();
+                }
+
+                if (part != null)
+                {
+                    await ReCallcMainCount(part.UniId);
                 }
             }
             else
@@ -961,14 +1039,14 @@ public class DataBaseAction : IDataBaseAction
                 var zakAndProd =
                     await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == item.MainCatId);
                 if (zakAndProd != null)
-                    zakAndProd.SellCount += count;
+                    zakAndProd.SellCount += count ?? 0;
 
                 await _context.SaveChangesAsync();
 
                 if (prodajaAlt != null)
                 {
-                    prodajaAlt.Count = item.Count;
-                    prodajaAlt.Price = item.Price;
+                    prodajaAlt.Count = item.Count ?? 0;
+                    prodajaAlt.Price = item.Price ?? 0;
                 }
 
                 if (cataPrice.Any())
@@ -978,10 +1056,10 @@ public class DataBaseAction : IDataBaseAction
                         var c = count * -1;
                         foreach (var pr in cataPrice)
                         {
-                            pr.Count += c;
+                            pr.Count += c ?? 0;
                             c = pr.Count;
-                            if (pr.Count <= 0)
-                                _context.MainCatPrices.Remove(pr);
+                            if (pr.Count < 0)
+                                pr.Count = 0;
 
                             if (c >= 0)
                                 break;
@@ -1006,18 +1084,23 @@ public class DataBaseAction : IDataBaseAction
                             await _context.MainCatPrices.AddAsync(new MainCatPrice
                             {
                                 MainCatId = mainCat.Id,
-                                Count = count * -1,
-                                Price = item.Price / currency.ToUsd,
+                                Count = (count ?? 0) * -1,
+                                Price = (item.Price ?? 0) / currency.ToUsd,
                                 CurrencyId = currency.Id ?? 2
                             });
-                            mainCat.Count += count * -1;
+                            mainCat.Count += (count?? 0) * -1;
                             uniIds.Add(mainCat.Id);
                             await _context.SaveChangesAsync();
                         }
                 }
+
+                if (mainCat != null)
+                {
+                    await ReCallcMainCount(mainCat.UniId);
+                }
             }
 
-        var mainGroup = await _context.ProdMainGroups.FindAsync(prodajaAltModels.First().ProdajaId);
+        var mainGroup = await _context.ProdMainGroups.FindAsync(prodajaAltModels.FirstOrDefault().ProdajaId);
         if (mainGroup != null)
         {
             mainGroup.TotalSum = totalSum;
@@ -1054,6 +1137,7 @@ public class DataBaseAction : IDataBaseAction
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
+                            Name = "  Цена:",
                             UniId = null,
                             MainCatId = x.MainCatId,
                             PriceId = x.Id,
@@ -1082,7 +1166,7 @@ public class DataBaseAction : IDataBaseAction
             var zakAndProd = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == model.MainCatId);
             if (zakAndProd != null)
             {
-                zakAndProd.SellCount += model.Count;
+                zakAndProd.SellCount += model.Count ?? 0;
             }
             else
             {
@@ -1092,7 +1176,7 @@ public class DataBaseAction : IDataBaseAction
                     {
                         MainCatId = model.MainCatId ?? 1,
                         BuyCount = 0,
-                        SellCount = model.Count
+                        SellCount = model.Count ?? 0
                     });
             }
 
@@ -1105,10 +1189,10 @@ public class DataBaseAction : IDataBaseAction
 
             foreach (var p in prices)
             {
-                p.Count += count;
+                p.Count += count ?? 0;
                 count = p.Count;
-                if (p.Count <= 0)
-                    _context.MainCatPrices.Remove(p);
+                if (p.Count < 0)
+                    p.Count = 0;
                 if (count >= 0)
                     break;
             }
@@ -1117,7 +1201,7 @@ public class DataBaseAction : IDataBaseAction
 
             if (mainCat != null)
             {
-                mainCat.Count -= model.Count;
+                mainCat.Count -= model.Count ?? 0;
                 catas.Add(new CatalogueModel
                 {
                     UniId = mainCat.UniId,
@@ -1132,6 +1216,7 @@ public class DataBaseAction : IDataBaseAction
                     Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                         new CatalogueModel
                         {
+                            Name = "  Цена:",
                             UniId = null,
                             MainCatId = x.MainCatId,
                             PriceId = x.Id,
@@ -1140,6 +1225,7 @@ public class DataBaseAction : IDataBaseAction
                             CurrencyId = x.CurrencyId
                         }))
                 });
+                await ReCallcMainCount(mainCat.UniId);
             }
         }
 
@@ -1153,10 +1239,10 @@ public class DataBaseAction : IDataBaseAction
             TotalSum = mainModel.TotalSum,
             Prodajas = models.Select(x => new Prodaja
             {
-                Count = x.Count,
+                Count = x.Count ?? 0,
                 MainCatId = x.MainCatId,
                 MainName = x.MainName,
-                Price = x.Price,
+                Price = x.Price ?? 0,
                 UniValue = x.UniValue,
                 InitialPrice = x.InitialPrice,
                 CurrencyId = x.CurrencyInitialId
@@ -1185,7 +1271,7 @@ public class DataBaseAction : IDataBaseAction
             {
                 var zakNprod = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == model.MainCatId);
                 if (zakNprod != null)
-                    zakNprod.SellCount -= model.Count;
+                    zakNprod.SellCount -= model.Count ?? 0;
                 await _context.SaveChangesAsync();
 
                 var prices = _context.MainCatPrices.Where(x => x.MainCatId == model.MainCatId);
@@ -1193,7 +1279,7 @@ public class DataBaseAction : IDataBaseAction
                     .ThenInclude(x => x.Currency).FirstOrDefaultAsync(x => x.Id == model.MainCatId);
                 if (prices.Any())
                 {
-                    prices.First().Count += model.Count;
+                    prices.First().Count += model.Count ?? 0;
                 }
                 else
                 {
@@ -1203,7 +1289,7 @@ public class DataBaseAction : IDataBaseAction
                         await _context.MainCatPrices.AddAsync(new MainCatPrice
                         {
                             MainCatId = model.MainCatId ?? 5923,
-                            Count = model.Count,
+                            Count = model.Count ?? 0,
                             CurrencyId = model.CurrencyInitialId,
                             Price = model.InitialPrice
                         });
@@ -1213,7 +1299,7 @@ public class DataBaseAction : IDataBaseAction
 
                 if (mainCat != null)
                 {
-                    mainCat.Count += model.Count;
+                    mainCat.Count += model.Count ?? 0;
                     catas.Add(new CatalogueModel
                     {
                         UniId = mainCat.UniId,
@@ -1228,6 +1314,7 @@ public class DataBaseAction : IDataBaseAction
                         Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                             new CatalogueModel
                             {
+                                Name = "  Цена:",
                                 UniId = null,
                                 MainCatId = x.MainCatId,
                                 PriceId = x.Id,
@@ -1237,6 +1324,8 @@ public class DataBaseAction : IDataBaseAction
                             }))
                     });
                 }
+
+                await ReCallcMainCount(model.MainCatId ?? 5923);
             }
 
         var transaction = await ReCalcTransactions(transactionId);
@@ -1399,6 +1488,7 @@ public class DataBaseAction : IDataBaseAction
                  Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
                      new CatalogueModel
                      {
+                         Name = "  Цена:",
                          UniId = null,
                          MainCatId = x.MainCatId,
                          PriceId = x.Id,

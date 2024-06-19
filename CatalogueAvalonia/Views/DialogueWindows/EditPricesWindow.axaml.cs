@@ -30,7 +30,7 @@ public partial class EditPricesWindow : Window
                 if (dc.MainCatPrices.Any())
                 {
                     Close();
-                    dc.SaveChangesCommand.Execute(null);
+                    dc.SaveChangesCommand.Execute(null);    
                 }
                 else
                 {

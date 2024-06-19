@@ -103,15 +103,15 @@ public partial class EditPurchaseViewModel : ViewModelBase
                 }
                 else
                 {
-                    item.MinCount = minCount;
+                    item.MinCount = minCount ?? 0;
                     item.CanDelete = false;
                 }
             }
 
             if (!_prevCounts.ContainsKey(item.MainCatId ?? 1))
-                _prevCounts.Add(item.MainCatId ?? 1, item.Count);
+                _prevCounts.Add(item.MainCatId ?? 1, item.Count ?? 0);
             else
-                _prevCounts[item.MainCatId ?? 1] += item.Count;
+                _prevCounts[item.MainCatId ?? 1] += item.Count ?? 0;
         }
 
 

@@ -87,7 +87,7 @@ public partial class NewProdajaViewModel : ViewModelBase
                         var overPr = (100 + OverPrice) / 100.0m;
 
                         if (partsCurr != null && SelectedCurrency != null)
-                            price = Math.Round(firstPrice.Price / partsCurr.ToUsd * SelectedCurrency.ToUsd * overPr, 2);
+                            price = Math.Round((firstPrice.Price / partsCurr.ToUsd * SelectedCurrency.ToUsd * overPr) ?? 0, 2);
 
                         _prodajaAlts.Add(new ProdajaAltModel
                         {
@@ -98,7 +98,7 @@ public partial class NewProdajaViewModel : ViewModelBase
                             UniValue = what.UniValue,
                             Price = price,
                             CurrencyInitialId = firstPrice.CurrencyId,
-                            InitialPrice = firstPrice.Price
+                            InitialPrice = firstPrice.Price ?? 0
                         });
                     }
         }

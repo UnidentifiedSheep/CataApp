@@ -175,6 +175,8 @@
                         <DataTemplate>
                             <NumericUpDown Value="{Binding Price}"
                                            BorderThickness="0"
+                                           Text="{Binding TextDecimal}"
+                                           Watermark="0,00"
                                            ValueChanged="NumericUpDownPrice_ValueChanged"
                                            Minimum="0"
                                            FormatString="{}{0:#,0.00}"

@@ -12,7 +12,6 @@ using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels;
-using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using DataBase.Data;
@@ -37,6 +36,8 @@ public class App : Application
 
         foreach (var path in dir)
             Directory.CreateDirectory($"../{path}");
+        var parth = Environment.ProcessPath!.Substring(0, Environment.ProcessPath!.LastIndexOf('\\')) + "\\Cache";
+        Directory.CreateDirectory(parth);
     }
 
     public override void Initialize()
@@ -109,8 +110,6 @@ public class App : Application
         builder.Services.AddSingleton<AgentViewModel>();
         builder.Services.AddSingleton<ZakupkaViewModel>();
         builder.Services.AddSingleton<ProdajaViewModel>();
-        builder.Services.AddSingleton<WebViewModel>();
-        builder.Services.AddSingleton<ServerStatusViewModel>();
 
         builder.Services.AddSingleton<TopModel>();
         builder.Services.AddSingleton<DataStore>();

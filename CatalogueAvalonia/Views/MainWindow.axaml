@@ -7,7 +7,6 @@
         x:Class="CatalogueAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         xmlns:view="using:CatalogueAvalonia.Views"
-        xmlns:viewItem="using:CatalogueAvalonia.Views.ViewItems"
         Icon="/Assets/Untitled.ico"
         Title="CatalogueAvalonia">
     <Grid RowDefinitions="auto, *">
@@ -21,16 +20,6 @@
                           Command="{Binding OpenProducersSettingsCommand}" />
             </MenuItem>
         </Menu>
-        <Button Grid.Row="0"
-                Content="Статус Сервера"
-                HorizontalAlignment="Right"
-                Background="Transparent">
-            <Button.Flyout>
-                <Flyout>
-                    <viewItem:ServerStatusView Height="200" Width="350" DataContext="{Binding  ViewModels[5]}"/>
-                </Flyout>
-            </Button.Flyout>
-        </Button>
         <TabControl Grid.Row="1"
                     BorderBrush="#20202020"
                     BorderThickness="0,1.8,0,0">
@@ -58,14 +47,7 @@
                 </TabItem.Header>
                 <view:ProdajaView DataContext="{Binding ViewModels[3]}" />
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <TextBlock Text="WebView"
-                               DataContext="{Binding ViewModels[4]}"
-                               IsVisible="False" />
-                </TabItem.Header>
-                <view:WebView />
-            </TabItem>
+            
         </TabControl>
     </Grid>
 </Window>

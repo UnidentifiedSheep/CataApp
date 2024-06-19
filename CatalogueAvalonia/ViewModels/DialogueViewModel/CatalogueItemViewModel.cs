@@ -57,7 +57,7 @@ public partial class CatalogueItemViewModel : ViewModelBase
                     "Номер запчасти", x => x.UniValue, new GridLength(150)),
                 new TextColumn<CatalogueModel, string>(
                     "Производитель", x => x.ProducerName, new GridLength(130)),
-                new TextColumn<CatalogueModel, decimal>(
+                new TextColumn<CatalogueModel, decimal?>(
                     "Цена", x => x.VisiblePrice, GridLength.Star),
                 new TextColumn<CatalogueModel, int>(
                     "Количество", x => x.Count, GridLength.Star)

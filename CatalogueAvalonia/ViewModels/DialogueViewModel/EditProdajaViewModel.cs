@@ -86,11 +86,11 @@ public partial class EditProdajaViewModel : ViewModelBase
         foreach (var item in _prodajaAlts)
         {
             var mainCatPrices = await _topModel.GetMainCatPricesByIdAsync(item.MainCatId ?? 5923);
-            item.MaxCount = item.Count + mainCatPrices.Sum(x => x.Count);
+            item.MaxCount = (item.Count ?? 0) + mainCatPrices.Sum(x => x.Count ?? 0);
             if (!_prevCounts.ContainsKey(item.MainCatId ?? 0))
-                _prevCounts.Add(item.MainCatId ?? 0, item.Count);
+                _prevCounts.Add(item.MainCatId ?? 0, item.Count ?? 0);
             else
-                _prevCounts[item.MainCatId ?? 0] += item.Count;
+                _prevCounts[item.MainCatId ?? 0] += item.Count ?? 0;
         }
 
         if (_currencies.Any(x => x.Id == _prodajaModel.CurrencyId))
@@ -120,7 +120,7 @@ public partial class EditProdajaViewModel : ViewModelBase
                         var overPr = (100 + OverPrice) / 100.0m;
 
                         if (partsCurr != null && SelectedCurrency != null)
-                            price = Math.Round(firstPrice.Price / partsCurr.ToUsd * SelectedCurrency.ToUsd * overPr, 2);
+                            price = Math.Round((firstPrice.Price / partsCurr.ToUsd * SelectedCurrency.ToUsd * overPr) ?? 0, 2);
 
                         _prodajaAlts.Add(new ProdajaAltModel
                         {
@@ -131,7 +131,7 @@ public partial class EditProdajaViewModel : ViewModelBase
                             UniValue = what.UniValue,
                             Price = price,
                             CurrencyInitialId = firstPrice.CurrencyId,
-                            InitialPrice = firstPrice.Price
+                            InitialPrice = firstPrice.Price ?? 0
                         });
                     }
 
@@ -147,7 +147,7 @@ public partial class EditProdajaViewModel : ViewModelBase
                 if (SelectedProdaja != null)
                 {
                     if (SelectedProdaja.Id != null && !_deletedIds.Any(x => x.Item1 == SelectedProdaja.Id))
-                        _deletedIds.Add(new Tuple<int, decimal>(SelectedProdaja.Id ?? 0, SelectedProdaja.Price));
+                        _deletedIds.Add(new Tuple<int, decimal>(SelectedProdaja.Id ?? 0, SelectedProdaja.Price ?? 0));
                     SelectedProdaja.Id = null;
                     SelectedProdaja.MainCatId = what.MainCatId;
                     SelectedProdaja.MainCatName = what.Name;
@@ -184,7 +184,7 @@ public partial class EditProdajaViewModel : ViewModelBase
         if (SelectedProdaja != null)
         {
             if (SelectedProdaja.Id != null)
-                _deletedIds.Add(new Tuple<int, decimal>(SelectedProdaja.Id ?? 0, SelectedProdaja.Price));
+                _deletedIds.Add(new Tuple<int, decimal>(SelectedProdaja.Id ?? 0, SelectedProdaja.Price ?? 0));
             _prodajaAlts.Remove(SelectedProdaja);
             IsDirty = true;
         }

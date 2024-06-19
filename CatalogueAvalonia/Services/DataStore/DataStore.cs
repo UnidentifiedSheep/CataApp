@@ -92,6 +92,7 @@ public class DataStore : ObservableRecipient
                     {
                         mainCats.Count = 0;
                         mainCats.Children.Clear();
+                        mainName.Count = mainName.Children.Sum(x => x.Count);
                     }
                 }
             }
@@ -155,7 +156,11 @@ public class DataStore : ObservableRecipient
                 if (mainName != null && mainName.Children != null)
                 {
                     var mainCats = mainName.Children.SingleOrDefault(x => x.MainCatId == what.MainCatId);
-                    if (mainCats != null) mainName.Children.ReplaceOrAdd(mainCats, what);
+                    if (mainCats != null)
+                    {
+                        mainName.Children.ReplaceOrAdd(mainCats, what);
+                        mainName.Count = mainName.Children.Sum(x => x.Count);
+                    }
                 }
             }
         }
@@ -169,7 +174,11 @@ public class DataStore : ObservableRecipient
                     if (mainName.Children != null)
                     {
                         var mainCats = mainName.Children.SingleOrDefault(x => x.MainCatId == item.MainCatId);
-                        if (mainCats != null) mainName.Children.ReplaceOrAdd(mainCats, item);
+                        if (mainCats != null)
+                        {
+                            mainName.Children.ReplaceOrAdd(mainCats, item);
+                            mainName.Count = mainName.Children.Sum(x => x.Count);
+                        }
                     }
                 }
         }

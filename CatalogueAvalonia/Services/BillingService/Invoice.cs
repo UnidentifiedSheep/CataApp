@@ -150,7 +150,7 @@ public static class Invoice
                         decimal totalSumLast = 0;
                         foreach (var part in parts)
                         {
-                            totalCount += part.Count;
+                            totalCount += part.Count ?? 0;
                             totalSumLast += part.PriceSum;
 
                             table.Cell().Border(1)

@@ -44,6 +44,8 @@ public class DataBaseProvider : IDataBaseProvider
             UniId = x.UniId,
             Name = x.Name,
             MainCatId = null,
+            RowColor = "#f2f2f2",
+            Count = x.Count,
             Children = new ObservableCollection<CatalogueModel>(x.MainCats.Select(x => new CatalogueModel
             {
                 UniId = x.UniId,
@@ -57,6 +59,7 @@ public class DataBaseProvider : IDataBaseProvider
                 TextColor = x.TextColor,
                 Children = new ObservableCollection<CatalogueModel>(x.MainCatPrices.Select(x => new CatalogueModel
                 {
+                    Name = "  Цена:",
                     UniId = null,
                     MainCatId = x.MainCatId,
                     PriceId = x.Id,
@@ -79,9 +82,12 @@ public class DataBaseProvider : IDataBaseProvider
         if (model != null)
             return new CatalogueModel
             {
+                
                 UniId = model.UniId,
                 Name = model.Name,
                 MainCatId = null,
+                RowColor = "#f2f2f2",
+                Count = model.Count,
                 Children = new ObservableCollection<CatalogueModel>(model.MainCats.Select(x => new CatalogueModel
                 {
                     UniId = x.UniId,
@@ -95,6 +101,7 @@ public class DataBaseProvider : IDataBaseProvider
                     TextColor = x.TextColor,
                     Children = new ObservableCollection<CatalogueModel>(x.MainCatPrices.Select(x => new CatalogueModel
                     {
+                        Name = "  Цена:",
                         UniId = null,
                         MainCatId = null,
                         PriceId = x.Id,

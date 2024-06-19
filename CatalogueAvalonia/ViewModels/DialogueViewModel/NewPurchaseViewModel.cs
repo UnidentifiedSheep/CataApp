@@ -87,7 +87,8 @@ public partial class NewPurchaseViewModel : ViewModelBase
                         MainCatId = what.MainCatId,
                         MainCatName = what.Name,
                         MainName = mainName,
-                        UniValue = what.UniValue
+                        UniValue = what.UniValue,
+                        Price = 0,
                     });
         }
         else if (where == "ZakupkaPartItemEdited")

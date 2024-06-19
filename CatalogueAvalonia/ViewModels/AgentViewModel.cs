@@ -34,7 +34,7 @@ public partial class AgentViewModel : ViewModelBase
 
     [ObservableProperty] private DateTime _endDate;
 
-    [ObservableProperty] private bool _isCurrencyVisible;
+    [ObservableProperty] private bool _isCurrencyVisible = true;
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(AddNewAgentCommand))]
     private bool _isDataBaseLoaded;
@@ -193,7 +193,15 @@ public partial class AgentViewModel : ViewModelBase
             var model = await _topModel.GetAgentTransactionsByIdsAsync(SelectedAgent.Id, SelectedCurrency.Id ?? default,
                 Converters.ToDateTimeSqlite(StartDate.ToString("dd.MM.yyyy")),
                 Converters.ToDateTimeSqlite(EndDate.ToString("dd.MM.yyyy")));
-            _agentTransactions.AddRange(model.Where(x => x.TransactionStatus != 3).OrderByDescending(x => x.Id));
+            _agentTransactions.AddRange(model.Where(x => x.TransactionStatus != 3).OrderByDescending(x => x.Id).ToList());
+
+            if (SelectedCurrency.Id == 1)
+            {
+                IsCurrencyVisible = false;
+                IsCurrencyVisible = true;
+            }
+            
+            
             var lastTr = _agentTransactions.FirstOrDefault();
             if (lastTr != null)
             {

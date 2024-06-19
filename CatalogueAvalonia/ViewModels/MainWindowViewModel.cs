@@ -7,11 +7,11 @@ using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
-using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace CatalogueAvalonia.ViewModels;
 
@@ -26,8 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel,
         AgentViewModel agentViewModel, ZakupkaViewModel zakupkaViewModel, DataStore dataStore,
-        IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel,
-        WebViewModel webViewModel, ServerStatusViewModel serverStatusViewModel) : base(messenger)
+        IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel) : base(messenger)
     {
         _dataStore = dataStore;
         _topModel = topModel;
@@ -37,9 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
             catalogueViewModel,
             agentViewModel,
             zakupkaViewModel,
-            prodajaViewModel,
-            webViewModel,
-            serverStatusViewModel
+            prodajaViewModel
         ];
         Messenger.Register<ActionMessage>(this, OnDataBaseLoaded);
     }
@@ -63,5 +60,10 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         await _dialogueService.OpenDialogue(new ProducerWindow(),
             new ProducerViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
+    }
+
+    public IMessenger GetMessenger()
+    {
+        return Messenger;
     }
 }

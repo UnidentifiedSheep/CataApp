@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using MsBox.Avalonia;
@@ -96,7 +97,7 @@ public partial class NewPurchaseWindow : Window
         {
             if (dcN.Zakupka.Any())
             {
-                var whereZero = dcN.Zakupka.Where(x => x.Count <= 0 || x.Price <= 0);
+                var whereZero = dcN.Zakupka.Where(x => x.Count <= 0 || x.Price <= 0.0099m || x.Count == null || x.Price == null);
                 if (!whereZero.Any())
                 {
                     if (dcN.SelectedAgent != null)
@@ -133,7 +134,7 @@ public partial class NewPurchaseWindow : Window
             {
                 if (dcE.IsDirty)
                 {
-                    var whereZero = dcE.Zakupka.Where(x => x.Count <= 0 || x.Price <= 0);
+                    var whereZero = dcE.Zakupka.Where(x => x.Count <= 0 || x.Price <= 0.0099m || x.Count == null || x.Price == null);
                     if (!whereZero.Any())
                     {
                         if (dcE.SelectedAgent != null)

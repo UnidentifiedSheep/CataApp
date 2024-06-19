@@ -5,9 +5,13 @@
         mc:Ignorable="d"
 		MinWidth="500" MinHeight="650" Width="500" Height="650"
         x:Class="CatalogueAvalonia.Views.DialogueWindows.EditPricesWindow"
+        xmlns:con="using:CatalogueAvalonia.Core.ConverterV"
 		xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
         Title="Редактировать цены"
 		x:CompileBindings="False">
+	<Window.Resources>
+		<con:NullBlocker x:Key="NullBlocker"/>
+	</Window.Resources>
 	<Design.DataContext>
 		<vm:EditPricesViewModel/>
 	</Design.DataContext>
@@ -41,8 +45,9 @@
 						<DataTemplate>
 							<NumericUpDown Value="{Binding Price}"
 										   BorderThickness="0"
+										   Text="{Binding RowDecimal}"
 										   IsReadOnly="{Binding IsReadOnly}"
-										   FormatString="{}{0:#,0.00}"
+										   FormatString="0.00"
 										   ShowButtonSpinner="False"/>
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>
@@ -55,6 +60,7 @@
 										   BorderThickness="0"
 										   IsReadOnly="{Binding IsReadOnly}"
 										   Minimum="0"
+										   Text="{Binding RowInt}"
 										   Maximum="2147483647"
 										   ShowButtonSpinner="False"/>
 						</DataTemplate>

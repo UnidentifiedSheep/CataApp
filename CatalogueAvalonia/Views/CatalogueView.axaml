@@ -97,16 +97,10 @@
                       Source="{Binding CatalogueModels}">
             <TreeDataGrid.Styles>
                 <Style Selector="TreeDataGrid TreeDataGridRow">
-                    <Setter Property="Background" Value="{Binding RowColor}" />
-                </Style>
-                <Style Selector="TreeDataGrid TreeDataGridRow">
-                    <Setter Property="Foreground" Value="{Binding TextColor}"/>
-                </Style>
-                <Style Selector="TreeDataGrid TreeDataGridRow">
-                    <Setter Property="BorderBrush" Value="DarkGray"/>
-                </Style>
-                <Style Selector="TreeDataGrid TreeDataGridRow">
                     <Setter Property="BorderThickness" Value="0, 1,0 ,0"/>
+                    <Setter Property="BorderBrush" Value="DarkGray"/>
+                    <Setter Property="Foreground" Value="{Binding TextColor}"/>
+                    <Setter Property="Background" Value="{Binding RowColor}" />
                 </Style>
             </TreeDataGrid.Styles>
             <TreeDataGrid.ContextMenu>

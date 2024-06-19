@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
@@ -73,7 +74,7 @@ public partial class CatalogueViewModel : ViewModelBase
                     "Номер запчасти", x => x.UniValue, new GridLength(150)),
                 new TextColumn<CatalogueModel, string>(
                     "Производитель", x => x.ProducerName, new GridLength(130)),
-                new TextColumn<CatalogueModel, decimal>(
+                new TextColumn<CatalogueModel, decimal?>(
                     "Цена", x => x.VisiblePrice, GridLength.Star),
                 new TextColumn<CatalogueModel, int>(
                     "Количество", x => x.Count, GridLength.Star)
@@ -269,20 +270,23 @@ private int _imgCount = 0;
         }
     }
 
+    [RelayCommand]
+    private async Task FilterByName(string value)
+    {
+        _catalogueModels.Clear();
+        await foreach (var res in DataFiltering.FilterByMainName(_dataStore.CatalogueModels, value, new CancellationToken()))
+            _catalogueModels.Add(res);
+    }
+
     partial void OnPartNameChanged(string value)
     {
-        var filter = new AsyncRelayCommand(async token =>
-        {
-            _catalogueModels.Clear();
-            await foreach (var res in DataFiltering.FilterByMainName(_dataStore.CatalogueModels, value, token))
-                _catalogueModels.Add(res);
-        });
+
         if (_isFilteringByUniValue)
         {
         }
         else if (value.Length >= 3)
         {
-            filter.Execute(null);
+            FilterByNameCommand.Execute(value);
         }
         else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
         {
@@ -291,18 +295,27 @@ private int _imgCount = 0;
         }
     }
 
+    [RelayCommand]
+    private async Task FilterUniValue(string value)
+    {
+        _catalogueModels.Clear();
+        await foreach (var res in DataFiltering.FilterByUniValue(_dataStore.CatalogueModels, value, new CancellationToken()))
+            _catalogueModels.Add(res);
+    }
+
     partial void OnPartUniValueChanged(string value)
     {
-        var filter = new AsyncRelayCommand(async token =>
-        {
-            _catalogueModels.Clear();
-            await foreach (var res in DataFiltering.FilterByUniValue(_dataStore.CatalogueModels, value, token))
-                _catalogueModels.Add(res);
-        });
         if (value.Length >= 2)
         {
-            filter.Execute(null);
+            FilterUniValueCommand.Execute(value);
             _isFilteringByUniValue = true;
+            if (_catalogueModels.Count <= 2)
+            {
+                for (int i = 0; i < _catalogueModels.Count; i++)
+                {
+                    CatalogueModels.Expand(i);
+                }
+            }
         }
         else if (value.Length <= 1 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
         {

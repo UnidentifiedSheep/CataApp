@@ -37,7 +37,7 @@ public partial class NewProdajaWindow : Window
             if (e.NewValue != null)
                 if (dcN.SelectedProdaja != null)
                 {
-                    dcN.SelectedProdaja.Price = (decimal)e.NewValue;
+                    dcN.SelectedProdaja.Price = e.NewValue;
                     dcN.TotalSum = Math.Round(dcN.Prodaja.Sum(x => x.PriceSum), 2);
                 }
         }
@@ -47,7 +47,7 @@ public partial class NewProdajaWindow : Window
                 if (dcE.SelectedProdaja != null)
                 {
                     dcE.IsDirty = true;
-                    dcE.SelectedProdaja.Price = (decimal)e.NewValue;
+                    dcE.SelectedProdaja.Price = e.NewValue;
                     dcE.TotalSum = Math.Round(dcE.Prodaja.Sum(x => x.PriceSum), 2);
                 }
         }
@@ -96,7 +96,7 @@ public partial class NewProdajaWindow : Window
         {
             if (dcN.Prodaja.Any())
             {
-                var whereZero = dcN.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0);
+                var whereZero = dcN.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0.0099m || x.Count == null || x.Price == null);
                 if (!whereZero.Any())
                 {
                     if (dcN.SelectedAgent != null)
@@ -134,7 +134,7 @@ public partial class NewProdajaWindow : Window
             {
                 if (dcE.IsDirty)
                 {
-                    var whereZero = dcE.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0);
+                    var whereZero = dcE.Prodaja.Where(x => x.Count <= 0 || x.Price <= 0.0099m || x.Count == null || x.Price == null);
                     if (!whereZero.Any())
                     {
                         if (dcE.SelectedAgent != null)

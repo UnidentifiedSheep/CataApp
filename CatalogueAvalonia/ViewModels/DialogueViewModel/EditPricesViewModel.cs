@@ -8,6 +8,7 @@ using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using DataBase.Data;
 using DynamicData;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel
@@ -80,19 +81,20 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 
 			GetPricesCommand.Execute(null);
 		}
+		
 
 		[RelayCommand]
 		private async Task SaveChanges()
 		{
 			BeforeSave();
 			var endCount = _mainCatPrices.Sum(x => x.Count) - _totalCountStart;
-			CatalogueModel? model = await _topModel.EditMainCatPricesAsync(_mainCatPrices, _mainCatId, endCount);
-			if (_mainCatPrices.Any() && (_mainCatPrices.Where(x => x.IsDirty).Any() || IsDirty))
+			CatalogueModel? model = await _topModel.EditMainCatPricesAsync(_mainCatPrices, _mainCatId, endCount ?? 0);
+			if (_mainCatPrices.Any() && (_mainCatPrices.Any(x => x.IsDirty) || IsDirty))
 			{
 				Messenger.Send(new EditedMessage(new ChangedItem
 					{ Where = "CataloguePrices", Id = _mainCatId, What = model }));
 			}
-			else if (!_mainCatPrices.Any() && (_mainCatPrices.Where(x => x.IsDirty).Any() || IsDirty) && model != null)
+			else if (!_mainCatPrices.Any() && (_mainCatPrices.Any(x => x.IsDirty) || IsDirty) && model != null)
 			{
 				Messenger.Send(new DeletedMessage(new DeletedItem
 					{ Id = _mainCatId, Where = "CataloguePrices", SecondId = model.UniId }));
@@ -101,9 +103,13 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 
 		private void BeforeSave()
 		{
-			var usdCurrency = _currencies.Where(x => x.Id == 2).SingleOrDefault();
+			var usdCurrency = _currencies.SingleOrDefault(x => x.Id == 2);
 
-			_mainCatPrices.RemoveMany(_mainCatPrices.Where(x => x.Count <= 0 || x.Price <= 0));
+			if (_mainCatPrices.Any(x => x.Count < 0 || x.Price <= 0.0099m))
+			{
+				IsDirty = true;
+				_mainCatPrices.RemoveMany(_mainCatPrices.Where(x => x.Count < 0 || x.Price <= 0.0099m));
+			}
 			foreach (var item in _mainCatPrices)
 			{
 				if (item.SelectedCurrency == null)
@@ -117,7 +123,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				}
 			}
 
-			_mainCatPrices.RemoveMany(_mainCatPrices.Where(x => x.Count <= 0 || x.Price <= 0));
+			_mainCatPrices.RemoveMany(_mainCatPrices.Where(x => x.Count < 0 || x.Price <= 0.0099m));
 		}
 
 		[RelayCommand]
@@ -126,7 +132,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 			_mainCatPrices.AddRange(await _topModel.GetMainCatPricesByIdAsync(_mainCatId));
 			foreach (var item in _mainCatPrices)
 			{
-				_totalCountStart += item.Count;
+				_totalCountStart += item.Count ?? 0;
 				item.Currency = new ObservableCollection<CurrencyModel>(_currencies.Where(x => x.Id != 1));
 				item.SelectedCurrency = item.Currency.SingleOrDefault(x => x.Id == item.CurrencyId);
 				item.IsEnabled = IsVisible;
@@ -143,10 +149,12 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				Id = null,
 				Count = 0,
 				Currency = new ObservableCollection<CurrencyModel>(_currencies.Where(x => x.Id != 1)),
-				CurrencyId = 1,
+				SelectedCurrency = _currencies.SingleOrDefault(x => x.Id == 2),
+				CurrencyId = 2,
 				MainCatId = _mainCatId,
 				Price = 0,
-				IsDirty = false
+				IsDirty = false,
+				IsEnabled = true
 			});
 			IsDirty = true;
 		}

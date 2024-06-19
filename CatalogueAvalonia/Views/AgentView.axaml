@@ -133,9 +133,9 @@
                           Grid.RowSpan="2"
                           BorderThickness="1.5,0,0,0"
                           HorizontalAlignment="Stretch" />
-            <Grid Column="2"
+            <Grid Row="0" 
+                  Column="2"
                   RowDefinitions="*,50">
-
                 <DataGrid Grid.Row="0"
                           SelectedItem="{Binding SelectedTransaction}"
                           SelectionMode="Single"
@@ -181,8 +181,7 @@
                                             Width="*" />
                         <DataGridTextColumn Header="Валюта"
                                             Binding="{Binding CurrencySign}"
-                                            Width="auto"
-                                            IsVisible="{Binding IsCurrencyVisible}" />
+                                            Width="auto"/>
                     </DataGrid.Columns>
 
                     <DataGrid.ContextMenu>
