@@ -38,7 +38,8 @@ public partial class AddNewTransactionViewModel : ViewModelBase
 
     [ObservableProperty] private CurrencyModel? _selectedCurrency;
 
-    [ObservableProperty] private decimal _transactionSum;
+    [ObservableProperty] private decimal? _transactionSum;
+    [ObservableProperty] private string? _transactionText = "0";
 
     public AddNewTransactionViewModel()
     {
@@ -116,6 +117,20 @@ public partial class AddNewTransactionViewModel : ViewModelBase
         }
     }
 
+    partial void OnTransactionSumChanged(decimal? value)
+    {
+        if (value == null)
+            TransactionSum = 0m;
+    }
+
+    partial void OnTransactionTextChanged(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            value = "0,00";
+        TransactionText = value.Replace('.', ',');
+        
+    }
+
     partial void OnConvertFromCurrChanged(bool value)
     {
         if (value)
@@ -129,15 +144,15 @@ public partial class AddNewTransactionViewModel : ViewModelBase
     {
         if (Action == 0)
         {
-            await AddNewTransactionNormal(TransactionSum);
+            await AddNewTransactionNormal(TransactionSum ?? 0);
         }
         else if (Action == 2)
         {
-            await AddNewTransactionNormal(-1 * TransactionSum);
+            await AddNewTransactionNormal(-1 * (TransactionSum ?? 0));
         }
         else if (Action == 3)
         {
-            await AddNewTransactionNormal(TransactionSum);
+            await AddNewTransactionNormal(TransactionSum ?? 0);
         }
         else if (Action == 1)
         {
@@ -153,7 +168,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
 
                     var lastTransaction =
                         await _topModel.GetLastTransactionAsync(_agentId, SelectedCurrency.Id ?? default);
-                    var sum = -1 * TransactionSum / SelectedConvertCurrency.ToUsd * SelectedCurrency.ToUsd;
+                    decimal sum = -1 * (TransactionSum ?? 0) / SelectedConvertCurrency.ToUsd * SelectedCurrency.ToUsd;
                     var id = await _topModel.AddNewTransactionAsync(new AgentTransactionModel
                     {
                         AgentId = _agentId,
@@ -168,7 +183,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
             }
             else
             {
-                await AddNewTransactionNormal(TransactionSum);
+                await AddNewTransactionNormal(TransactionSum ?? 0);
             }
         }
     }

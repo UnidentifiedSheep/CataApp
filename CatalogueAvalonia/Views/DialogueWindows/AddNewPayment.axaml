@@ -37,6 +37,7 @@
                            FormatString="{}{0:#,0.00}"
                            Minimum="0"
                            Value="{Binding TransactionSum}"
+                           Text="{Binding TransactionText}"
                            ShowButtonSpinner="False"
                            Grid.Row="0"
                            Height="20" />

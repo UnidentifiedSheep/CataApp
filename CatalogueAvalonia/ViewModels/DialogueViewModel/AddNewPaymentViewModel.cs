@@ -40,7 +40,8 @@ public partial class AddNewPaymentViewModel : ViewModelBase
 
     [ObservableProperty] private CurrencyModel? _selectedCurrency;
 
-    [ObservableProperty] private decimal _transactionSum;
+    [ObservableProperty] private decimal? _transactionSum;
+    [ObservableProperty] private string? _transactionText = "0";
     
     public AddNewPaymentViewModel()
     {
@@ -76,6 +77,20 @@ public partial class AddNewPaymentViewModel : ViewModelBase
         else
             IsVisAndEnb = false;
     }
+    partial void OnTransactionSumChanged(decimal? value)
+    {
+        if (value == null)
+            TransactionSum = 0m;
+    }
+
+    partial void OnTransactionTextChanged(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            value = "0,00";
+        TransactionText = value.Replace('.', ',');
+        
+    }
+    
     [RelayCommand]
     private async Task AddNewTransactionNormal(decimal transactionSum)
     {
@@ -111,13 +126,13 @@ public partial class AddNewPaymentViewModel : ViewModelBase
         {
             if (SelectedCurrency != null && SelectedConvertCurrency != null)
             {
-                var sum = TransactionSum / SelectedConvertCurrency.ToUsd * SelectedCurrency.ToUsd; 
+                decimal sum = (TransactionSum ?? 0) / SelectedConvertCurrency.ToUsd * SelectedCurrency.ToUsd; 
                 await AddNewTransactionNormal(sum);
             }
         }
         else
         {
-            await AddNewTransactionNormal(TransactionSum);
+            await AddNewTransactionNormal(TransactionSum ?? 0);
         }
     }
 }

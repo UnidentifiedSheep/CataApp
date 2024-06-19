@@ -38,6 +38,7 @@
                            Grid.ColumnSpan="2"
                            Minimum="{Binding MinTrSum}"
                            FormatString="{}{0:#,0.00}"
+                           Text="{Binding TransactionText}"
                            Value="{Binding TransactionSum}"
                            ShowButtonSpinner="False"
                            Grid.Row="0"
