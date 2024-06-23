@@ -27,7 +27,7 @@ public interface IDataBaseAction
     Task<IEnumerable<CatalogueModel>> DeleteZakupkaWithCountReCalc(int transactionId,
         IEnumerable<ZakupkaAltModel> zakupkaAltModels);
 
-    Task<IEnumerable<CatalogueModel>> EditZakupka(IEnumerable<int> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts,
+    Task<IEnumerable<CatalogueModel>> EditZakupka(IEnumerable<Tuple<int,int>> deletedIds, IEnumerable<ZakupkaAltModel> zakupkaAlts,
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
         string comment);
 

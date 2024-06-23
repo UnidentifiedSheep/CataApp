@@ -34,7 +34,7 @@ public partial class EditPurchaseViewModel : ViewModelBase
 
     [ObservableProperty] private bool _convertToUsd = true;
 
-    private readonly List<int> _deletedIds = new();
+    private readonly List<Tuple<int, int>> _deletedIds = new();
 
     [ObservableProperty] private bool _isVisibleConverter;
 
@@ -88,14 +88,20 @@ public partial class EditPurchaseViewModel : ViewModelBase
     [RelayCommand]
     private async Task LoadZakupki()
     {
+        var beenIds = new Dictionary<int, int>();
         _zakupka.AddRange(await _topModel.GetZakAltGroup(_zakupkaMainGroup.Id));
 
         foreach (var item in _zakupka)
         {
             var diff = await _topModel.CanDeleteProdaja(item.MainCatId ?? 1);
+            
+            
             if (diff != null)
             {
-                var minCount = item.Count - (diff ?? 0);
+                if (!beenIds.ContainsKey(item.MainCatId ?? 0))
+                    beenIds.Add(item.MainCatId ?? 0, diff ?? 0);
+                var minCount = item.Count - beenIds[item.MainCatId ?? 0];
+                beenIds[item.MainCatId ?? 0] -= item.Count ?? 0;
                 if (minCount <= 0)
                 {
                     item.MinCount = 0;
@@ -158,8 +164,8 @@ public partial class EditPurchaseViewModel : ViewModelBase
             {
                 if (SelectedZakupka != null)
                 {
-                    if (SelectedZakupka.Id != null && !_deletedIds.Contains(SelectedZakupka.Id ?? 0))
-                        _deletedIds.Add(SelectedZakupka.Id ?? 0);
+                    if (SelectedZakupka.Id != null && !_deletedIds.Any(x => x.Item1 == SelectedZakupka.Id && x.Item2 == SelectedZakupka.MainCatId))
+                        _deletedIds.Add(new Tuple<int, int>(SelectedZakupka.Id ?? 0, SelectedZakupka.MainCatId??0));
                     SelectedZakupka.Id = null;
                     SelectedZakupka.MainCatId = what.MainCatId;
                     SelectedZakupka.MainCatName = what.Name;
@@ -206,13 +212,13 @@ public partial class EditPurchaseViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task DeletePart(Window parent)
+    private async Task RemovePart(Window parent)
     {
         if (SelectedZakupka != null)
         {
             if (SelectedZakupka.CanDelete)
             {
-                if (SelectedZakupka.Id != null) _deletedIds.Add(SelectedZakupka.Id ?? 0);
+                if (SelectedZakupka.Id != null) _deletedIds.Add(new Tuple<int, int>(SelectedZakupka.Id ?? 0, SelectedZakupka.MainCatId??0));
                 _zakupka.Remove(SelectedZakupka);
                 IsDirty = true;
             }
@@ -244,7 +250,7 @@ public partial class EditPurchaseViewModel : ViewModelBase
     {
         foreach (var item in altModels)
             if (item.Id != null)
-                _deletedIds.Add(item.Id ?? 0);
+                _deletedIds.Add(new Tuple<int, int>(item.Id ?? 0, item.MainCatId??0));
         _zakupka.RemoveMany(altModels);
     }
 

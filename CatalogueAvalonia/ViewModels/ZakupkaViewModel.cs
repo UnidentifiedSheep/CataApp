@@ -186,12 +186,20 @@ public partial class ZakupkaViewModel : ViewModelBase
             var canDelete = false;
             var tfList = new List<bool>();
             ZakupkaAltModel? model = null;
+            var haveBeen = new Dictionary<int, int>();
+            
             foreach (var item in _altGroup)
             {
                 var diff = await _topModel.CanDeleteProdaja(item.MainCatId);
                 if (diff != null)
                 {
+                    if (haveBeen.ContainsKey(item.MainCatId ?? 0))
+                        diff =haveBeen[item.MainCatId ?? 0];
+                    else
+                        haveBeen.Add(item.MainCatId??0, diff??0);
+                    
                     var itog = (diff ?? 0) - item.Count;
+                    haveBeen[item.MainCatId ?? 0] -= item.Count??0;
                     if (itog >= 0)
                     {
                         tfList.Add(true);

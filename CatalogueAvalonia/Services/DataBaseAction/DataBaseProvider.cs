@@ -296,10 +296,12 @@ public class DataBaseProvider : IDataBaseProvider
                 {
                     Id = item.Id,
                     Count = item.Count,
+                    TextCount = Convert.ToString(item.Count),
                     MainCatId = item.MainCatId,
                     MainCatName = item.MainCat.Name,
                     MainName = item.MainName,
                     Price = item.Price,
+                    TextDecimal = Convert.ToString(item.Price),
                     UniValue = item.MainCat.UniValue,
                     ZakupkaId = item.ZakId
                 });
@@ -308,10 +310,12 @@ public class DataBaseProvider : IDataBaseProvider
                 {
                     Id = item.Id,
                     Count = item.Count,
+                    TextCount = Convert.ToString(item.Count),
                     MainCatId = item.MainCatId,
                     MainCatName = null,
                     MainName = item.MainName,
                     Price = item.Price,
+                    TextDecimal = Convert.ToString(item.Price),
                     UniValue = item.UniValue,
                     ZakupkaId = item.ZakId
                 });
@@ -366,11 +370,14 @@ public class DataBaseProvider : IDataBaseProvider
                 list.Add(new ProdajaAltModel
                 {
                     Id = item.Id,
+                    MaxCount = item.Count,
                     Count = item.Count,
+                    TextCont = Convert.ToString(item.Count),
                     MainCatId = item.MainCatId,
                     MainCatName = item.MainCat.Name,
                     MainName = item.MainName,
                     Price = item.Price,
+                    TextDecimal = Convert.ToString(item.Price),
                     UniValue = item.MainCat.UniValue,
                     ProdajaId = item.ProdajaId,
                     ProducerName = item.MainCat.Producer.ProducerName,
@@ -382,10 +389,13 @@ public class DataBaseProvider : IDataBaseProvider
                 {
                     Id = item.Id,
                     Count = item.Count,
+                    MaxCount = item.Count,
+                    TextCont = Convert.ToString(item.Count),
                     MainCatId = item.MainCatId,
                     MainCatName = null,
                     MainName = item.MainName,
                     Price = item.Price,
+                    TextDecimal = Convert.ToString(item.Price),
                     UniValue = item.UniValue,
                     ProdajaId = item.ProdajaId
                 });

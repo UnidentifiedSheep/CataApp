@@ -1,6 +1,7 @@
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using MsBox.Avalonia;
 
@@ -42,4 +43,5 @@ public partial class AddNewPartView : Window
     {
         Close();
     }
+    
 }

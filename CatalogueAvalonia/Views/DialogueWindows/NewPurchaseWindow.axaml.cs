@@ -24,66 +24,6 @@ public partial class NewPurchaseWindow : Window
         _viewModelName = viewModelName;
     }
 
-    private void NumericUpDownPrice_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
-    {
-        EditPurchaseViewModel? dcE = null;
-        NewPurchaseViewModel? dcN = null;
-        if (_viewModelName == "NewPurchaseViewModel")
-            dcN = (NewPurchaseViewModel?)DataContext;
-        else if (_viewModelName == "EditPurchaseViewModel")
-            dcE = (EditPurchaseViewModel?)DataContext;
-
-        if (dcN != null)
-        {
-            if (e.NewValue != null)
-                if (dcN.SelectedZakupka != null)
-                {
-                    dcN.SelectedZakupka.Price = (decimal)e.NewValue;
-                    dcN.TotalSum = Math.Round(dcN.Zakupka.Sum(x => x.PriceSum), 2);
-                }
-        }
-        else if (dcE != null)
-        {
-            if (e.NewValue != null)
-                if (dcE.SelectedZakupka != null)
-                {
-                    dcE.IsDirty = true;
-                    dcE.SelectedZakupka.Price = (decimal)e.NewValue;
-                    dcE.TotalSum = Math.Round(dcE.Zakupka.Sum(x => x.PriceSum), 2);
-                }
-        }
-    }
-
-    private void NumericUpDownCount_ValueChanged(object? sender, NumericUpDownValueChangedEventArgs e)
-    {
-        EditPurchaseViewModel? dcE = null;
-        NewPurchaseViewModel? dcN = null;
-        if (_viewModelName == "NewPurchaseViewModel")
-            dcN = (NewPurchaseViewModel?)DataContext;
-        else if (_viewModelName == "EditPurchaseViewModel")
-            dcE = (EditPurchaseViewModel?)DataContext;
-
-        if (dcN != null)
-        {
-            if (e.NewValue != null)
-                if (dcN.SelectedZakupka != null)
-                {
-                    dcN.SelectedZakupka!.Count = (int)e.NewValue;
-                    dcN.TotalSum = Math.Round(dcN.Zakupka.Sum(x => x.PriceSum), 2);
-                }
-        }
-        else if (dcE != null)
-        {
-            if (e.NewValue != null)
-                if (dcE.SelectedZakupka != null)
-                {
-                    dcE.IsDirty = true;
-                    dcE.SelectedZakupka!.Count = (int)e.NewValue;
-                    dcE.TotalSum = Math.Round(dcE.Zakupka.Sum(x => x.PriceSum), 2);
-                }
-        }
-    }
-
     private async void SaveButt_Clicked(object sender, RoutedEventArgs e)
     {
         EditPurchaseViewModel? dcE = null;
@@ -187,5 +127,24 @@ public partial class NewPurchaseWindow : Window
     private void CancleButt_Clicked(object sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void DataGrid_OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    {
+        EditPurchaseViewModel? dcE = null;
+        NewPurchaseViewModel? dcN = null;
+        if (_viewModelName == "NewPurchaseViewModel")
+            dcN = (NewPurchaseViewModel?)DataContext;
+        else if (_viewModelName == "EditPurchaseViewModel")
+            dcE = (EditPurchaseViewModel?)DataContext;
+
+        if (dcN != null)
+            dcN.TotalSum = dcN.Zakupka.Sum(x => x.PriceSum);
+        else if (dcE != null)
+        {
+            dcE.TotalSum = dcE.Zakupka.Sum(x => x.PriceSum);
+            dcE.IsDirty = true;
+        }
+        
     }
 }

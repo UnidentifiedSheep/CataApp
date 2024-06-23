@@ -590,7 +590,7 @@ public class TopModel
         }
     }
 
-    public async Task<IEnumerable<CatalogueModel>> EditZakupkaAsync(IEnumerable<int> deletedIds,
+    public async Task<IEnumerable<CatalogueModel>> EditZakupkaAsync(IEnumerable<Tuple<int,int>> deletedIds,
         IEnumerable<ZakupkaAltModel> zakupkaAlts, Dictionary<int, int> lastCounts,
         CurrencyModel currency, decimal totalSum, string date, int transactionId, string comment)
     {

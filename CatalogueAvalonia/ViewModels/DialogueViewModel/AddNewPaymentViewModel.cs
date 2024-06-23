@@ -60,6 +60,7 @@ public partial class AddNewPaymentViewModel : ViewModelBase
         _agentId = transactionData.AgentId;
         Date = DateTime.Now.Date;
         TransactionSum = transactionData.TransactionSum;
+        
         _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
         SelectedCurrency = _currencies.FirstOrDefault(x => x.Id == transactionData.CurrencyId);
         OnStart();
@@ -68,7 +69,14 @@ public partial class AddNewPaymentViewModel : ViewModelBase
     private void OnStart()
     {
         if (TransactionSum < 0)
+        {
             TransactionSum *= -1;
+            TransactionText = (TransactionData!.TransactionSum * (-1)).ToString();
+        }
+        else
+        {
+            TransactionText = TransactionData!.TransactionSum.ToString();
+        }
     }
     partial void OnConvertFromCurrChanged(bool value)
     {
@@ -116,10 +124,14 @@ public partial class AddNewPaymentViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task AddTransaction()
+    private async Task AddTransaction(bool payAll)
     {
-        if (TransactionData is { TransactionSum: > 0 })
+        if (TransactionData!.TransactionSum < 0 && payAll)
             TransactionSum *= -1;
+        else if (TransactionData!.TransactionSum > 0)
+        {
+            TransactionSum *= -1;
+        }
         
         
         if (ConvertFromCurr)

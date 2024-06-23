@@ -26,35 +26,65 @@ public partial class EditCatalogueWindow : Window
         var dc = (EditCatalogueViewModel?)DataContext;
         if (dc != null)
         {
-            if (dc.IsDirty)
+            if (dc.CurrAction == 0)
             {
-                if (dc.Catalogues.Any())
+                if (dc.IsDirty)
                 {
-                    Close();
-                    dc.SaveChangesCommand.Execute(null);
-                }
-                else
-                {
-                    var res = await MessageBoxManager.GetMessageBoxStandard
-                    (
-                        "Список запчастей пуст",
-                        "Вы уверены что хотите удалить группу запчастей?",
-                        ButtonEnum.YesNo
-                    ).ShowWindowDialogAsync(this);
-                    if (res == ButtonResult.Yes)
+                    if (dc.Catalogues.Any())
                     {
                         Close();
-                        dc.DeleteGroupCommand.Execute(null);
+                        dc.SaveChangesCommand.Execute(null);
                     }
                     else
                     {
-                        Close();
+                        var res = await MessageBoxManager.GetMessageBoxStandard
+                        (
+                            "Список запчастей пуст",
+                            "Вы уверены что хотите удалить группу запчастей?",
+                            ButtonEnum.YesNo
+                        ).ShowWindowDialogAsync(this);
+                        if (res == ButtonResult.Yes)
+                        {
+                            Close();
+                            dc.DeleteGroupCommand.Execute(null);
+                        }
+                        else
+                        {
+                            Close();
+                        }
                     }
                 }
+                else
+                {
+                    Close();
+                }
             }
-            else
+            else if (dc.CurrAction == 1)
             {
-                Close();
+                if (dc.Catalogues.Any())
+                {
+                    if (!string.IsNullOrEmpty(dc.NameOfPart))
+                    {
+                        Close();
+                        dc.AddToCatalogueCommand.Execute(null);
+                    }
+                    else
+                    {
+                        await MessageBoxManager.GetMessageBoxStandard
+                        (
+                            "?",
+                            "Введите название."
+                        ).ShowWindowDialogAsync(this);
+                    }
+                }
+                else
+                {
+                    await MessageBoxManager.GetMessageBoxStandard
+                    (
+                        "?",
+                        "Список запчастей пуст"
+                    ).ShowWindowDialogAsync(this);
+                }
             }
         }
     }

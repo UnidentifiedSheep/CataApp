@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -10,6 +11,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using Newtonsoft.Json;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel;
 
@@ -52,6 +54,7 @@ public partial class AddNewPartViewModel : ViewModelBase
     partial void OnPartsChanged(string value)
     {
         var filterSlashes = new AsyncRelayCommand(async () => { parts = await DataFiltering.FilterSlashes(value); });
+        
         if (value.Length >= 2)
         {
             parts.Clear();
@@ -69,6 +72,7 @@ public partial class AddNewPartViewModel : ViewModelBase
             _catalogueModels.Clear();
         }
     }
+    
 
     [RelayCommand]
     private async Task filterProducers(string value)

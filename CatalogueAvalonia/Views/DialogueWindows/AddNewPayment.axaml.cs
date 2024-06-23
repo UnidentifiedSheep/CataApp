@@ -23,14 +23,14 @@ public partial class AddNewPayment : Window
                 {
                     if (!dc.ConvertFromCurr)
                     {
-                        dc.AddTransactionCommand.Execute(null);
+                        dc.AddTransactionCommand.Execute(false);
                         Close();
                     }
                     else
                     {
                         if (dc.SelectedConvertCurrency != null)
                         {
-                            dc.AddTransactionCommand.Execute(null);
+                            dc.AddTransactionCommand.Execute(false);
                             Close();
                         }
                         else
@@ -67,7 +67,7 @@ public partial class AddNewPayment : Window
             {
                 dc.TransactionSum = dc.TransactionData.TransactionSum;
                 dc.ConvertFromCurr = false;
-                dc.AddTransactionCommand.Execute(null);
+                dc.AddTransactionCommand.Execute(true);
                 Close();
             }
     }

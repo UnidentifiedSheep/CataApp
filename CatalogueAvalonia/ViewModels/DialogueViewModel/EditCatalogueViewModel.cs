@@ -21,6 +21,8 @@ public partial class EditCatalogueViewModel : ViewModelBase
     private readonly ObservableCollection<ProducerModel> _producers;
     private readonly TopModel _topModel;
     private readonly int? _uniId;
+    private readonly int _currAction = 0;
+    public int CurrAction => _currAction;
 
     [ObservableProperty] private string _nameOfPart = string.Empty;
 
@@ -50,7 +52,18 @@ public partial class EditCatalogueViewModel : ViewModelBase
         _dataStore = dataStore;
         _producers = new ObservableCollection<ProducerModel>(_dataStore.ProducerModels);
         _catalogueModels = new ObservableCollection<CatalogueModel>();
+        _currAction = 0;
         GetParts(_uniId);
+    }
+
+    public EditCatalogueViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel,
+        IEnumerable<CatalogueModel> models) : base(messenger)
+    {
+        _topModel = topModel;
+        _dataStore = dataStore;
+        _producers = new ObservableCollection<ProducerModel>(_dataStore.ProducerModels);
+        _catalogueModels = new ObservableCollection<CatalogueModel>(models);
+        _currAction = 1;
     }
 
     public IEnumerable<ProducerModel> Producers => _producers;
@@ -159,6 +172,17 @@ public partial class EditCatalogueViewModel : ViewModelBase
             var index = _catalogueModels.IndexOf(SelectedCatalogue);
             ChangeProducer(index, value.Id, value.ProducerName);
         }
+    }
+    [RelayCommand]
+    private async Task AddToCatalogue()
+    {
+        var newId = await _topModel.AddNewCatalogue(new CatalogueModel
+        {
+            Name = NameOfPart,
+            Children = new ObservableCollection<CatalogueModel>(_catalogueModels)
+        });
+        Messenger.Send(new AddedMessage(new ChangedItem
+            { Id = newId, Where = "Catalogue", What = await _topModel.GetCatalogueByIdAsync(newId) }));
     }
 
     private void ChangeProducer(int index, int id, string name)

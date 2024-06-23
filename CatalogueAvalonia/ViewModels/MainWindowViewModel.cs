@@ -1,17 +1,27 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Animation;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.Views;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Hosting.Internal;
 
 namespace CatalogueAvalonia.ViewModels;
 
@@ -23,6 +33,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(OpenCurrencySettingsCommand))] [NotifyCanExecuteChangedFor(nameof(OpenProducersSettingsCommand))]
     private bool _isDataBaseLoaded;
+
+    [ObservableProperty] private bool _isVisAndEnb = false;
+    [ObservableProperty] private string _fastSearch = string.Empty;
 
     public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel,
         AgentViewModel agentViewModel, ZakupkaViewModel zakupkaViewModel, DataStore dataStore,
@@ -62,6 +75,96 @@ public partial class MainWindowViewModel : ViewModelBase
             new ProducerViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
     }
 
+    [RelayCommand]
+    private async Task TryMakeNewPurchase(string jsonData)
+    {
+        var jsonArray = await DataFiltering.FromJsonToArray(jsonData);
+        List<ZakupkaAltModel> models = new List<ZakupkaAltModel>();
+        if (jsonArray != null)
+        {
+            Regex reg = new(@"[^a-zА-Яа-яA-Z0-9_]+");
+            Regex regPrice = new(@"[^0-9.,]+");
+            foreach (var item in jsonArray)
+            {
+                var count = Convert.ToInt32(item["count"].ToString());
+                var producer = item["producer"].ToString();
+                var uniValue = item["uniValue"].ToString();
+                var price = Convert.ToDecimal(regPrice.Replace(item["price"].ToString(),"").Replace(',','.'));
+                
+                ProducerModel? producerModel = _dataStore.ProducerModels.FirstOrDefault(x =>
+                    reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower()));
+                
+                models.Add(new ZakupkaAltModel {Count = count, Price = price, UniValue = uniValue, ProducerModel = producerModel});
+                
+            }
+            var mainWindow = (MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
+            await _dialogueService.OpenDialogue(new NewPurchaseWindow("NewPurchaseViewModel"),
+                new NewPurchaseViewModel(Messenger, _dataStore, _topModel, _dialogueService, models), mainWindow);
+            SetTextBoxVisOrUnvisCommand.Execute(null);
+        }
+    }
+    [RelayCommand]
+    private async Task TryEnterFullParts(string jsonData)
+    {
+        var jsonArray = await DataFiltering.FromJsonToArray(jsonData);
+        List<CatalogueModel> models = new List<CatalogueModel>();
+
+        if (jsonArray != null)
+        { 
+            Regex reg = new(@"[^a-zА-Яа-яA-Z0-9_]+");
+            foreach (var item in jsonArray)
+            {
+                var producer = item["producer"].ToString();
+                ProducerModel? producerModel = _dataStore.ProducerModels.FirstOrDefault(x =>
+                    reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower()));
+                    
+                if (producerModel != null)
+                {
+                    models.Add(new CatalogueModel { Count = 0, Name = item["name"].ToString(), UniValue = item["uniValue"].ToString(), ProducerName = producerModel.ProducerName, ProducerId = producerModel.Id});
+                }
+                else
+                {
+                    var newProducer = await _topModel.AddNewProducer(producer);
+                    models.Add(new CatalogueModel { Count = 0, Name = item["name"].ToString(), UniValue = item["uniValue"].ToString(), ProducerName = newProducer!.ProducerName, ProducerId = newProducer.Id});
+                    Messenger.Send(new AddedMessage(new ChangedItem { What = newProducer, Where = "Producer" }));
+                }
+                
+            }
+        }
+        var mainWindow = (MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
+        SetTextBoxVisOrUnvisCommand.Execute(null);
+        await _dialogueService.OpenDialogue(new EditCatalogueWindow(),
+            new EditCatalogueViewModel(Messenger, _dataStore, _topModel, models), mainWindow);
+    }
+
+    partial void OnFastSearchChanged(string value)
+    {
+        if (value.Length >= 2)
+        {
+            if (value[0] == '$' && value[1] == '$')
+                TryEnterFullPartsCommand.Execute(value.Substring(2));
+            else if(value[0] == '$' && value[1] == '*')
+                TryMakeNewPurchaseCommand.Execute(value.Substring(2));
+            
+        }
+    }
+    [RelayCommand]
+    private async Task SetTextBoxVisOrUnvis()
+    {
+        var mainWindow = (MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
+        if (IsVisAndEnb)
+        {
+            await mainWindow.StartTransitionDownAsync();
+            IsVisAndEnb = false;
+        }
+        else
+        {
+            IsVisAndEnb = true;
+            await mainWindow.StartTransitionUpAsync();
+        }
+        FastSearch = "";
+
+    }
     public IMessenger GetMessenger()
     {
         return Messenger;

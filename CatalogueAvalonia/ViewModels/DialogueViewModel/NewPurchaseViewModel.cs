@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
+using CatalogueAvalonia.Views;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -68,6 +71,35 @@ public partial class NewPurchaseViewModel : ViewModelBase
         _zakupka = new ObservableCollection<ZakupkaAltModel>();
         Messenger.Register<AddedMessage>(this, OnItemAdded);
     }
+    public NewPurchaseViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel,
+        IDialogueService dialogueService, IEnumerable<ZakupkaAltModel> tempZak) : base(messenger)
+    {
+        _dataStore = dataStore;
+        _topModel = topModel;
+        _dialogueServices = dialogueService;
+
+        _purchaseDate = DateTime.Now.Date;
+        _canEditUsd = !ConvertToUsd;
+        _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
+        _agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.IsZak == 1 && x.Id != 1));
+        _zakupka = new ObservableCollection<ZakupkaAltModel>();
+        Messenger.Register<AddedMessage>(this, OnItemAdded);
+        StartAddingCommand.Execute(tempZak);
+    }
+
+    private ZakupkaAltModel? _currAltModel;
+    [RelayCommand]
+    private async Task StartAdding(IEnumerable<ZakupkaAltModel> zakupki)
+    {
+        var mainWindow = (MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
+        foreach (var item in zakupki)
+        {
+            _currAltModel = item;
+            await _dialogueServices.OpenDialogue(new CatalogueItemWindow(),
+                new CatalogueItemViewModel(Messenger, _dataStore, _topModel, _dialogueServices, item), mainWindow);
+        }
+    }
+    
 
     public IEnumerable<CurrencyModel> Currencies => _currencies;
     public IEnumerable<AgentModel> Agents => _agents;
@@ -81,7 +113,6 @@ public partial class NewPurchaseViewModel : ViewModelBase
             var what = (CatalogueModel?)message.Value.What;
             var mainName = message.Value.MainName;
             if (what != null)
-                if (!_zakupka.Any(x => x.MainCatId == what.MainCatId))
                     _zakupka.Add(new ZakupkaAltModel
                     {
                         MainCatId = what.MainCatId,
@@ -103,6 +134,22 @@ public partial class NewPurchaseViewModel : ViewModelBase
                     SelectedZakupka.MainName = mainName;
                     SelectedZakupka.UniValue = what.UniValue;
                 }
+        }
+        else if (where == "AutomatedZakupka")
+        {
+            var what = (CatalogueModel?)message.Value.What;
+            var mainName = message.Value.MainName;
+            if (what != null)
+                _zakupka.Add(new ZakupkaAltModel
+                {
+                    MainCatId = what.MainCatId,
+                    MainCatName = what.Name,
+                    MainName = mainName,
+                    UniValue = what.UniValue,
+                    Price = _currAltModel!.Price,
+                    Count = _currAltModel!.Count,
+                    TextDecimal = _currAltModel!.Price.ToString()
+                });
         }
     }
 
@@ -130,7 +177,7 @@ public partial class NewPurchaseViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void DeletePart(Window parent)
+    private void RemovePart(Window parent)
     {
         if (SelectedZakupka != null) _zakupka.Remove(SelectedZakupka);
     }

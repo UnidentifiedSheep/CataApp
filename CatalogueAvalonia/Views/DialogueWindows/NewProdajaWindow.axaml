@@ -113,6 +113,7 @@
                   Grid.Column="0"
                   Grid.ColumnSpan="6"
                   SelectionMode="Single"
+                  CellEditEnded="DataGrid_OnCellEditEnded"
                   SelectedItem="{Binding SelectedProdaja}"
                   CanUserReorderColumns="True"
                   CanUserResizeColumns="True"
@@ -131,33 +132,12 @@
                                     Width="2*"
                                     IsReadOnly="True"
                                     Binding="{Binding MainCatName}"/>
-				<DataGridTemplateColumn Header="Цена"
-										Width="*">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<NumericUpDown Value="{Binding Price}"
-										   BorderThickness="0"
-										   ValueChanged="NumericUpDownPrice_ValueChanged"
-										   Minimum="0"
-										   FormatString="{}{0:#,0.00}"
-										   ShowButtonSpinner="False"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Количество"
-										Width="*">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<NumericUpDown Value="{Binding Count}"
-										   FormatString="#"
-										   ValueChanged="NumericUpDownCount_ValueChanged"
-										   BorderThickness="0"
-										   Minimum="0"
-										   Maximum="{Binding MaxCount}"
-										   ShowButtonSpinner="False"/>
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="Цена"
+				                    Width="*"
+				                    Binding="{Binding TextDecimal}"/>
+				<DataGridTextColumn Header="Количество"
+				                    Width="*"
+				                    Binding="{Binding TextCont}"/>
 				<DataGridTextColumn Header="Сумма"
 									Width="*"
 									IsReadOnly="True"

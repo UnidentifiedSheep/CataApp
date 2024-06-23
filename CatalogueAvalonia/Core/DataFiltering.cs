@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CatalogueAvalonia.Core;
 
@@ -91,5 +94,10 @@ public class DataFiltering
     private static Task<bool> CheckIfContainsName(string name, string ObjectToFind)
     {
         return Task.FromResult(reg.Replace(name, "").ToLower().Contains(reg.Replace(ObjectToFind, "").ToLower()));
+    }
+
+    public static Task<JArray?> FromJsonToArray(string jsonData)
+    {
+        return Task.FromResult((JArray?)JsonConvert.DeserializeObject(jsonData));
     }
 }

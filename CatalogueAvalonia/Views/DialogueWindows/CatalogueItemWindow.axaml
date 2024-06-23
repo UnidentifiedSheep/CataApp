@@ -64,8 +64,11 @@
                       Margin="0, 10, 0, 10"
                       Source="{Binding CatalogueModels}">
             <TreeDataGrid.Styles>
-                <Style Selector="TreeDataGrid TreeDataGridRow:nth-last-child(2n)">
-                    <Setter Property="Background" Value="#20808080" />
+                <Style Selector="TreeDataGrid TreeDataGridRow">
+                    <Setter Property="BorderThickness" Value="0, 1,0 ,0"/>
+                    <Setter Property="BorderBrush" Value="DarkGray"/>
+                    <Setter Property="Foreground" Value="{Binding TextColor}"/>
+                    <Setter Property="Background" Value="{Binding RowColor}" />
                 </Style>
             </TreeDataGrid.Styles>
         </TreeDataGrid>

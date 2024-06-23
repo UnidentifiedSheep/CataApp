@@ -124,7 +124,8 @@
                 <Button Grid.Column="2"
                         HorizontalContentAlignment="Center"
                         Content="Удалить"
-                        Command="{Binding DeletePartCommand}"
+                        Command="{Binding RemovePartCommand}"
+                        CommandParameter="{Binding $parent[Window]}"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center" />
                 <StackPanel Grid.Column="3"
@@ -154,6 +155,7 @@
                   SelectedItem="{Binding SelectedZakupka}"
                   CanUserReorderColumns="True"
                   CanUserResizeColumns="True"
+                  CellEditEnded="DataGrid_OnCellEditEnded"
                   CanUserSortColumns="False"
                   ItemsSource="{Binding Zakupka}">
             <DataGrid.Columns>
@@ -169,35 +171,12 @@
                                     Width="2*"
                                     IsReadOnly="True"
                                     Binding="{Binding MainCatName}" />
-                <DataGridTemplateColumn Header="Цена"
-                                        Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <NumericUpDown Value="{Binding Price}"
-                                           BorderThickness="0"
-                                           Text="{Binding TextDecimal}"
-                                           Watermark="0,00"
-                                           ValueChanged="NumericUpDownPrice_ValueChanged"
-                                           Minimum="0"
-                                           FormatString="{}{0:#,0.00}"
-                                           ShowButtonSpinner="False" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Количество"
-                                        Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <NumericUpDown Value="{Binding Count}"
-                                           FormatString="#"
-                                           ValueChanged="NumericUpDownCount_ValueChanged"
-                                           BorderThickness="0"
-                                           Minimum="{Binding MinCount}"
-                                           Maximum="2147483647"
-                                           ShowButtonSpinner="False" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Цена"
+                                    Width="*"
+                                    Binding="{Binding TextDecimal}"/>
+                <DataGridTextColumn Header="Количество"
+                                    Width="*"
+                                    Binding="{Binding TextCount}"/>
                 <DataGridTextColumn Header="Сумма"
                                     Width="*"
                                     IsReadOnly="True"
@@ -209,11 +188,12 @@
                               CommandParameter="{Binding $parent[Window]}"
                               Command="{Binding AddNewPartCommand}" />
                     <MenuItem Header="Изменить"
-                              Command="{Binding ChangePartCommand}"
-                              CommandParameter="{Binding $parent[Window]}" />
+                              CommandParameter="{Binding $parent[Window]}" 
+                              Command="{Binding ChangePartCommand}"/>
                     <MenuItem Header="Удалить"
-                              Command="{Binding DeletePartCommand}"
-                              CommandParameter="{Binding $parent[Window]}" />
+                              Command="{Binding RemovePartCommand}"
+                              CommandParameter="{Binding $parent[Window]}"/>
+                    <MenuItem Header="-"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
         </DataGrid>

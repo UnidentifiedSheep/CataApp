@@ -9,7 +9,35 @@
         xmlns:view="using:CatalogueAvalonia.Views"
         Icon="/Assets/Untitled.ico"
         Title="CatalogueAvalonia">
+    <Window.KeyBindings>
+        <KeyBinding Gesture="ctrl+e"
+                    Command="{Binding SetTextBoxVisOrUnvisCommand}"/>
+    </Window.KeyBindings>
+    <Window.Resources>
+        <Animation Duration="0:0:0.2"
+                   x:Key="TransitionUpAnimation"
+                   x:SetterTargetType="Grid">
+            <KeyFrame Cue="0%">
+                <Setter Property="Opacity" Value="0.0"/>
+            </KeyFrame>
+            <KeyFrame Cue="100%">
+                <Setter Property="Opacity" Value="1.0"/>
+            </KeyFrame>
+        </Animation>
+        <Animation Duration="0:0:0.2"
+                   x:Key="TransitionDownAnimation"
+                   x:SetterTargetType="Grid">
+            <KeyFrame Cue="0%">
+                <Setter Property="Opacity" Value="1.0"/>
+            </KeyFrame>
+            <KeyFrame Cue="100%">
+                <Setter Property="Opacity" Value="0.0"/>
+            </KeyFrame>
+        </Animation>
+        
+    </Window.Resources>
     <Grid RowDefinitions="auto, *">
+        
         <Menu Grid.Row="0">
             <MenuItem Header="Настройки">
                 <MenuItem Header="Валюта"
@@ -49,5 +77,42 @@
             </TabItem>
             
         </TabControl>
+        <Grid Row="1"
+              x:Name="SearchGrid"
+              VerticalAlignment="Stretch"
+              Background="#55d3d3d3"
+              IsVisible="{Binding IsVisAndEnb}"
+              IsEnabled="{Binding IsVisAndEnb}"
+              PointerPressed="InputElement_OnPointerPressed"
+              HorizontalAlignment="Stretch"
+              RowDefinitions="* ,30, 3*">
+            <TextBox Grid.Row="1"
+                     Text="{Binding FastSearch}"
+                     Foreground="White"
+                     FontSize="15"
+                     Width="450"
+                     VerticalAlignment="Center"
+                     IsVisible="{Binding IsVisAndEnb}"
+                     IsEnabled="{Binding IsVisAndEnb}"
+                     FontWeight="Light">
+                <TextBox.Styles>
+                    <Style Selector="TextBox">
+                        <Setter Property="Background" Value="#373b4d"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="CornerRadius" Value="8"/>
+                    </Style>
+                    <Style Selector="TextBox:focus /template/ Border">
+                        <Setter Property="Background" Value="#373b4d"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="CornerRadius" Value="8"/>
+                    </Style>
+                    <Style Selector="TextBox:pointerover /template/ Border">
+                        <Setter Property="Background" Value="#464b61"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="CornerRadius" Value="8"/>
+                    </Style>
+                </TextBox.Styles>
+            </TextBox>
+        </Grid>
     </Grid>
 </Window>

@@ -95,8 +95,11 @@ public partial class NewProdajaViewModel : ViewModelBase
                             MainCatName = what.Name,
                             MainName = mainName,
                             MaxCount = what.Count,
+                            Count = 0,
+                            TextCont = "0",
                             UniValue = what.UniValue,
                             Price = price,
+                            TextDecimal = Convert.ToString(price),
                             CurrencyInitialId = firstPrice.CurrencyId,
                             InitialPrice = firstPrice.Price ?? 0
                         });
@@ -116,6 +119,7 @@ public partial class NewProdajaViewModel : ViewModelBase
                         SelectedProdaja.UniValue = what.UniValue;
                         SelectedProdaja.MaxCount = what.Count;
                         SelectedProdaja.Count = 0;
+                        SelectedProdaja.TextCont = "0";
                     }
         }
     }

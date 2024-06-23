@@ -188,4 +188,26 @@ public partial class NewProdajaWindow : Window
     {
         Close();
     }
+
+    private void DataGrid_OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    {
+        EditProdajaViewModel? dcE = null;
+        NewProdajaViewModel? dcN = null;
+        if (_viewModelName == "NewProdajaViewModel")
+            dcN = (NewProdajaViewModel?)DataContext;
+        else if (_viewModelName == "EditProdajaViewModel")
+            dcE = (EditProdajaViewModel?)DataContext;
+
+        if (dcN != null)
+            dcN.TotalSum = dcN.Prodaja.Sum(x => x.PriceSum);
+        
+        
+        else if (dcE != null)
+        {
+            dcE.TotalSum = dcE.Prodaja.Sum(x => x.PriceSum);
+            dcE.IsDirty = true;
+        }
+        
+        
+    }
 }
