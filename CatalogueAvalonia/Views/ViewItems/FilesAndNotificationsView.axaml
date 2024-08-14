@@ -1,0 +1,57 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="450"
+             Background="White"
+             xmlns:vm="using:CatalogueAvalonia.ViewModels.ItemViewModel"
+             x:Class="CatalogueAvalonia.Views.ViewItems.FilesAndNotificationsView"
+             x:CompileBindings="False">
+    <UserControl.Styles>
+        <Style Selector="FlyoutPresenter.DefaultFlyout">
+            <Setter Property="Background" Value="Transparent" /> 
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </UserControl.Styles>
+    <Design.DataContext>
+        <vm:FileAndNotificationsViewModel />
+    </Design.DataContext>
+    <ListBox ItemsSource="{Binding Notifications}"
+             Background="White"
+             HorizontalAlignment="Stretch"
+             DoubleTapped="InputElement_OnDoubleTapped">
+        <ListBox.ItemTemplate>
+            <DataTemplate>
+                <Grid ColumnDefinitions="30,*,50">
+                    <Image Grid.Column="0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           Height="30"
+                           Source="{Binding Ico}"
+                           ToolTip.Tip="{Binding StepsState}"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding FileInfo}"
+                               HorizontalAlignment="Left"
+                               FontSize="13"
+                               Padding="5,0,0,0"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="2"
+                            Height="50"
+                            Width="50"
+                            Background="Transparent"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                        <Image Source="/Assets/question.png"/>
+                        <Button.Flyout>
+                            <Flyout FlyoutPresenterClasses="DefaultFlyout">
+                                <TextBox Text="{Binding Description.Description}"
+                                         IsReadOnly="True"
+                                         MaxWidth="500"/>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+            </DataTemplate>
+        </ListBox.ItemTemplate>
+    </ListBox>
+</UserControl>

@@ -72,7 +72,6 @@
                           IsChecked="{Binding ConvertToUsd}"
                           FontSize="16" />
             </Grid>
-
         </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

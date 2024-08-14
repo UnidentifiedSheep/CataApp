@@ -15,6 +15,7 @@ using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,7 +40,7 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel,
         AgentViewModel agentViewModel, ZakupkaViewModel zakupkaViewModel, DataStore dataStore,
-        IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel) : base(messenger)
+        IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel, FileAndNotificationsViewModel fileAndNotificationsViewModel) : base(messenger)
     {
         _dataStore = dataStore;
         _topModel = topModel;
@@ -49,7 +50,8 @@ public partial class MainWindowViewModel : ViewModelBase
             catalogueViewModel,
             agentViewModel,
             zakupkaViewModel,
-            prodajaViewModel
+            prodajaViewModel,
+            fileAndNotificationsViewModel
         ];
         Messenger.Register<ActionMessage>(this, OnDataBaseLoaded);
     }
@@ -86,11 +88,11 @@ public partial class MainWindowViewModel : ViewModelBase
             Regex regPrice = new(@"[^0-9.,]+");
             foreach (var item in jsonArray)
             {
-                var count = Convert.ToInt32(item["count"].ToString());
-                var producer = item["producer"].ToString();
-                var uniValue = item["uniValue"].ToString();
-                var price = Convert.ToDecimal(regPrice.Replace(item["price"].ToString(),"").Replace(',','.'));
-                
+                var count = Convert.ToInt32(item["count"]!.ToString());
+                var producer = item["producer"]!.ToString();
+                var uniValue = item["uniValue"]!.ToString();
+                var price = Convert.ToDecimal(regPrice.Replace(item["price"]!.ToString(),"").Replace(',','.'));
+                if (producer == "DT") producer = "DIESEL TECHNIC";
                 ProducerModel? producerModel = _dataStore.ProducerModels.FirstOrDefault(x =>
                     reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower()));
                 
@@ -114,18 +116,19 @@ public partial class MainWindowViewModel : ViewModelBase
             Regex reg = new(@"[^a-zА-Яа-яA-Z0-9_]+");
             foreach (var item in jsonArray)
             {
-                var producer = item["producer"].ToString();
+                var producer = item["producer"]!.ToString();
+                if (producer == "DT") producer = "DIESEL TECHNIC";
                 ProducerModel? producerModel = _dataStore.ProducerModels.FirstOrDefault(x =>
                     reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower()));
                     
                 if (producerModel != null)
                 {
-                    models.Add(new CatalogueModel { Count = 0, Name = item["name"].ToString(), UniValue = item["uniValue"].ToString(), ProducerName = producerModel.ProducerName, ProducerId = producerModel.Id});
+                    models.Add(new CatalogueModel { Count = 0, Name = item["name"]!.ToString(), UniValue = item["uniValue"]!.ToString(), ProducerName = producerModel.ProducerName, ProducerId = producerModel.Id});
                 }
                 else
                 {
                     var newProducer = await _topModel.AddNewProducer(producer);
-                    models.Add(new CatalogueModel { Count = 0, Name = item["name"].ToString(), UniValue = item["uniValue"].ToString(), ProducerName = newProducer!.ProducerName, ProducerId = newProducer.Id});
+                    models.Add(new CatalogueModel { Count = 0, Name = item["name"]!.ToString(), UniValue = item["uniValue"]!.ToString(), ProducerName = newProducer!.ProducerName, ProducerId = newProducer.Id});
                     Messenger.Send(new AddedMessage(new ChangedItem { What = newProducer, Where = "Producer" }));
                 }
                 

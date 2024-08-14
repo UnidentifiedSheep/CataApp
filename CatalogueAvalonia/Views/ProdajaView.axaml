@@ -16,7 +16,7 @@
             <ColumnDefinition Width="3*" />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0" Margin="10"
-              RowDefinitions="159*, 148*, 32*">
+              RowDefinitions="199*, 118*, 32*">
             <StackPanel Grid.Row="0">
                 <StackPanel Margin="0, 10, 0, 0">
                     <Label Content="С даты"
@@ -54,6 +54,18 @@
                             </ComboBox.ItemTemplate>
                         </ComboBox>
                     </StackPanel>
+                    <StackPanel>
+                        <Border BorderBrush="LightGray"
+                                Margin="0,15,0,0"
+                                BorderThickness="0,1,0,0"
+                                HorizontalAlignment="Stretch"/>
+                        <StackPanel Margin="0,5,0,0">
+                            <TextBlock Text="Поиск по комментариям"
+                                       FontSize="15"
+                                       Foreground="#505050"/>
+                            <TextBox Text="{Binding SearchFiledComment}"/>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
             <Button Content="Новая Продажа"
@@ -79,6 +91,7 @@
             <DataGrid Grid.Row="0"
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True"
+                      SelectionMode="Single"
                       SelectedItem="{Binding SelectedProdaja}"
                       ItemsSource="{Binding MainGroup}"
                       IsReadOnly="True">
@@ -113,8 +126,21 @@
                         <MenuItem Header="Редактировать"
                                   CommandParameter="{Binding $parent[Window]}"
                                   Command="{Binding EditProdajaCommand}" />
-                        <MenuItem Header="Печать"
-                                  Command="{Binding CreateInvoiceCommand}" />
+                        <MenuItem Header="Печать">
+                            <MenuItem Header="Печать"
+                                      CommandParameter="{Binding $parent[Window]}"
+                                      Command="{Binding CreateInvoiceCommand}" />
+                            <MenuItem Header="Печать Excel"
+                                      CommandParameter="{Binding $parent[Window]}"
+                                      Command="{Binding CreateInvoiceExcelCommand}" />
+                            <MenuItem Header="Печать за период(минимал)"
+                                      CommandParameter="{Binding $parent[Window]}"
+                                      Command="{Binding CreateInvoiceManyMinimalCommand}" />
+                            <MenuItem Header="Печать за период"
+                                      CommandParameter="{Binding $parent[Window]}"
+                                      Command="{Binding CreateInvoiceManyCommand}" />
+                        </MenuItem>
+                        
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>
@@ -125,6 +151,7 @@
             <DataGrid Grid.Row="2"
                       ItemsSource="{Binding AltGroup}"
                       IsReadOnly="True"
+                      SelectionMode="Single"
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True">
                 <DataGrid.Columns>

@@ -44,7 +44,7 @@ public class Listener
 
                 if (value.Contains("c533298572f02ab76227a31bb04faaf6"))
                 {
-                    byte[] sendbuf = Encoding.ASCII.GetBytes($"{_tcpServer.Port}");
+                    byte[] sendbuf = Encoding.ASCII.GetBytes($"c533298572f02ab76227a31bb04faaf6|{_tcpServer.Port}");
                     IPEndPoint ep = new IPEndPoint(IPAddress.Broadcast, 58760);
                     _listener.Send(sendbuf, ep);
                 }

@@ -21,7 +21,7 @@
             <ColumnDefinition Width="4*" />
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0"
-              RowDefinitions="5, 119*, 160*, 160*, 75*"
+              RowDefinitions="5, 149*, 160*, 130*, 75*"
               Margin="10">
             <StackPanel Grid.Row="1" Orientation="Vertical">
                 <StackPanel>
@@ -92,39 +92,59 @@
                          IsEnabled="{Binding IsLoaded}"
                          IsVisible="{Binding IsLoaded}"
                          IsIndeterminate="True" />
-        <TreeDataGrid Grid.Column="1"
-                      Margin="0, 10, 0, 10"
-                      Source="{Binding CatalogueModels}">
-            <TreeDataGrid.Styles>
-                <Style Selector="TreeDataGrid TreeDataGridRow">
-                    <Setter Property="BorderThickness" Value="0, 1,0 ,0"/>
-                    <Setter Property="BorderBrush" Value="DarkGray"/>
-                    <Setter Property="Foreground" Value="{Binding TextColor}"/>
-                    <Setter Property="Background" Value="{Binding RowColor}" />
-                </Style>
-            </TreeDataGrid.Styles>
-            <TreeDataGrid.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Редактировать Запчасти"
-                              Command="{Binding EditCatalogueCommand}" 
-                              CommandParameter="{Binding $parent[Window]}" />
-                    <MenuItem Header="Редактировать Цены"
-                              Command="{Binding EditPricesCommand}" 
-                              CommandParameter="{Binding $parent[Window]}" />
-                    <MenuItem Header="Редактировать картинку"
-                              Command="{Binding SetImgsPartCommand}" 
-                              CommandParameter="{Binding $parent[Window]}" />
-                    <MenuItem Header="Сменить цвет"
-                              Command="{Binding ChangeColorCommand}"
-                              CommandParameter="{Binding $parent[Window]}"/>
-                    <MenuItem Header="Удалить запчасть"
-                              Command="{Binding DeleteSoloCommand}"
-                              CommandParameter="{Binding $parent[Window]}" />
-                    <MenuItem Header="Удалить группу запчастей"
-                              Command="{Binding DeleteGroupCommand}" 
-                              CommandParameter="{Binding $parent[Window]}" />
-                </ContextMenu>
-            </TreeDataGrid.ContextMenu>
-        </TreeDataGrid>
+        <Grid Column="1"
+              RowDefinitions="*, 30">
+                <TreeDataGrid Grid.Row="0"
+                          Margin="0, 10, 0, 10"
+                          Source="{Binding CatalogueModels}"
+                          DoubleTapped="InputElement_OnDoubleTapped"
+                          KeyDown="InputElement_OnKeyDown">
+                <TreeDataGrid.Styles>
+                    <Style Selector="TreeDataGrid TreeDataGridRow">
+                        <Setter Property="BorderThickness" Value="0,1,0,0"/>
+                        <Setter Property="BorderBrush" Value="DarkGray"/>
+                        <Setter Property="Foreground" Value="{Binding TextColor}"/>
+                        <Setter Property="Background" Value="{Binding RowColor}" />
+                    </Style>
+                </TreeDataGrid.Styles>
+                <TreeDataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Редактировать Запчасти"
+                                  Command="{Binding EditCatalogueCommand}" 
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Редактировать Цены"
+                                  Command="{Binding EditPricesCommand}" 
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Редактировать картинку"
+                                  Command="{Binding SetImgsPartCommand}" 
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Сменить цвет"
+                                  Command="{Binding ChangeColorCommand}"
+                                  CommandParameter="{Binding $parent[Window]}"/>
+                        <MenuItem Header="Удалить запчасть"
+                                  Command="{Binding DeleteSoloCommand}"
+                                  CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Удалить группу запчастей"
+                                  Command="{Binding DeleteGroupCommand}" 
+                                  CommandParameter="{Binding $parent[Window]}" />
+                    </ContextMenu>
+                </TreeDataGrid.ContextMenu>
+            </TreeDataGrid>
+            <Border Grid.Row="1"
+                    BorderBrush="#60606060"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch"
+                    BorderThickness="0,0,0,1"
+                    Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Сумма отображенных запчастей: "
+                               FontSize="15"
+                               FontWeight="Medium"/>
+                    <TextBlock Text="{Binding TotalSum}"
+                               FontSize="15"
+                               FontWeight="SemiBold"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
@@ -136,6 +138,15 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel
 				item.Currency = new ObservableCollection<CurrencyModel>(_currencies.Where(x => x.Id != 1));
 				item.SelectedCurrency = item.Currency.SingleOrDefault(x => x.Id == item.CurrencyId);
 				item.IsEnabled = IsVisible;
+				foreach (var currency in _dataStore.CurrencyModels)
+				{
+					if (currency.Id == item.CurrencyId || currency.Id == 1)
+						continue;
+					var crn = currency.CurrencyName;
+					decimal? inCurr = item.Price / item.SelectedCurrency!.ToUsd * currency.ToUsd;
+					item.OtherCurrency += $"В {crn} = {Math.Round(inCurr ?? 0, 2)}, с наценкой 50% = {Math.Round(inCurr*1.5m ?? 0, 2)}\n";
+				}
+				item.OtherCurrency = item.OtherCurrency!.TrimEnd('\n');
 			}
 
 			IsDirty = false;

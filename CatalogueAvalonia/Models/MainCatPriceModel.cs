@@ -38,9 +38,10 @@ public partial class MainCatPriceModel : ObservableObject
         }
     }
 
-    [ObservableProperty] private string _rowInt;
+    [ObservableProperty] private string _rowInt = string.Empty;
     [ObservableProperty] private bool _isEnabled;
     [ObservableProperty] private string _rowDecimal = string.Empty;
+    [ObservableProperty] private string? _otherCurrency = null;
 
     partial void OnRowDecimalChanged(string value)
     {
@@ -63,7 +64,7 @@ public partial class MainCatPriceModel : ObservableObject
         {
             _selectedCurrency = value;
             if (value != null)
-                CurrencyId = value.Id ?? default;
+                CurrencyId = value.Id ?? 1;
             IsDirty = true;
         }
     }

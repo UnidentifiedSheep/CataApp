@@ -3,6 +3,10 @@
   <component name="AvaloniaProject">
     <option name="projectPerEditor">
       <map>
+        <entry key="AvaloniaApplication1/AvaloniaApplication1/App.axaml" value="AvaloniaApplication1/AvaloniaApplication1.Desktop/AvaloniaApplication1.Desktop.csproj" />
+        <entry key="AvaloniaApplication1/AvaloniaApplication1/Views/MainView.axaml" value="AvaloniaApplication1/AvaloniaApplication1.Desktop/AvaloniaApplication1.Desktop.csproj" />
+        <entry key="AvaloniaApplication1/AvaloniaApplication1/Views/MainWindow.axaml" value="AvaloniaApplication1/AvaloniaApplication1.Desktop/AvaloniaApplication1.Desktop.csproj" />
+        <entry key="AvaloniaApplication1/AvaloniaApplication1/Views/SearchView.axaml" value="AvaloniaApplication1/AvaloniaApplication1.Desktop/AvaloniaApplication1.Desktop.csproj" />
         <entry key="CatHelper/CatHelper/App.axaml" value="CatHelper/CatHelper.Browser/CatHelper.Browser.csproj" />
         <entry key="CatHelper/CatHelper/Views/MainView.axaml" value="CatHelper/CatHelper.Browser/CatHelper.Browser.csproj" />
         <entry key="CatHelper/CatHelper/Views/MainWindow.axaml" value="CatHelper/CatHelper.Browser/CatHelper.Browser.csproj" />
@@ -29,6 +33,8 @@
         <entry key="CatalogueAvalonia/Views/DialogueWindows/WebWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/MainWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ProdajaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/ViewItems/FilesAndNotificationsView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/ViewItems/FilesAndNotofocationsView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ViewItems/ServerStatusView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/WebView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ZakupkaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
@@ -31,7 +32,7 @@ public partial class NewProdajaViewModel : ViewModelBase
 
     [ObservableProperty] private bool _isVisibleConverter = true;
 
-    [ObservableProperty] private int _overPrice = 20;
+    [ObservableProperty] private int? _overPrice = 0;
 
     [ObservableProperty] private DateTime _prodajaDate;
 
@@ -43,12 +44,53 @@ public partial class NewProdajaViewModel : ViewModelBase
 
     [ObservableProperty] private decimal _totalSum;
 
+    [ObservableProperty] private string _producerSearch = string.Empty;
+    [ObservableProperty] private bool _producerSearchOpen = false;
+
     public NewProdajaViewModel()
     {
         _currencies = new ObservableCollection<CurrencyModel>();
         _agents = new ObservableCollection<AgentModel>();
         _prodajaAlts = new ObservableCollection<ProdajaAltModel>();
         _prodajaDate = DateTime.Now.Date;
+    }
+
+    [RelayCommand]
+    private async Task FilterAgent(string value)
+    {
+        _agents.Clear();
+        await foreach (var agent in DataFiltering.FilterAgents(_dataStore.AgentModels, value))
+        {
+            if (agent.Id != 1)
+                _agents.Add(agent);
+            
+        }
+    }
+
+    partial void OnProducerSearchChanged(string value)
+    {
+        if (value.Length >= 1)
+        {
+            ProducerSearchOpen = true;
+            FilterAgentCommand.Execute(value);
+        }
+        else
+        {
+            ProducerSearchOpen = false;
+            if (_dataStore.AgentModels.Count != _agents.Count)
+            {
+                _agents.Clear();
+                _agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 1));
+            }
+        }
+    }
+    partial void OnSelectedAgentChanged(AgentModel? value)
+    {
+        if (value == null) return;
+        
+        ProducerSearch = string.Empty;
+        OverPrice = value.OverPrice;
+
     }
 
     public NewProdajaViewModel(IMessenger messenger, TopModel topModel, DataStore dataStore,
@@ -64,6 +106,12 @@ public partial class NewProdajaViewModel : ViewModelBase
         _prodajaAlts = new ObservableCollection<ProdajaAltModel>();
 
         Messenger.Register<AddedMessage>(this, OnItemAdded);
+        OnStart();
+    }
+
+    private void OnStart()
+    {
+        SelectedCurrency = _currencies.FirstOrDefault(x => x.CurrencyName.Contains("Рубл"));
     }
 
     public IEnumerable<CurrencyModel> Currencies => _currencies;
@@ -82,7 +130,7 @@ public partial class NewProdajaViewModel : ViewModelBase
                 if (!_prodajaAlts.Any(x => x.MainCatId == what.MainCatId))
                     if (what.Children != null && what.Children.Any())
                     {
-                        var firstPrice = what.Children.First();
+                        var firstPrice = what.Children.OrderByDescending(x => x.Count).First();
                         var partsCurr = _dataStore.CurrencyModels.FirstOrDefault(x => x.Id == firstPrice.CurrencyId);
                         var overPr = (100 + OverPrice) / 100.0m;
 
@@ -123,6 +171,10 @@ public partial class NewProdajaViewModel : ViewModelBase
                     }
         }
     }
+    partial void OnCommentChanged(string value)
+    {
+        Comment = value.Replace("/", "");
+    }
 
     [RelayCommand]
     private async Task AddNewPart(Window parent)
@@ -143,6 +195,7 @@ public partial class NewProdajaViewModel : ViewModelBase
     private void DeletePart(Window parent)
     {
         if (SelectedProdaja != null) _prodajaAlts.Remove(SelectedProdaja);
+        TotalSum = _prodajaAlts.Sum(x => x.PriceSum);
     }
 
     public void RemoveWhereZero(IEnumerable<ProdajaAltModel> models)
@@ -175,7 +228,7 @@ public partial class NewProdajaViewModel : ViewModelBase
             var agentModel = new AgentTransactionModel
             {
                 AgentId = SelectedAgent.Id,
-                CurrencyId = SelectedCurrency.Id ?? default,
+                CurrencyId = SelectedCurrency.Id ?? 1,
                 TransactionDatatime = ProdajaDate.Date.ToString("dd.MM.yyyy"),
                 TransactionSum = TotalSum,
                 Balance = lastTransaction.Balance + TotalSum,
@@ -189,8 +242,8 @@ public partial class NewProdajaViewModel : ViewModelBase
             {
                 AgentId = SelectedAgent.Id,
                 Datetime = Converters.ToDateTimeSqlite(ProdajaDate.Date.ToString("dd.MM.yyyy")),
-                Comment = Comment,
-                CurrencyId = SelectedCurrency.Id ?? 0,
+                Comment = $" {Comment} ",
+                CurrencyId = SelectedCurrency.Id ?? 1,
                 TotalSum = TotalSum,
                 TransactionId = transactionId
             };

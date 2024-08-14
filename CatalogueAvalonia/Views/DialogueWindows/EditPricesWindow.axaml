@@ -48,7 +48,9 @@
 										   Text="{Binding RowDecimal}"
 										   IsReadOnly="{Binding IsReadOnly}"
 										   FormatString="0.00"
-										   ShowButtonSpinner="False"/>
+										   ShowButtonSpinner="False"
+										   ToolTip.ShowOnDisabled="True"
+										   ToolTip.Tip="{Binding OtherCurrency}"/>
 						</DataTemplate>
 					</DataGridTemplateColumn.CellTemplate>
 				</DataGridTemplateColumn>

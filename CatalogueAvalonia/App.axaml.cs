@@ -8,10 +8,12 @@ using Avalonia.Markup.Xaml;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.BarcodeServer;
+using CatalogueAvalonia.Services.BillingService;
 using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels;
+using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views;
 using CommunityToolkit.Mvvm.Messaging;
 using DataBase.Data;
@@ -103,6 +105,7 @@ public class App : Application
         builder.Services.AddDbContext<DataContext>(o => o.UseSqlite("DataSource=../Data/data.db"));
         builder.Services.AddDbContext<DataContextDataProvider>(o =>
             o.UseSqlite("DataSource=../Data/data.db").UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+        builder.Services.AddDbContext<DataContextDataForInvoices>(o => o.UseSqlite("DataSource=../Data/data.db").UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
         builder.Services.AddTransient<ViewLocator>();
 
         builder.Services.AddSingleton<MainWindowViewModel>();
@@ -110,7 +113,14 @@ public class App : Application
         builder.Services.AddSingleton<AgentViewModel>();
         builder.Services.AddSingleton<ZakupkaViewModel>();
         builder.Services.AddSingleton<ProdajaViewModel>();
+        builder.Services.AddSingleton<FileAndNotificationsViewModel>();
 
+        builder.Services.AddSingleton<MainInvoice>();
+        builder.Services.AddSingleton<Invoice>();
+        builder.Services.AddSingleton<InvoiceForPeriod>();
+        builder.Services.AddSingleton<InvoiceForPeriodMinimal>();
+        builder.Services.AddSingleton<ExcelInvoice>();
+        
         builder.Services.AddSingleton<TopModel>();
         builder.Services.AddSingleton<DataStore>();
         builder.Services.AddSingleton<TaskQueue>();
@@ -120,8 +130,7 @@ public class App : Application
         builder.Services.AddSingleton<IDataBaseAction, DataBaseAction>();
         builder.Services.AddSingleton<IDialogueService, DialogueService>();
         builder.Services.AddSingleton<IMessenger, WeakReferenceMessenger>();
-
-
+        
         return builder;
     }
 }

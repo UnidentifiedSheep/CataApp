@@ -14,6 +14,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace CatalogueAvalonia.ViewModels.DialogueViewModel;
 
@@ -64,12 +65,13 @@ public partial class EditProdajaViewModel : ViewModelBase
         _dataStore = dataStore;
         _topModel = topModel;
         _dialogueService = dialogueService;
-        _comment = prodMainGroup.Comment ?? string.Empty;
+        _comment = (prodMainGroup.Comment ?? string.Empty).TrimStart(' ').TrimEnd(' ');
         DateTime.TryParse(prodMainGroup.Datetime, out _prodajaDate);
         _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
         _agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.Id != 1));
         _prodajaAlts = new ObservableCollection<ProdajaAltModel>();
         Messenger.Register<AddedMessage>(this, OnItemAdded);
+        _isVisibleConverter = false;
 
         LoadProdajaCommand.Execute(null);
     }
@@ -201,6 +203,7 @@ public partial class EditProdajaViewModel : ViewModelBase
 
     partial void OnCommentChanged(string value)
     {
+        Comment = value.Replace("/", "");
         IsDirty = true;
     }
 
@@ -216,7 +219,7 @@ public partial class EditProdajaViewModel : ViewModelBase
         {
             var catas = await _topModel.EditProdajaAsync(_deletedIds, Prodaja, _prevCounts, SelectedCurrency,
                 Converters.ToDateTimeSqlite(ProdajaDate.Date.ToString("dd.MM.yyyy")), TotalSum,
-                _prodajaModel.TransactionId, Comment);
+                _prodajaModel.TransactionId, $" {Comment} ");
 
             Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
             Messenger.Send(new ActionMessage("Update"));

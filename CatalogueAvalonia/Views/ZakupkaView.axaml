@@ -69,6 +69,7 @@
             <DataGrid Grid.Row="0"
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True"
+                      SelectionMode="Single"
                       SelectedItem="{Binding SelectedZakupki}"
                       ItemsSource="{Binding ZakupkiMainGroup}"
                       IsReadOnly="True">
@@ -115,6 +116,7 @@
             <DataGrid Grid.Row="2"
                       ItemsSource="{Binding AltGroup}"
                       IsReadOnly="True"
+                      SelectionMode="Single"
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True">
                 <DataGrid.Columns>

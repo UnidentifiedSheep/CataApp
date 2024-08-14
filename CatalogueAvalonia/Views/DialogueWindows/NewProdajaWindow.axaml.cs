@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using MsBox.Avalonia;
@@ -208,6 +209,30 @@ public partial class NewProdajaWindow : Window
             dcE.IsDirty = true;
         }
         
+        
+    }
+
+    private void InputElement_OnPointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        var tb = (TextBox?)sender;
+        if (tb != null)
+            tb.Text = " ";
+    }
+
+    private void InputElement_OnLostFocus(object? sender, RoutedEventArgs e)
+    {
+        EditProdajaViewModel? dcE = null;
+        NewProdajaViewModel? dcN = null;
+        if (_viewModelName == "NewProdajaViewModel")
+            dcN = (NewProdajaViewModel?)DataContext;
+        else if (_viewModelName == "EditProdajaViewModel")
+            dcE = (EditProdajaViewModel?)DataContext;
+
+        if (dcN != null)
+        {
+            dcN.ProducerSearchOpen = false;
+            dcN.ProducerSearch = string.Empty;
+        }
         
     }
 }

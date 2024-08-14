@@ -3,34 +3,64 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CatalogueAvalonia.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
+using CatalogueAvalonia.Services.BillingService.Components;
+using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using QuestPDF;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using QuestPDF.Previewer;
 
 namespace CatalogueAvalonia.Services.BillingService;
 
-public class Invoice : ObservableRecipient
+public class InvoiceForPeriod
 {
-    private IMessenger _messenger;
-    public Invoice(IMessenger messenger)
+    private readonly IMessenger _messenger;
+    public InvoiceForPeriod(IMessenger messenger)
     {
         _messenger = messenger;
     }
-    public Tuple<NotificationModel, Document> CreateDocument(IEnumerable<ProdajaAltModel> parts, ProdajaModel mainGroup, int fileId, NotificationModel notification)
+    public Tuple<NotificationModel, Document> CreateInvoice(IEnumerable<Tuple<ProdajaModel, IEnumerable<ProdajaAltModel>>> tuples, DateTime start, DateTime end, int fileId, NotificationModel notification)
     {
         Settings.CheckIfAllTextGlyphsAreAvailable = false;
-        notification.FileInfo = $"Накладная реализация за {mainGroup.Datetime} для {mainGroup.AgentName}";
+        notification.FileInfo = $"Накладные реализации зa {start:dd/MM/yyyy} - {end:dd/MM/yyyy}";
+        
         var doc = Document.Create(document =>
         {
-            document.Page(page =>
+            decimal totalSumS = 0;
+            int countS = 0;
+            var countSteps = 0;
+            notification.TotalSteps = tuples.Count() +1;
+            foreach (var item in tuples)
             {
-                page.DefaultTextStyle(x => x.FontFamily("Arial"));
-                page.Margin(15);
-                page.Header().Height(2.5f, Unit.Centimetre)
-                    .Element(Header);
+                totalSumS += item.Item1.TotalSum;
+                countS += item.Item2.Sum(x => x.Count ?? 0);
+
+                document.Page(page =>
+                {
+                    page.DefaultTextStyle(x => x.FontFamily("Arial"));
+                    page.Margin(15);
+                    page.Header().Height(2.5f, Unit.Centimetre)
+                        .Element(Header);
+
+                    page.Content().Element(Content);
+
+                    page.Footer().AlignCenter().Text(text =>
+                    {
+                        text.DefaultTextStyle(x =>
+                            x.FontFamily("Arial").FontSize(10).FontColor(Colors.Grey.Darken1));
+
+                        text.Span("Страница ");
+
+                        text.CurrentPageNumber();
+
+                        text.Span(" из ");
+
+                        text.TotalPages();
+                    });
+                });
 
                 void Header(IContainer container)
                 {
@@ -50,7 +80,7 @@ public class Invoice : ObservableRecipient
                 {
                     container.Row(row =>
                     {
-                        row.AutoItem().AlignLeft().Text($"№{mainGroup.Id}").FontSize(10);
+                        row.AutoItem().AlignLeft().Text($"№{item.Item1.Id}").FontSize(10);
                         row.RelativeItem().AlignCenter().Text("Накладная Реализация").FontSize(15);
                     });
                 }
@@ -59,22 +89,32 @@ public class Invoice : ObservableRecipient
                 {
                     container.Column(column =>
                         {
-                            column.Item().Text($"Покупатель: {mainGroup.AgentName}")
-                                .FontSize(10);
-                            column.Item().Text($"Дата: {mainGroup.Datetime}").FontSize(10);
-                            column.Item().Text($"Валюта: {mainGroup.CurrencyName}").FontSize(10);
+                            column.Item().Text($"Покупатель: {item.Item1.AgentName}")
+                                .FontSize(14);
+                            column.Item().Text($"Дата: {item.Item1.Datetime}").FontSize(10);
+                            column.Item().Text($"Валюта: {item.Item1.CurrencyName}").FontSize(10);
                         }
                     );
                 }
 
                 void HeaderRowRight(IContainer container)
                 {
+                    container.Column(column =>
+                    {
+                        column.Item().Text($"Детали/Комментарий: {item.Item1.Comment}").FontSize(10);
+                    });
                 }
 
-
-                page.Content().Element(Content);
-
                 void Content(IContainer container)
+                {
+                    container.Column(col =>
+                    {
+                        col.Item().Element(ContentTop);
+                        col.Item().Dynamic(new LastPageTotalSum(countS, totalSumS));
+                    });
+                }
+
+                void ContentTop(IContainer container)
                 {
                     container.PaddingTop(20).Table(table =>
                     {
@@ -125,7 +165,7 @@ public class Invoice : ObservableRecipient
                             header.Cell().Border(1)
                                 .Background(Colors.Grey.Lighten2)
                                 .AlignMiddle()
-                                .AlignCenter().Text($"Цена({mainGroup.CurrencySign})")
+                                .AlignCenter().Text($"Цена({item.Item1.CurrencySign})")
                                 .FontFamily("Arial")
                                 .FontSize(10)
                                 .FontColor(Colors.Black);
@@ -139,7 +179,7 @@ public class Invoice : ObservableRecipient
                             header.Cell().Border(1)
                                 .Background(Colors.Grey.Lighten2)
                                 .AlignMiddle()
-                                .AlignCenter().Text($"Сумма({mainGroup.CurrencySign})")
+                                .AlignCenter().Text($"Сумма({item.Item1.CurrencySign})")
                                 .FontFamily("Arial")
                                 .FontSize(10)
                                 .FontColor(Colors.Black);
@@ -148,8 +188,7 @@ public class Invoice : ObservableRecipient
                         var count = 1;
                         var totalCount = 0;
                         decimal totalSumLast = 0;
-                        notification.TotalSteps = parts.Count() + 1;
-                        foreach (var part in parts)
+                        foreach (var part in item.Item2)
                         {
                             totalCount += part.Count ?? 0;
                             totalSumLast += part.PriceSum;
@@ -168,7 +207,6 @@ public class Invoice : ObservableRecipient
                             var name = part.MainCatName;
                             if (string.IsNullOrWhiteSpace(part.MainCatName) || part.MainCatName == "Название не указано")
                                 name = part.MainName;
-                            
                             table.Cell().Border(1)
                                 .PaddingLeft(5)
                                 .AlignLeft()
@@ -198,7 +236,6 @@ public class Invoice : ObservableRecipient
                                 .FontSize(8);
 
                             count++;
-                            notification.CurrStep = count -1;
                         }
 
 
@@ -227,36 +264,22 @@ public class Invoice : ObservableRecipient
                             .Text($"{totalSumLast:F}")
                             .FontSize(8);
                     });
+
                 }
 
-
-                page.Footer().AlignCenter().Text(text =>
-                {
-                    text.DefaultTextStyle(x => x.FontFamily("Arial")
-                        .FontSize(10)
-                        .FontColor(Colors.Grey.Darken1)
-                    );
-
-                    text.Span("Страница ");
-
-                    text.CurrentPageNumber();
-
-                    text.Span(" из ");
-
-                    text.TotalPages();
-                });
-            });
-
+                countSteps++;
+                notification.CurrStep = countSteps;
+            }
         });
-        string path = $"../Documents/{fileId}Invoice{mainGroup.Id}от{mainGroup.Datetime}.pdf";
+        string path = $"../Documents/{fileId}InvoiceОт{start:dd/MM/yyyy}-{end:dd/MM/yyyy}.pdf";
         notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
-        notification.StatusOfFile = FileStatus.Ready;
         notification.Description = new DescriptionModel
         {
-            StartDate = mainGroup.Datetime,
+            StartDate = start.ToString("dd/MM/yyyy"),
+            EndDate = end.ToString("dd/MM/yyyy"),
             Description = "Накладная реализация\n" +
                           $"Номер файла: {fileId}\n" +
-                          $"Дата: {mainGroup.Datetime}\n" +
+                          $"Дата: {start:dd/MM/yyyy} - {end:dd/MM/yyyy}\n" +
                           $"Путь к файлу: {notification.FilePath}"
         };
         return new Tuple<NotificationModel, Document>(notification, doc);

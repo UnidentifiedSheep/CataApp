@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Data.SqlTypes;
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace CatalogueAvalonia.Models;
@@ -28,7 +30,7 @@ public partial class CatalogueModel : ObservableObject
     public int ProducerId { get; set; }
     public int CurrencyId { get; set; }
 
-    public ObservableCollection<CatalogueModel>? Children { get; set; }
+    public ObservableCollection<CatalogueModel>? Children { get; set; } 
 
     partial void OnNameChanged(string value)
     {

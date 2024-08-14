@@ -54,6 +54,7 @@ public partial class AgentViewModel : ViewModelBase
     [ObservableProperty] private decimal _totalCredit;
 
     [ObservableProperty] private decimal _totalDebt;
+    [ObservableProperty] private bool _isOverPriceVis = false;
 
     public AgentViewModel()
     {
@@ -101,6 +102,12 @@ public partial class AgentViewModel : ViewModelBase
                     _currencyModels.AddRange(what);
                 });
         }
+    }
+
+    [RelayCommand]
+    private void SetVisability()
+    {
+        IsOverPriceVis = !IsOverPriceVis;
     }
 
     private void OnAction(object recipient, ActionMessage message)
@@ -200,16 +207,13 @@ public partial class AgentViewModel : ViewModelBase
                 IsCurrencyVisible = false;
                 IsCurrencyVisible = true;
             }
-            
-            
-            var lastTr = _agentTransactions.FirstOrDefault();
-            if (lastTr != null)
-            {
-                if (lastTr.Balance > 0)
-                    TotalDebt = lastTr.Balance;
-                else if (lastTr.Balance < 0)
-                    TotalCredit = lastTr.Balance * -1;
-            }
+
+
+            var lastTr = await _topModel.GetLastTransactionAsync(SelectedAgent.Id, SelectedCurrency.Id ?? 1);
+            if (lastTr.Balance > 0)
+                TotalDebt = lastTr.Balance;
+            else if (lastTr.Balance < 0)
+                TotalCredit = lastTr.Balance * -1;
         }
     }
 
@@ -226,7 +230,7 @@ public partial class AgentViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]
     private async Task AddNewAgent(Window parent)
     {
-        await _dialogueService.OpenDialogue(new AddNewAgentWindow(), new AddNewAgentViewModel(Messenger, _topModel),
+        await _dialogueService.OpenDialogue(new AddNewAgentWindow(), new AddNewAgentViewModel(Messenger, _topModel, _dataStore),
             parent);
     }
 

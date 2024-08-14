@@ -196,6 +196,11 @@ public partial class CatalogueItemViewModel : ViewModelBase
             _catalogueModels.Clear();
             await foreach (var res in DataFiltering.FilterByUniValue(_dataStore.CatalogueModels, value, token))
                 _catalogueModels.Add(res);
+            if (_catalogueModels.Count <= 2)
+            {
+                for (int i = 0; i < _catalogueModels.Count; i++)
+                    CatalogueModels.Expand(i);
+            }
         });
         if (value.Length >= 2)
         {

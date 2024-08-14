@@ -9,6 +9,7 @@ public partial class Agent
     public string Name { get; set; } = null!;
 
     public int IsZak { get; set; }
+    public int OverPr { get; set; }
 
     public virtual ICollection<AgentTransaction> AgentTransactions { get; set; } = new List<AgentTransaction>();
 

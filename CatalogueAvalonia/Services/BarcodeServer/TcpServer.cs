@@ -57,14 +57,15 @@ public class TcpServer
 
             var res = new List<CatalogueModel>();
             
-            if (input.Substring(0,6).Contains("Search"))
+            if (input.Contains("Search"))
             {
-                res = await TrySearchUniValue(input.Substring(input.IndexOf('|')));
+                res = await TrySearchUniValue(input.Substring(input.IndexOf('|')+1));
             }
             
             if (input == "END") break;
 
             await stream.WriteAsync(res.Serialize());
+            GC.Collect();
             response.Clear();
         }
         tcpClient.Close();

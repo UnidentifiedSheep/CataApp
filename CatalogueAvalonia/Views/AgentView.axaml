@@ -110,6 +110,11 @@
                                             Binding="{Binding IsZak}"
                                             Width="2*"
                                             IsReadOnly="False" />
+                    <DataGridTextColumn Header="Наценка"
+                                        Width="80"
+                                        Binding="{Binding OverPriceText}"
+                                        IsVisible="{Binding IsOverPriceVis}">
+                    </DataGridTextColumn>
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
@@ -124,6 +129,8 @@
                                   CommandParameter="{Binding $parent[Window]}" />
                         <MenuItem Header="Удалить контрагента"
                                   Command="{Binding DeleteAgentCommand}" />
+                        <MenuItem Header="Наценка"
+                                  Command="{Binding SetVisabilityCommand}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>

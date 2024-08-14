@@ -15,10 +15,11 @@ namespace CatalogueAvalonia.Services.DataBaseAction;
 public class DataBaseProvider : IDataBaseProvider
 {
     private readonly DataContextDataProvider _context;
-
-    public DataBaseProvider(DataContextDataProvider dataContext)
+    private readonly DataContextDataForInvoices _contextForInvoice;
+    public DataBaseProvider(DataContextDataProvider dataContext, DataContextDataForInvoices contextForInvoice)
     {
         _context = dataContext;
+        _contextForInvoice = contextForInvoice;
     }
 
     public async Task<IEnumerable<AgentModel>> GetAgentsAsync()
@@ -27,7 +28,9 @@ public class DataBaseProvider : IDataBaseProvider
         {
             Id = x.Id,
             IsZak = x.IsZak,
-            Name = x.Name
+            Name = x.Name,
+            OverPrice = x.OverPr,
+            OverPriceText = x.OverPr.ToString()
         }).ToListAsync();
     }
 
@@ -117,12 +120,11 @@ public class DataBaseProvider : IDataBaseProvider
 
     public async Task<IEnumerable<CatalogueModel>> GetCatalogueById(IEnumerable<int> uniIds)
     {
-        IEnumerable<CatalogueModel> catalogueModels = new List<CatalogueModel>();
+        List<CatalogueModel> catalogueModels = new List<CatalogueModel>();
         foreach (var uniId in uniIds)
         {
             var model = await GetCatalogueById(uniId);
-            if (model != null)
-                catalogueModels.Append(model);
+            catalogueModels.Add(model);
         }
 
         return catalogueModels;
@@ -188,7 +190,7 @@ public class DataBaseProvider : IDataBaseProvider
     {
         var model = await _context.Agents.FindAsync(id);
         if (model != null)
-            return new AgentModel { Id = id, IsZak = model.IsZak, Name = model.Name };
+            return new AgentModel { Id = id, IsZak = model.IsZak, Name = model.Name, OverPrice = model.OverPr, OverPriceText = model.OverPr.ToString()};
         return new AgentModel();
     }
 
@@ -359,47 +361,90 @@ public class DataBaseProvider : IDataBaseProvider
                 Comment = x.Comment
             }).ToListAsync();
     }
-
-    public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId)
+    public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId, int action)
     {
-        var model = await _context.Prodajas.Include(x => x.MainCat).ThenInclude(x => x.Producer)
-            .Where(x => x.ProdajaId == zakMainGroupId).ToListAsync();
-        var list = new List<ProdajaAltModel>();
-        foreach (var item in model)
-            if (item.MainCat != null)
-                list.Add(new ProdajaAltModel
-                {
-                    Id = item.Id,
-                    MaxCount = item.Count,
-                    Count = item.Count,
-                    TextCont = Convert.ToString(item.Count),
-                    MainCatId = item.MainCatId,
-                    MainCatName = item.MainCat.Name,
-                    MainName = item.MainName,
-                    Price = item.Price,
-                    TextDecimal = Convert.ToString(item.Price),
-                    UniValue = item.MainCat.UniValue,
-                    ProdajaId = item.ProdajaId,
-                    ProducerName = item.MainCat.Producer.ProducerName,
-                    InitialPrice = item.InitialPrice,
-                    CurrencyInitialId = item.CurrencyId
-                });
-            else
-                list.Add(new ProdajaAltModel
-                {
-                    Id = item.Id,
-                    Count = item.Count,
-                    MaxCount = item.Count,
-                    TextCont = Convert.ToString(item.Count),
-                    MainCatId = item.MainCatId,
-                    MainCatName = null,
-                    MainName = item.MainName,
-                    Price = item.Price,
-                    TextDecimal = Convert.ToString(item.Price),
-                    UniValue = item.UniValue,
-                    ProdajaId = item.ProdajaId
-                });
-        return list;
+        if (action == 1)
+        {
+            var model = await _contextForInvoice.Prodajas.Include(x => x.MainCat).ThenInclude(x => x.Producer)
+                .Where(x => x.ProdajaId == zakMainGroupId).ToListAsync();
+            var list = new List<ProdajaAltModel>();
+            foreach (var item in model)
+                if (item.MainCat != null)
+                    list.Add(new ProdajaAltModel
+                    {
+                        Id = item.Id,
+                        MaxCount = item.Count,
+                        Count = item.Count,
+                        TextCont = Convert.ToString(item.Count),
+                        MainCatId = item.MainCatId,
+                        MainCatName = item.MainCat.Name,
+                        MainName = item.MainName,
+                        Price = item.Price,
+                        TextDecimal = Convert.ToString(item.Price),
+                        UniValue = item.MainCat.UniValue,
+                        ProdajaId = item.ProdajaId,
+                        ProducerName = item.MainCat.Producer.ProducerName,
+                        InitialPrice = item.InitialPrice,
+                        CurrencyInitialId = item.CurrencyId
+                    });
+                else
+                    list.Add(new ProdajaAltModel
+                    {
+                        Id = item.Id,
+                        Count = item.Count,
+                        MaxCount = item.Count,
+                        TextCont = Convert.ToString(item.Count),
+                        MainCatId = item.MainCatId,
+                        MainCatName = null,
+                        MainName = item.MainName,
+                        Price = item.Price,
+                        TextDecimal = Convert.ToString(item.Price),
+                        UniValue = item.UniValue,
+                        ProdajaId = item.ProdajaId
+                    });
+            return list;
+        }
+        else
+        {
+            var model = await _context.Prodajas.Include(x => x.MainCat).ThenInclude(x => x.Producer)
+                .Where(x => x.ProdajaId == zakMainGroupId).ToListAsync();
+            var list = new List<ProdajaAltModel>();
+            foreach (var item in model)
+                if (item.MainCat != null)
+                    list.Add(new ProdajaAltModel
+                    {
+                        Id = item.Id,
+                        MaxCount = item.Count,
+                        Count = item.Count,
+                        TextCont = Convert.ToString(item.Count),
+                        MainCatId = item.MainCatId,
+                        MainCatName = item.MainCat.Name,
+                        MainName = item.MainName,
+                        Price = item.Price,
+                        TextDecimal = Convert.ToString(item.Price),
+                        UniValue = item.MainCat.UniValue,
+                        ProdajaId = item.ProdajaId,
+                        ProducerName = item.MainCat.Producer.ProducerName,
+                        InitialPrice = item.InitialPrice,
+                        CurrencyInitialId = item.CurrencyId
+                    });
+                else
+                    list.Add(new ProdajaAltModel
+                    {
+                        Id = item.Id,
+                        Count = item.Count,
+                        MaxCount = item.Count,
+                        TextCont = Convert.ToString(item.Count),
+                        MainCatId = item.MainCatId,
+                        MainCatName = null,
+                        MainName = item.MainName,
+                        Price = item.Price,
+                        TextDecimal = Convert.ToString(item.Price),
+                        UniValue = item.UniValue,
+                        ProdajaId = item.ProdajaId
+                    });
+            return list;
+        }
     }
 
     private IEnumerable<AgentTransactionModel> AgentTransactionToModel(IEnumerable<AgentTransaction> transactions)
@@ -423,12 +468,17 @@ public class DataBaseProvider : IDataBaseProvider
         var part = await _context.MainCats.FindAsync(mainCatId);
         if (part != null)
         {
-            if (part.Img != null)
+            if (part.ImageId != null)
             {
                 Bitmap? img;
-                using (var ms = new MemoryStream(part.Img))
-                    img = new Bitmap(ms);
-                
+                var imgModel = await _context.Images.FindAsync(part.ImageId);
+                if (imgModel != null && imgModel.Img != null)
+                {
+                    using (var ms = new MemoryStream(imgModel.Img))
+                        img = new Bitmap(ms);
+                }
+                else
+                    return null;
 
                 return img;
             }

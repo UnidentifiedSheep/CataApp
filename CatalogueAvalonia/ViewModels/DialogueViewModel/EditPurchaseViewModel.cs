@@ -70,7 +70,7 @@ public partial class EditPurchaseViewModel : ViewModelBase
         _dataStore = dataStore;
         _topModel = topModel;
         _dialogueServices = dialogueService;
-        _comment = zakupkaMainGroup.Comment ?? string.Empty;
+        _comment = (zakupkaMainGroup.Comment ?? string.Empty).TrimStart(' ').TrimEnd(' ');
         DateTime.TryParse(zakupkaMainGroup.Datetime, out _purchaseDate);
         _canEditUsd = !ConvertToUsd;
         _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));

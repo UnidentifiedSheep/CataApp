@@ -7,8 +7,15 @@
         x:Class="CatalogueAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         xmlns:view="using:CatalogueAvalonia.Views"
+        xmlns:viewitem="using:CatalogueAvalonia.Views.ViewItems"
         Icon="/Assets/Untitled.ico"
         Title="CatalogueAvalonia">
+    <Window.Styles>
+        <Style Selector="FlyoutPresenter.DefaultFlyout">
+            <Setter Property="Background" Value="White" /> 
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </Window.Styles>
     <Window.KeyBindings>
         <KeyBinding Gesture="ctrl+e"
                     Command="{Binding SetTextBoxVisOrUnvisCommand}"/>
@@ -48,6 +55,23 @@
                           Command="{Binding OpenProducersSettingsCommand}" />
             </MenuItem>
         </Menu>
+        <Button Grid.Row="0"
+                Background="Transparent"
+                Height="40"
+                HorizontalAlignment="Right">
+            <Image Source="../Assets/file.png"/>
+            <Button.Flyout>
+                <Flyout FlyoutPresenterClasses="DefaultFlyout">
+                    <FlyoutPresenter Height="500"
+                                     MinWidth="350"
+                                     Background="White">
+                        <viewitem:FilesAndNotificationsView
+                            DataContext="{Binding ViewModels[4]}"/>
+                    </FlyoutPresenter>
+                </Flyout>
+            </Button.Flyout>
+            
+        </Button>
         <TabControl Grid.Row="1"
                     BorderBrush="#20202020"
                     BorderThickness="0,1.8,0,0">

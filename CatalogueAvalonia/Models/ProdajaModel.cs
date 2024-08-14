@@ -1,4 +1,6 @@
-﻿namespace CatalogueAvalonia.Models;
+﻿using System;
+
+namespace CatalogueAvalonia.Models;
 
 public class ProdajaModel
 {
@@ -26,4 +28,5 @@ public class ProdajaModel
                 _currencySign = value;
         }
     }
+    
 }

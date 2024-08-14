@@ -24,7 +24,8 @@ public interface IDataBaseProvider
     Task<IEnumerable<ZakupkiModel>> GetZakupkiMainModel(string _startD, string _endD, int agentId);
     Task<IEnumerable<ZakupkaAltModel>> GetZakupkiAltModel(int zakMainGroupId);
     Task<IEnumerable<ProdajaModel>> GetProdajaMainGroup(string _startD, string _endD, int agentId);
-    Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId);
+    Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId, int action);
     Task<Bitmap?> GetPartsImg(int? mainCatId);
     Task<ProducerModel?> GetProducerById(int producerId);
+    
 }

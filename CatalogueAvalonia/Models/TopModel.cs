@@ -627,7 +627,21 @@ public class TopModel
     {
         try
         {
-            return await _dataBaseProvider.GetProdajaAltModel(mainGroupId);
+            return await _dataBaseProvider.GetProdajaAltModel(mainGroupId, 0);
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return new List<ProdajaAltModel>();
+        }
+    }
+    public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltGroupNewTask(int mainGroupId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.GetProdajaAltModel(mainGroupId, 1));
         }
         catch (Exception e)
         {

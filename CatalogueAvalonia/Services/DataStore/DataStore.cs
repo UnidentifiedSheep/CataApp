@@ -40,6 +40,7 @@ public class DataStore : ObservableRecipient
     public List<AgentModel> AgentModels { get; }
 
     public List<CurrencyModel> CurrencyModels { get; }
+    public decimal TotalSum { get; private set; } = 0;
 
     private void OnDataBaseAdded(object recipient, AddedMessage message)
     {
@@ -71,6 +72,7 @@ public class DataStore : ObservableRecipient
             var what = CatalogueModels.Find(x => x.UniId == message.Value.Id);
             if (what != null)
                 CatalogueModels.Remove(what);
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "TotalSum" }));
         }
         else if (where == "Agent")
         {
@@ -96,6 +98,7 @@ public class DataStore : ObservableRecipient
                     }
                 }
             }
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "TotalSum" }));
         }
         else if(where == "Producer")
         {
@@ -137,6 +140,7 @@ public class DataStore : ObservableRecipient
                 var item = CatalogueModels.SingleOrDefault(x => x.UniId == uniId);
                 if (item != null) CatalogueModels.ReplaceOrAdd(item, model);
             }
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "TotalSum" }));
         }
         else if (where == "Currencies")
         {
@@ -163,6 +167,7 @@ public class DataStore : ObservableRecipient
                     }
                 }
             }
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "TotalSum" }));
         }
         else if (where == "CataloguePricesList")
         {
@@ -181,6 +186,7 @@ public class DataStore : ObservableRecipient
                         }
                     }
                 }
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "TotalSum" }));
         }
         else if (where == "Producer")
         {
@@ -200,6 +206,7 @@ public class DataStore : ObservableRecipient
             }
         }
     }
+    
 
     //to initialize Store
     public async Task LoadLazy()

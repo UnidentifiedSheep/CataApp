@@ -26,7 +26,7 @@ using MsBox.Avalonia.Enums;
 
 namespace CatalogueAvalonia.ViewModels;
 
-//Если не использовать Deselct для treegrid то приложение может крашнутся.
+
 public partial class CatalogueViewModel : ViewModelBase
 {
     private readonly ObservableCollection<CatalogueModel> _catalogueModels;
@@ -51,6 +51,7 @@ public partial class CatalogueViewModel : ViewModelBase
     [ObservableProperty] private Bitmap? _itemsImg;
     [ObservableProperty] private bool _isImgVisible;
     [ObservableProperty] private bool _isImgLoading;
+    [ObservableProperty] private string _totalSum = "0$";
 
     public CatalogueViewModel()
     {
@@ -100,7 +101,6 @@ public partial class CatalogueViewModel : ViewModelBase
         {
             if (ItemsImg != null)
                 ItemsImg.Dispose();
-
         }
     }
 
@@ -182,7 +182,7 @@ public partial class CatalogueViewModel : ViewModelBase
         }
     }
 
-private int _imgCount = 0;
+    private int _imgCount = 0;
     [RelayCommand]
     private async Task OpenImageInDialogue(Window parent)
     {
@@ -227,15 +227,18 @@ private int _imgCount = 0;
                 IsLoaded = !true;
                 IsDataBaseLoaded = true;
                 _catalogueModels.AddRange(_dataStore.CatalogueModels);
+                SumTotalSum();
             });
     }
-
+    public void ExpandRow(IndexPath index)
+    {
+        CatalogueModels.Expand(index);
+    }
     private void OnDataBaseAdded(object recipient, AddedMessage message)
     {
         if (message.Value.Where == "Catalogue")
         {
-            var what = message.Value.What as CatalogueModel;
-            if (what != null)
+            if (message.Value.What is CatalogueModel what)
                 Dispatcher.UIThread.Post(() =>
                 {
                     _catalogueModels.Add(what);
@@ -248,7 +251,10 @@ private int _imgCount = 0;
         var where = message.Value.Where;
         if (where == "PartCatalogue")
             Dispatcher.UIThread.Post(() =>
-                _catalogueModels.Remove(_catalogueModels.Single(x => x.UniId == message.Value.Id)));
+            {
+                _catalogueModels.Remove(_catalogueModels.Single(x => x.UniId == message.Value.Id));
+            });
+        
     }
 
     private void OnEditedIdDataBase(object recipient, EditedMessage message)
@@ -268,6 +274,26 @@ private int _imgCount = 0;
                     });
             }
         }
+        else if (where == "TotalSum")
+            SumTotalSum();
+    }
+
+    private void SumTotalSum()
+    {
+        decimal totalSum = 0;
+        foreach (var main in _catalogueModels)
+        {
+            if (main.Children == null)
+                continue;
+            foreach (var alt in main.Children)
+            {
+                if (alt.Children == null || !alt.Children.Any())
+                    continue;
+                totalSum += alt.Children.Sum(x => (x.Price ?? 0) * x.Count);
+            }
+        }
+
+        TotalSum = $"{Math.Round(totalSum, 2):N}$";
     }
 
     [RelayCommand]
@@ -287,11 +313,13 @@ private int _imgCount = 0;
         else if (value.Length >= 3)
         {
             FilterByNameCommand.Execute(value);
+            SumTotalSum();
         }
         else if (value.Length <= 2 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
         {
             _catalogueModels.Clear();
             _catalogueModels.AddRange(_dataStore.CatalogueModels);
+            SumTotalSum();
         }
     }
 
@@ -301,6 +329,7 @@ private int _imgCount = 0;
         _catalogueModels.Clear();
         await foreach (var res in DataFiltering.FilterByUniValue(_dataStore.CatalogueModels, value, new CancellationToken()))
             _catalogueModels.Add(res);
+        
     }
 
     partial void OnPartUniValueChanged(string value)
@@ -309,13 +338,12 @@ private int _imgCount = 0;
         {
             FilterUniValueCommand.Execute(value);
             _isFilteringByUniValue = true;
-            if (_catalogueModels.Count <= 2)
+            if (_catalogueModels.Count <= 4)
             {
                 for (int i = 0; i < _catalogueModels.Count; i++)
-                {
                     CatalogueModels.Expand(i);
-                }
             }
+            SumTotalSum();
         }
         else if (value.Length <= 1 && _catalogueModels.Count != _dataStore.CatalogueModels.Count)
         {
@@ -323,6 +351,7 @@ private int _imgCount = 0;
             _catalogueModels.Clear();
             _catalogueModels.AddRange(_dataStore.CatalogueModels);
             OnPartNameChanged(PartName);
+            SumTotalSum();
         }
     }
 
@@ -343,8 +372,9 @@ private int _imgCount = 0;
             if (res == ButtonResult.Yes)
             {
                 await _topModel.DeleteGroupFromCatalogue(Selecteditem.UniId);
-                _catalogueModels.Remove(Selecteditem);
                 _dataStore.CatalogueModels.Remove(Selecteditem);
+                _catalogueModels.Remove(Selecteditem);
+                SumTotalSum();
             }
         }
     }
@@ -372,9 +402,11 @@ private int _imgCount = 0;
                     if (item != null && item.Children != null)
                     {
                         item.Children.Remove(Selecteditem);
+                        SumTotalSum();
                     }
                     GetImageCommand.Execute(null);
                 }
+                
             }
         }
     }
@@ -390,8 +422,8 @@ private int _imgCount = 0;
             await _dialogueService.OpenDialogue(new EditPricesWindow(),
                 new EditPricesViewModel(Messenger, _topModel, Selecteditem.MainCatId ?? default, _dataStore,
                     Selecteditem.UniValue), parent);
-            CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
             GetImageCommand.Execute(null);
+
         }
     }
 
@@ -405,7 +437,6 @@ private int _imgCount = 0;
         {
             await _dialogueService.OpenDialogue(new EditCatalogueWindow(),
                 new EditCatalogueViewModel(Messenger, _dataStore, Selecteditem.UniId, _topModel), parent);
-            CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
             GetImageCommand.Execute(null);
         }
         
@@ -416,7 +447,6 @@ private int _imgCount = 0;
     {
         await _dialogueService.OpenDialogue(new AddNewPartView(),
             new AddNewPartViewModel(Messenger, _dataStore, _topModel), parent);
-        CatalogueModels.RowSelection!.Deselect(CatalogueModels.RowSelection.SelectedIndex);
         GetImageCommand.Execute(null);
     }
 

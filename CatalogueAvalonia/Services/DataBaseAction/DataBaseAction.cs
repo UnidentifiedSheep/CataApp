@@ -6,9 +6,12 @@ using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
+using CatalogueAvalonia.Views.DialogueWindows;
 using DataBase.Data;
+using DynamicData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using SQLitePCL;
 using Action = DataBase.Data.Action;
 
 namespace CatalogueAvalonia.Services.DataBaseAction;
@@ -149,6 +152,7 @@ public class DataBaseAction : IDataBaseAction
         {
             model.Name = agentModel.Name;
             model.IsZak = agentModel.IsZak;
+            model.OverPr = agentModel.OverPrice ?? 0;
             
             await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
                 Values = model.Name, 
@@ -171,7 +175,7 @@ public class DataBaseAction : IDataBaseAction
             Description = $"Добавлено id={model.Id}", Seen = 0, 
             Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
             Time = DateTime.Now.ToShortTimeString()});
-        return new AgentModel { Id = model.Id, IsZak = model.IsZak, Name = model.Name };
+        return new AgentModel { Id = model.Id, IsZak = model.IsZak, Name = model.Name, OverPrice = model.OverPr, OverPriceText = model.OverPr.ToString() };
     }
 
     public async Task DeleteAgent(int id)
@@ -1430,7 +1434,17 @@ public class DataBaseAction : IDataBaseAction
             var part = await _context.MainCats.FindAsync(mainCatId);
             if (part != null)
             {
-                part.Img = img;
+                if (part.ImageId != null)
+                {
+                    var imge = await _context.Images.FindAsync(part.ImageId);
+                    if (imge != null)
+                        _context.Images.Remove(imge);
+                }
+                var imgModel = new Image { Img = img };
+                await _context.Images.AddAsync(imgModel);
+                await _context.SaveChangesAsync();
+                
+                part.ImageId = imgModel.Id;
                 await _context.SaveChangesAsync();
             }
         }
@@ -1513,10 +1527,7 @@ public class DataBaseAction : IDataBaseAction
          } 
          return null;
     }
-/*
- * Возможно большое потребление памяти диска.
- * Позже исправить.
- */
+    
     private async Task AddRecordToLog(Action action)
     {
         var act = await _context.Actions.AddAsync(action);
