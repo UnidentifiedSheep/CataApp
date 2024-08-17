@@ -274,7 +274,7 @@ public partial class ProdajaViewModel : ViewModelBase
                 FileId = _fileId,
                 StatusOfFile = FileStatus.Processing,
             };
-            _mainInvoice.GenerateInvoiceExcel(await _topModel.GetProdajaAltGroupNewTask(SelectedProdaja.Id), SelectedProdaja, _fileId, notification);
+            await _mainInvoice.GenerateInvoiceExcel(await _topModel.GetProdajaAltGroupNewTask(SelectedProdaja.Id), SelectedProdaja, _fileId, notification);
             Messenger.Send(new AddedMessage(new ChangedItem { Id = _fileId, What = notification, Where = "FileAdded" }));
             await TryRunQueu(parent);
         }

@@ -42,7 +42,7 @@ public class InvoiceForPeriod
                 {
                     page.DefaultTextStyle(x => x.FontFamily("Arial"));
                     page.Margin(15);
-                    page.Header().Height(2.5f, Unit.Centimetre)
+                    page.Header().Height(3f, Unit.Centimetre)
                         .Element(Header);
 
                     page.Content().Element(Content);

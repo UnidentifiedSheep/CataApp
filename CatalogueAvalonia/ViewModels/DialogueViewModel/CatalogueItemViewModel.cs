@@ -220,7 +220,7 @@ public partial class CatalogueItemViewModel : ViewModelBase
     private async Task AddNewPart(Window parent)
     {
         await _dialogueService.OpenDialogue(new AddNewPartView(),
-            new AddNewPartViewModel(Messenger, _dataStore, _topModel), parent);
+            new AddNewPartViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
     }
 
     [RelayCommand]

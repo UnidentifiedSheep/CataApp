@@ -24,6 +24,7 @@ public class DataBaseAction : IDataBaseAction
         Update = 1,
         Delete = 2
     }
+
     private readonly DataContext _context;
 
     public DataBaseAction(DataContext dataContext)
@@ -40,14 +41,15 @@ public class DataBaseAction : IDataBaseAction
             mainName = el.Name;
             _context.MainNames.Remove(el);
             await _context.SaveChangesAsync();
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-                Values = mainName, 
-                Description = $"Удалено id={id}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Delete,
+                Values = mainName,
+                Description = $"Удалено id={id}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
         }
-        
-
     }
 
     public async Task DeleteFromMainCatById(int? id)
@@ -57,17 +59,20 @@ public class DataBaseAction : IDataBaseAction
         {
             var uniValue = el.UniValue;
             var uniId = el.UniId;
-            
+
             _context.MainCats.Remove(el);
-            
+
             await _context.SaveChangesAsync();
             await ReCallcMainCount(el.UniId);
-            
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-                Values = uniValue, 
-                Description = $"Удалено id={id}, uni_id={uniId}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Delete,
+                Values = uniValue,
+                Description = $"Удалено id={id}, uni_id={uniId}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
         }
     }
 
@@ -108,11 +113,14 @@ public class DataBaseAction : IDataBaseAction
             }
 
             await _context.SaveChangesAsync();
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-                Values = name, 
-                Description = $"Редактировано uni_id={uniId}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Update,
+                Values = name,
+                Description = $"Редактировано uni_id={uniId}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
         }
     }
 
@@ -133,12 +141,15 @@ public class DataBaseAction : IDataBaseAction
             await _context.MainNames.AddAsync(model);
             await _context.SaveChangesAsync();
 
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
-                Values = model.Name, 
-                Description = $"Добавлено uni_id={model.UniId}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
-            
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Write,
+                Values = model.Name,
+                Description = $"Добавлено uni_id={model.UniId}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
+
             return model.UniId;
         }
 
@@ -153,12 +164,15 @@ public class DataBaseAction : IDataBaseAction
             model.Name = agentModel.Name;
             model.IsZak = agentModel.IsZak;
             model.OverPr = agentModel.OverPrice ?? 0;
-            
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-                Values = model.Name, 
-                Description = $"Редактировано id={model.Id}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Update,
+                Values = model.Name,
+                Description = $"Редактировано id={model.Id}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
         }
 
         await _context.SaveChangesAsync();
@@ -170,12 +184,19 @@ public class DataBaseAction : IDataBaseAction
         await _context.Agents.AddAsync(model);
         await _context.SaveChangesAsync();
 
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
-            Values = model.Name, 
-            Description = $"Добавлено id={model.Id}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
-        return new AgentModel { Id = model.Id, IsZak = model.IsZak, Name = model.Name, OverPrice = model.OverPr, OverPriceText = model.OverPr.ToString() };
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Write,
+            Values = model.Name,
+            Description = $"Добавлено id={model.Id}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
+        return new AgentModel
+        {
+            Id = model.Id, IsZak = model.IsZak, Name = model.Name, OverPrice = model.OverPr,
+            OverPriceText = model.OverPr.ToString()
+        };
     }
 
     public async Task DeleteAgent(int id)
@@ -185,12 +206,15 @@ public class DataBaseAction : IDataBaseAction
         {
             var name = model.Name;
             _context.Agents.Remove(model);
-            
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-                Values = name, 
-                Description = $"Удалено id={id}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Delete,
+                Values = name,
+                Description = $"Удалено id={id}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
             await _context.SaveChangesAsync();
         }
     }
@@ -208,11 +232,16 @@ public class DataBaseAction : IDataBaseAction
         };
         await _context.AgentTransactions.AddAsync(model);
         await _context.SaveChangesAsync();
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
-            Values = model.TransactionSum.ToString(), 
-            Description = $"Новая транзакция id={model.Id}, agent_id={model.AgentId}, transaction_status={model.TransactionStatus}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Write,
+            Values = model.TransactionSum.ToString(),
+            Description =
+                $"Новая транзакция id={model.Id}, agent_id={model.AgentId}, transaction_status={model.TransactionStatus}",
+            Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
         return model.Id;
     }
 
@@ -228,12 +257,17 @@ public class DataBaseAction : IDataBaseAction
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
             foreach (var tr in afterTransactions) tr.Balance = tr.Balance - transactionSum;
-            
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-                Values = transaction.Id.ToString(), 
-                Description = $"Удалено id={transaction.Id}, transaction_sum={transaction.TransactionSum}, transaction_datetime={transaction.TransactionDatatime}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Delete,
+                Values = transaction.Id.ToString(),
+                Description =
+                    $"Удалено id={transaction.Id}, transaction_sum={transaction.TransactionSum}, transaction_datetime={transaction.TransactionDatatime}",
+                Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
             await _context.SaveChangesAsync();
         }
     }
@@ -242,7 +276,7 @@ public class DataBaseAction : IDataBaseAction
         int endCount)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
-        
+
         var mainCat = await _context.MainCats.Include(x => x.MainCatPrices).ThenInclude(x => x.Currency)
             .Include(x => x.Producer).FirstOrDefaultAsync(x => x.Id == mainCatId);
         if (mainCat != null)
@@ -269,20 +303,24 @@ public class DataBaseAction : IDataBaseAction
                 await _context.SaveChangesAsync().ConfigureAwait(true);
 
 
-                var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+                var mainName = await _context.MainNames.Include(x => x.MainCats)
+                    .FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
                 if (mainName != null)
                 {
                     mainName.Count = mainName.MainCats.Sum(x => x.Count);
                 }
-                
+
                 await transaction.CommitAsync();
-                
-                await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-                    Values = mainCatId.ToString(), 
-                    Description = $"Редактировано цены id={mainCatId}, ", Seen = 0, 
-                    Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                    Time = DateTime.Now.ToShortTimeString()});
-                
+
+                await AddRecordToLog(new Action
+                {
+                    Action1 = (int)ActionsEnum.Update,
+                    Values = mainCatId.ToString(),
+                    Description = $"Редактировано цены id={mainCatId}, ", Seen = 0,
+                    Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                    Time = DateTime.Now.ToShortTimeString()
+                });
+
                 return new CatalogueModel
                 {
                     UniId = mainCat.UniId,
@@ -310,21 +348,25 @@ public class DataBaseAction : IDataBaseAction
 
             mainCat.MainCatPrices.Clear();
             mainCat.Count = 0;
-            
-            var main = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+
+            var main = await _context.MainNames.Include(x => x.MainCats)
+                .FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
             if (main != null)
             {
                 main.Count = main.MainCats.Sum(x => x.Count);
             }
 
             await transaction.CommitAsync();
-            
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-                Values = mainCatId.ToString(), 
-                Description = $"Редактировано цены id={mainCatId}, ", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
-            
+
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Update,
+                Values = mainCatId.ToString(),
+                Description = $"Редактировано цены id={mainCatId}, ", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
+
             return new CatalogueModel
             {
                 UniId = mainCat.UniId,
@@ -340,12 +382,15 @@ public class DataBaseAction : IDataBaseAction
             };
         }
 
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-            Values = mainCatId.ToString(), 
-            Description = $"Редактировано цены id={mainCatId}, ", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
-        
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Update,
+            Values = mainCatId.ToString(),
+            Description = $"Редактировано цены id={mainCatId}, ", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
+
         await transaction.CommitAsync();
         return null;
     }
@@ -355,11 +400,14 @@ public class DataBaseAction : IDataBaseAction
         List<MainCatPrice>? prices = await _context.MainCatPrices.Where(x => x.MainCatId == mainCatId).ToListAsync();
 
         if (prices != null) _context.MainCatPrices.RemoveRange(prices);
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-            Values = mainCatId.ToString(), 
-            Description = $"Удалено цены id={mainCatId}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Delete,
+            Values = mainCatId.ToString(),
+            Description = $"Удалено цены id={mainCatId}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
         await _context.SaveChangesAsync();
     }
 
@@ -406,7 +454,7 @@ public class DataBaseAction : IDataBaseAction
     public async Task AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain)
     {
         var transaction = await _context.Database.BeginTransactionAsync();
-        
+
         foreach (var model in zakupka)
         {
             var zakAndProd = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == model.MainCatId);
@@ -449,12 +497,15 @@ public class DataBaseAction : IDataBaseAction
         await _context.ZakMainGroups.AddAsync(a);
 
         await transaction.CommitAsync();
-        
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
-            Values = a.Id.ToString(), 
-            Description = $"Добавлена закупка id={a.Id}, agent_id={a.AgentId}, total_sum={a.TotalSum}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Write,
+            Values = a.Id.ToString(),
+            Description = $"Добавлена закупка id={a.Id}, agent_id={a.AgentId}, total_sum={a.TotalSum}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
     }
 
     public async Task<IEnumerable<CatalogueModel>> AddNewPricesForParts(IEnumerable<ZakupkaAltModel> parts,
@@ -479,14 +530,16 @@ public class DataBaseAction : IDataBaseAction
                 await _context.SaveChangesAsync();
             }
 
-            var mainCat = await _context.MainCats.Include(x => x.Uni).Include(x => x.Producer).Include(x => x.MainCatPrices)
+            var mainCat = await _context.MainCats.Include(x => x.Uni).Include(x => x.Producer)
+                .Include(x => x.MainCatPrices)
                 .ThenInclude(x => x.Currency).FirstOrDefaultAsync(x => x.Id == part.MainCatId);
             if (mainCat != null)
             {
-                var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+                var mainName = await _context.MainNames.Include(x => x.MainCats)
+                    .FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
                 if (mainName != null)
                     mainName.Count = mainName.MainCats.Sum(x => x.Count);
-                
+
                 cata.Add(new CatalogueModel
                 {
                     UniId = mainCat.UniId,
@@ -511,14 +564,17 @@ public class DataBaseAction : IDataBaseAction
                         }))
                 });
             }
-                
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
-                Values = mainCat.UniValue, 
-                Description = $"Добавлена цена id={mainCat.Id}, uni_value={mainCat.UniValue}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Write,
+                Values = mainCat.UniValue,
+                Description = $"Добавлена цена id={mainCat.Id}, uni_value={mainCat.UniValue}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
         }
-        
+
         return cata;
     }
 
@@ -529,11 +585,14 @@ public class DataBaseAction : IDataBaseAction
         {
             _context.AgentTransactions.Remove(transaction);
             await _context.SaveChangesAsync();
-            await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-                Values = transactionId.ToString(), 
-                Description = $"Удалена закупка transaction_id={transactionId}", Seen = 0, 
-                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-                Time = DateTime.Now.ToShortTimeString()});
+            await AddRecordToLog(new Action
+            {
+                Action1 = (int)ActionsEnum.Delete,
+                Values = transactionId.ToString(),
+                Description = $"Удалена закупка transaction_id={transactionId}", Seen = 0,
+                Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+                Time = DateTime.Now.ToShortTimeString()
+            });
         }
     }
 
@@ -541,7 +600,7 @@ public class DataBaseAction : IDataBaseAction
         IEnumerable<ZakupkaAltModel> zakupkaAltModels)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
-        
+
         var uniIds = new List<CatalogueModel>();
         foreach (var item in zakupkaAltModels)
         {
@@ -564,6 +623,7 @@ public class DataBaseAction : IDataBaseAction
                     {
                         price.Count = 0;
                     }
+
                     var partCatalogue = await _context.MainCats.FindAsync(item.MainCatId);
                     if (partCatalogue != null)
                         partCatalogue.Count = 0;
@@ -598,11 +658,13 @@ public class DataBaseAction : IDataBaseAction
                 {
                     mainCat.Count = await _context.MainCatPrices.Where(x => x.MainCatId == item.MainCatId)
                         .SumAsync(x => x.Count);
-                    var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
+                    var mainName = await _context.MainNames.Include(x => x.MainCats)
+                        .FirstOrDefaultAsync(x => x.UniId == mainCat.UniId);
                     if (mainName != null)
                     {
                         mainName.Count = mainName.MainCats.Sum(x => x.Count);
                     }
+
                     uniIds.Add(new CatalogueModel
                     {
                         UniId = mainCat.UniId,
@@ -633,13 +695,16 @@ public class DataBaseAction : IDataBaseAction
         var tr = await ReCalcTransactions(transactionId);
         if (tr != null)
             _context.AgentTransactions.Remove(tr);
-        
+
         await transaction.CommitAsync();
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-            Values = transactionId.ToString(), 
-            Description = $"Удалена закупка transaction_id={transactionId}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Delete,
+            Values = transactionId.ToString(),
+            Description = $"Удалена закупка transaction_id={transactionId}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
         return uniIds;
     }
 
@@ -650,7 +715,8 @@ public class DataBaseAction : IDataBaseAction
             mainName.Count = mainName.MainCats.Sum(x => x.Count);
         await _context.SaveChangesAsync();
     }
-    public async Task<IEnumerable<CatalogueModel>> EditZakupka(IEnumerable<Tuple<int,int>> deletedIds,
+
+    public async Task<IEnumerable<CatalogueModel>> EditZakupka(IEnumerable<Tuple<int, int>> deletedIds,
         IEnumerable<ZakupkaAltModel> zakupkaAlts,
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
         string comment)
@@ -673,6 +739,7 @@ public class DataBaseAction : IDataBaseAction
                         lastCounts[item.Item2] -= zakupkaAltItem.Count;
                     }
                 }
+
                 await _context.SaveChangesAsync();
 
 
@@ -688,6 +755,7 @@ public class DataBaseAction : IDataBaseAction
                     {
                         price.Count = 0;
                     }
+
                     if (cataloguePart != null)
                     {
                         cataloguePart.Count = 0;
@@ -714,14 +782,13 @@ public class DataBaseAction : IDataBaseAction
                         uniIds.Add(cataloguePart.Id);
                         await _context.SaveChangesAsync();
                         await ReCallcMainCount(cataloguePart.UniId);
-
                     }
                 }
 
-                
+
                 _context.Zakupkas.Remove(zakupkaAltItem);
+                await _context.SaveChangesAsync();
             }
-            
         }
 
         await _context.SaveChangesAsync();
@@ -806,7 +873,7 @@ public class DataBaseAction : IDataBaseAction
                     {
                         foreach (var price in cataPrice)
                             price.Count = 0;
-                        
+
                         if (mainCat != null)
                         {
                             mainCat.Count = 0;
@@ -824,7 +891,8 @@ public class DataBaseAction : IDataBaseAction
                         });
                         if (mainCat != null)
                         {
-                            mainCat.Count = await _context.MainCatPrices.Where(x => x.MainCatId == mainCat.Id).SumAsync(x => x.Count);
+                            mainCat.Count = await _context.MainCatPrices.Where(x => x.MainCatId == mainCat.Id)
+                                .SumAsync(x => x.Count);
                             uniIds.Add(mainCat.Id);
                         }
                     }
@@ -851,7 +919,8 @@ public class DataBaseAction : IDataBaseAction
                             await _context.SaveChangesAsync();
                             if (mainCat != null)
                             {
-                                mainCat.Count = _context.MainCatPrices.Where(x => x.MainCatId == item.MainCatId && x.Count > 0).Sum(x => x.Count);
+                                mainCat.Count = _context.MainCatPrices
+                                    .Where(x => x.MainCatId == item.MainCatId && x.Count > 0).Sum(x => x.Count);
                                 uniIds.Add(mainCat.Id);
                             }
                         }
@@ -926,11 +995,14 @@ public class DataBaseAction : IDataBaseAction
         }
 
         await dBTransaction.CommitAsync();
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-            Values = transactionId.ToString(), 
-            Description = $"Редактирована закупка transaction_id={transactionId}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Update,
+            Values = transactionId.ToString(),
+            Description = $"Редактирована закупка transaction_id={transactionId}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
         return catas;
     }
 
@@ -979,7 +1051,9 @@ public class DataBaseAction : IDataBaseAction
 
                     await ReCallcMainCount(cataloguePart.UniId);
                 }
-                
+
+                _context.Prodajas.Remove(prodajaItem);
+                await _context.SaveChangesAsync();
             }
         }
 
@@ -1032,7 +1106,7 @@ public class DataBaseAction : IDataBaseAction
                         if (count >= 0)
                             break;
                     }
-                    
+
                     await _context.SaveChangesAsync();
                 }
 
@@ -1104,7 +1178,7 @@ public class DataBaseAction : IDataBaseAction
                                 Price = (item.Price ?? 0) / currency.ToUsd,
                                 CurrencyId = currency.Id ?? 2
                             });
-                            mainCat.Count += (count?? 0) * -1;
+                            mainCat.Count += (count ?? 0) * -1;
                             uniIds.Add(mainCat.Id);
                             await _context.SaveChangesAsync();
                         }
@@ -1165,11 +1239,14 @@ public class DataBaseAction : IDataBaseAction
         }
 
         await dbTransaction.CommitAsync();
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Update, 
-            Values = transactionId.ToString(), 
-            Description = $"Редактирована продажа transaction_id={transactionId}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Update,
+            Values = transactionId.ToString(),
+            Description = $"Редактирована продажа transaction_id={transactionId}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
         return catas;
     }
 
@@ -1267,12 +1344,16 @@ public class DataBaseAction : IDataBaseAction
         await _context.ProdMainGroups.AddAsync(prod);
 
         await _context.SaveChangesAsync();
-        
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Write, 
-            Values = prod.Id.ToString(), 
-            Description = $"Добавлено продажа id={prod.Id}, agent_id={prod.AgentId}, total_sum={prod.TotalSum}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
+
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Write,
+            Values = prod.Id.ToString(),
+            Description = $"Добавлено продажа id={prod.Id}, agent_id={prod.AgentId}, total_sum={prod.TotalSum}",
+            Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
         return catas;
     }
 
@@ -1350,13 +1431,16 @@ public class DataBaseAction : IDataBaseAction
 
         await _context.SaveChangesAsync();
         await dbTransaction.CommitAsync();
-        
-        await AddRecordToLog(new Action { Action1 = (int)ActionsEnum.Delete, 
-            Values = transactionId.ToString(), 
-            Description = $"Удалено продажи transaction_id={transactionId}", Seen = 0, 
-            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")), 
-            Time = DateTime.Now.ToShortTimeString()});
-        
+
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Delete,
+            Values = transactionId.ToString(),
+            Description = $"Удалено продажи transaction_id={transactionId}", Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
+
         return catas;
     }
 
@@ -1396,14 +1480,14 @@ public class DataBaseAction : IDataBaseAction
         {
             var transactionSum = transaction.TransactionSum;
             FormattableString query =
-                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} >= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and id > {transactionId}";
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and id > {transactionId}";
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
             foreach (var tr in afterTransactions) tr.Balance = tr.Balance - transactionSum;
             await _context.SaveChangesAsync();
             return transaction;
         }
-        
+
         return transaction;
     }
 
@@ -1415,15 +1499,15 @@ public class DataBaseAction : IDataBaseAction
             transaction.TransactionSum += diff;
             transaction.Balance += diff;
             FormattableString query =
-                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} >= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and id > {transactionId}";
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and id > {transactionId}";
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
             foreach (var tr in afterTransactions)
-                tr.Balance = tr.Balance + diff;
+                tr.Balance += diff;
             await _context.SaveChangesAsync();
             return transaction;
         }
-        
+
         return transaction;
     }
 
@@ -1440,10 +1524,11 @@ public class DataBaseAction : IDataBaseAction
                     if (imge != null)
                         _context.Images.Remove(imge);
                 }
+
                 var imgModel = new Image { Img = img };
                 await _context.Images.AddAsync(imgModel);
                 await _context.SaveChangesAsync();
-                
+
                 part.ImageId = imgModel.Id;
                 await _context.SaveChangesAsync();
             }
@@ -1465,7 +1550,7 @@ public class DataBaseAction : IDataBaseAction
         var producer = new Producer { ProducerName = producerName };
         await _context.Producers.AddAsync(producer);
         await _context.SaveChangesAsync();
-        
+
         return new ProducerModel { Id = producer.Id, ProducerName = producerName };
     }
 
@@ -1491,43 +1576,44 @@ public class DataBaseAction : IDataBaseAction
 
     public async Task<CatalogueModel?> EditColor(string rowColor, string textColor, int id)
     {
-         var mainCat = await _context.MainCats.Include(x => x.MainCatPrices).ThenInclude(x => x.Currency)
+        var mainCat = await _context.MainCats.Include(x => x.MainCatPrices).ThenInclude(x => x.Currency)
             .Include(x => x.Producer).FirstOrDefaultAsync(x => x.Id == id);
 
-         if (mainCat != null)
-         {
-             mainCat.RowColor = rowColor;
-             mainCat.TextColor = textColor;
-             await _context.SaveChangesAsync();
+        if (mainCat != null)
+        {
+            mainCat.RowColor = rowColor;
+            mainCat.TextColor = textColor;
+            await _context.SaveChangesAsync();
 
-             return new CatalogueModel
-             {
-                 UniId = mainCat.UniId,
-                 MainCatId = mainCat.Id,
-                 Name = mainCat.Name,
-                 Count = mainCat.Count,
-                 UniValue = mainCat.UniValue,
-                 ProducerId = mainCat.ProducerId,
-                 ProducerName = mainCat.Producer.ProducerName,
-                 RowColor = mainCat.RowColor,
-                 TextColor = mainCat.TextColor,
-                 Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
-                     new CatalogueModel
-                     {
-                         Name = "  Цена:",
-                         UniId = null,
-                         MainCatId = x.MainCatId,
-                         PriceId = x.Id,
-                         Count = x.Count,
-                         Price = x.Price,
-                         CurrencyId = x.CurrencyId,
-                         CurrencyName = x.Currency.CurrencyName
-                     }))
-             };
-         } 
-         return null;
+            return new CatalogueModel
+            {
+                UniId = mainCat.UniId,
+                MainCatId = mainCat.Id,
+                Name = mainCat.Name,
+                Count = mainCat.Count,
+                UniValue = mainCat.UniValue,
+                ProducerId = mainCat.ProducerId,
+                ProducerName = mainCat.Producer.ProducerName,
+                RowColor = mainCat.RowColor,
+                TextColor = mainCat.TextColor,
+                Children = new ObservableCollection<CatalogueModel>(mainCat.MainCatPrices.Select(x =>
+                    new CatalogueModel
+                    {
+                        Name = "  Цена:",
+                        UniId = null,
+                        MainCatId = x.MainCatId,
+                        PriceId = x.Id,
+                        Count = x.Count,
+                        Price = x.Price,
+                        CurrencyId = x.CurrencyId,
+                        CurrencyName = x.Currency.CurrencyName
+                    }))
+            };
+        }
+
+        return null;
     }
-    
+
     private async Task AddRecordToLog(Action action)
     {
         var act = await _context.Actions.AddAsync(action);

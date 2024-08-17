@@ -436,7 +436,7 @@ public partial class CatalogueViewModel : ViewModelBase
         if (Selecteditem != null)
         {
             await _dialogueService.OpenDialogue(new EditCatalogueWindow(),
-                new EditCatalogueViewModel(Messenger, _dataStore, Selecteditem.UniId, _topModel), parent);
+                new EditCatalogueViewModel(Messenger, _dataStore, Selecteditem.UniId, _topModel, _dialogueService), parent);
             GetImageCommand.Execute(null);
         }
         
@@ -446,7 +446,7 @@ public partial class CatalogueViewModel : ViewModelBase
     private async Task AddNewPart(Window parent)
     {
         await _dialogueService.OpenDialogue(new AddNewPartView(),
-            new AddNewPartViewModel(Messenger, _dataStore, _topModel), parent);
+            new AddNewPartViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
         GetImageCommand.Execute(null);
     }
 

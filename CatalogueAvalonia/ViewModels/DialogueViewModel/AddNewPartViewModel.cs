@@ -3,10 +3,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
+using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
+using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -21,6 +24,7 @@ public partial class AddNewPartViewModel : ViewModelBase
     private readonly DataStore _dataStore;
     private readonly ObservableCollection<ProducerModel> _producers;
     private readonly TopModel _topModel;
+    private readonly IDialogueService _dialogueService;
 
     [ObservableProperty] private string _nameOfParts = string.Empty;
 
@@ -40,12 +44,20 @@ public partial class AddNewPartViewModel : ViewModelBase
         _producers = new ObservableCollection<ProducerModel>();
     }
 
-    public AddNewPartViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel) : base(messenger)
+    public AddNewPartViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel, IDialogueService dialogueService) : base(messenger)
     {
         _dataStore = dataStore;
         _topModel = topModel;
         _catalogueModels = new ObservableCollection<CatalogueModel>();
         _producers = new ObservableCollection<ProducerModel>(_dataStore.ProducerModels);
+        _dialogueService = dialogueService;
+        Messenger.Register<AddedMessage>(this, OnProducerAdded);
+    }
+
+    private void OnProducerAdded(object recipient, AddedMessage message)
+    {
+        if (message.Value.Where == "Producer")
+            _producers.Add((ProducerModel)message.Value.What!);
     }
 
     public IEnumerable<CatalogueModel> Catalogues => _catalogueModels;
@@ -127,5 +139,11 @@ public partial class AddNewPartViewModel : ViewModelBase
 
         Messenger.Send(new AddedMessage(new ChangedItem
             { Id = newId, Where = "Catalogue", What = await _topModel.GetCatalogueByIdAsync(newId) }));
+    }
+
+    [RelayCommand]
+    private async Task AddNewProducer(Window parent)
+    {
+        await _dialogueService.OpenDialogue(new AddNewProducerWindow(), new AddNewProducerViewModel(Messenger, _topModel), parent);
     }
 }

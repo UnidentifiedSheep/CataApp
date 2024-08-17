@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Controls;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
+using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
+using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -17,6 +20,7 @@ namespace CatalogueAvalonia.ViewModels.DialogueViewModel;
 public partial class EditCatalogueViewModel : ViewModelBase
 {
     private readonly ObservableCollection<CatalogueModel> _catalogueModels;
+    private readonly IDialogueService _dialogueService;
     private readonly DataStore _dataStore;
     private readonly ObservableCollection<ProducerModel> _producers;
     private readonly TopModel _topModel;
@@ -44,7 +48,7 @@ public partial class EditCatalogueViewModel : ViewModelBase
             _catalogueModels.Add(new CatalogueModel { Name = "", UniValue = $"part{i}", ProducerName = $"sampa{i}" });
     }
 
-    public EditCatalogueViewModel(IMessenger messenger, DataStore dataStore, int? id, TopModel topModel) :
+    public EditCatalogueViewModel(IMessenger messenger, DataStore dataStore, int? id, TopModel topModel, IDialogueService dialogueService) :
         base(messenger)
     {
         _topModel = topModel;
@@ -53,17 +57,28 @@ public partial class EditCatalogueViewModel : ViewModelBase
         _producers = new ObservableCollection<ProducerModel>(_dataStore.ProducerModels);
         _catalogueModels = new ObservableCollection<CatalogueModel>();
         _currAction = 0;
+        _dialogueService = dialogueService;
         GetParts(_uniId);
+        Messenger.Register<AddedMessage>(this, OnProducerAdded);
     }
 
     public EditCatalogueViewModel(IMessenger messenger, DataStore dataStore, TopModel topModel,
-        IEnumerable<CatalogueModel> models) : base(messenger)
+        IEnumerable<CatalogueModel> models, IDialogueService dialogueService) : base(messenger)
     {
         _topModel = topModel;
         _dataStore = dataStore;
         _producers = new ObservableCollection<ProducerModel>(_dataStore.ProducerModels);
         _catalogueModels = new ObservableCollection<CatalogueModel>(models);
         _currAction = 1;
+        _dialogueService = dialogueService;
+        Messenger.Register<AddedMessage>(this, OnProducerAdded);
+    }
+
+    private void OnProducerAdded(object recipient, AddedMessage message)
+    {
+        if (message.Value.Where == "Producer")
+            _producers.Add((ProducerModel)message.Value.What!);
+        
     }
 
     public IEnumerable<ProducerModel> Producers => _producers;
@@ -183,6 +198,12 @@ public partial class EditCatalogueViewModel : ViewModelBase
         });
         Messenger.Send(new AddedMessage(new ChangedItem
             { Id = newId, Where = "Catalogue", What = await _topModel.GetCatalogueByIdAsync(newId) }));
+    }
+
+    [RelayCommand]
+    private async Task AddNewProducer(Window parent)
+    {
+        await _dialogueService.OpenDialogue(new AddNewProducerWindow(), new AddNewProducerViewModel(Messenger, _topModel), parent);
     }
 
     private void ChangeProducer(int index, int id, string name)

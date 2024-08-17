@@ -173,8 +173,8 @@ public partial class NewProdajaWindow : Window
             }
             else
             {
-                var res = await MessageBoxManager.GetMessageBoxStandard("Удалить закупку?",
-                    "Вы уверенны что хотите удалить закупку?",
+                var res = await MessageBoxManager.GetMessageBoxStandard("Удалить продажу?",
+                    "Вы уверенны что хотите удалить продажу?",
                     ButtonEnum.YesNo).ShowWindowDialogAsync(this);
                 if (res == ButtonResult.Yes)
                 {
@@ -219,7 +219,7 @@ public partial class NewProdajaWindow : Window
             tb.Text = " ";
     }
 
-    private void InputElement_OnLostFocus(object? sender, RoutedEventArgs e)
+    private void ComboBox_OnDropDownClosed(object? sender, EventArgs e)
     {
         EditProdajaViewModel? dcE = null;
         NewProdajaViewModel? dcN = null;
@@ -233,6 +233,5 @@ public partial class NewProdajaWindow : Window
             dcN.ProducerSearchOpen = false;
             dcN.ProducerSearch = string.Empty;
         }
-        
     }
 }

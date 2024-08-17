@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using CatalogueAvalonia.Core;
+using OfficeOpenXml;
 using QuestPDF;
 using QuestPDF.Infrastructure;
 
@@ -17,9 +18,11 @@ namespace CatalogueAvalonia
         [STAThread]
         public static void Main(string[] args)
         {
+            
             if (mutex.WaitOne(TimeSpan.Zero, true))
             {
                 Settings.License = LicenseType.Community;
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
                 mutex.ReleaseMutex();
             }

@@ -47,6 +47,7 @@ public partial class EditProdajaViewModel : ViewModelBase
     [ObservableProperty] private ProdajaAltModel? _selectedProdaja;
 
     [ObservableProperty] private decimal _totalSum;
+    public bool IsEditingRestricted => true;
 
     public bool IsDirty;
 
@@ -71,7 +72,6 @@ public partial class EditProdajaViewModel : ViewModelBase
         _agents = new ObservableCollection<AgentModel>(_dataStore.AgentModels.Where(x => x.Id != 1));
         _prodajaAlts = new ObservableCollection<ProdajaAltModel>();
         Messenger.Register<AddedMessage>(this, OnItemAdded);
-        _isVisibleConverter = false;
 
         LoadProdajaCommand.Execute(null);
     }

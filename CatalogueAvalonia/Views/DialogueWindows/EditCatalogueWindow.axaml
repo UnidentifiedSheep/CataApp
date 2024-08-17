@@ -78,6 +78,13 @@
                                             Width="*"
                                             Binding="{Binding ProducerName}" />
                     </DataGrid.Columns>
+                    <DataGrid.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Добавить производителя"
+                                      Command="{Binding AddNewProducerCommand}"
+                                      CommandParameter="{Binding $parent[Window]}"/>
+                        </ContextMenu>
+                    </DataGrid.ContextMenu>
                 </DataGrid>
             </Grid>
             

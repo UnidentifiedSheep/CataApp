@@ -97,6 +97,7 @@ public partial class NewPurchaseViewModel : ViewModelBase
             _currAltModel = item;
             await _dialogueServices.OpenDialogue(new CatalogueItemWindow(),
                 new CatalogueItemViewModel(Messenger, _dataStore, _topModel, _dialogueServices, item), mainWindow);
+            TotalSum = _zakupka.Sum(x => x.PriceSum);
         }
     }
     
@@ -148,7 +149,8 @@ public partial class NewPurchaseViewModel : ViewModelBase
                     UniValue = what.UniValue,
                     Price = _currAltModel!.Price,
                     Count = _currAltModel!.Count,
-                    TextDecimal = _currAltModel!.Price.ToString()
+                    TextDecimal = _currAltModel!.Price.ToString(),
+                    TextCount = _currAltModel!.TextCount
                 });
         }
     }

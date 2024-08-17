@@ -91,12 +91,12 @@ public partial class MainWindowViewModel : ViewModelBase
                 var count = Convert.ToInt32(item["count"]!.ToString());
                 var producer = item["producer"]!.ToString();
                 var uniValue = item["uniValue"]!.ToString();
-                var price = Convert.ToDecimal(regPrice.Replace(item["price"]!.ToString(),"").Replace(',','.'));
+                var price = Convert.ToDecimal(regPrice.Replace(item["price"]!.ToString(),""));
                 if (producer == "DT") producer = "DIESEL TECHNIC";
                 ProducerModel? producerModel = _dataStore.ProducerModels.FirstOrDefault(x =>
                     reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower()));
                 
-                models.Add(new ZakupkaAltModel {Count = count, Price = price, UniValue = uniValue, ProducerModel = producerModel});
+                models.Add(new ZakupkaAltModel {Count = count,TextCount = count.ToString(), Price = price, UniValue = uniValue, ProducerModel = producerModel});
                 
             }
             var mainWindow = (MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
@@ -118,9 +118,13 @@ public partial class MainWindowViewModel : ViewModelBase
             {
                 var producer = item["producer"]!.ToString();
                 if (producer == "DT") producer = "DIESEL TECHNIC";
-                ProducerModel? producerModel = _dataStore.ProducerModels.FirstOrDefault(x =>
-                    reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower()));
-                    
+                var producers = _dataStore.ProducerModels.Where(x =>
+                    reg.Replace(x.ProducerName, "").ToLower().Contains(reg.Replace(producer, "").ToLower())).ToList();
+                ProducerModel? producerModel = null;
+                if (producers.Any(x => x.ProducerName.ToLower() == producer.ToLower()))
+                    producerModel = producers.FirstOrDefault(x => x.ProducerName.ToLower() == producer.ToLower());
+                else
+                    producerModel = producers.FirstOrDefault();
                 if (producerModel != null)
                 {
                     models.Add(new CatalogueModel { Count = 0, Name = item["name"]!.ToString(), UniValue = item["uniValue"]!.ToString(), ProducerName = producerModel.ProducerName, ProducerId = producerModel.Id});
@@ -137,7 +141,7 @@ public partial class MainWindowViewModel : ViewModelBase
         var mainWindow = (MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!;
         SetTextBoxVisOrUnvisCommand.Execute(null);
         await _dialogueService.OpenDialogue(new EditCatalogueWindow(),
-            new EditCatalogueViewModel(Messenger, _dataStore, _topModel, models), mainWindow);
+            new EditCatalogueViewModel(Messenger, _dataStore, _topModel, models, _dialogueService), mainWindow);
     }
 
     partial void OnFastSearchChanged(string value)

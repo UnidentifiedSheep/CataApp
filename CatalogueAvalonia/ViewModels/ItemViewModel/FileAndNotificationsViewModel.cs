@@ -14,6 +14,7 @@ using CatalogueAvalonia.Views;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 
 namespace CatalogueAvalonia.ViewModels.ItemViewModel;
 
@@ -44,6 +45,17 @@ public class FileAndNotificationsViewModel : ViewModelBase
             if (model != null)
                 Dispatcher.UIThread.Post(() => model.Ico = Icons[(int)model.StatusOfFile]);
         }
+        else if(where == "FailedToGenerate")
+        {
+            var model = _notification.FirstOrDefault(x => x.FileId == message.Value.Id);
+            if(model != null)
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        model.StatusOfFile = FileStatus.NotAvailable;
+                        model.Ico = Icons[2];
+                        model.StepsState = "Файл не доступен.";
+                    });
+        }
     }
     
     public async Task ChangeStateAndImg(int id, FileStatus state)
@@ -69,6 +81,8 @@ public class FileAndNotificationsViewModel : ViewModelBase
             Dispatcher.UIThread.Post(() =>
             {
                 what.Ico = Icons[(int)what.StatusOfFile];
+                if (what.FileInfo.Length >= 45)
+                    what.FileInfo = what.FileInfo.Substring(0,45) + "...";
                 _notification.Insert(0,what);
             });
             

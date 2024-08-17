@@ -46,6 +46,7 @@ public partial class NewProdajaViewModel : ViewModelBase
 
     [ObservableProperty] private string _producerSearch = string.Empty;
     [ObservableProperty] private bool _producerSearchOpen = false;
+    public bool IsEditingRestricted => false;
 
     public NewProdajaViewModel()
     {

@@ -1,10 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.Messaging;
-using ExcelLibrary.SpreadSheet;
+using FluentAvalonia.UI.Controls;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 
 
 namespace CatalogueAvalonia.Services.BillingService;
@@ -17,53 +22,65 @@ public class ExcelInvoice
         _messenger = messenger;
     }
 
-    public Workbook CreateExcel(IEnumerable<ProdajaAltModel> parts, ProdajaModel mainGroup, int fileId, NotificationModel notification)
+    public async Task CreateExcel(IEnumerable<ProdajaAltModel> parts, ProdajaModel mainGroup, int fileId, NotificationModel notification)
     {
-        var prodajaAltModels = parts.ToList();
-        
-        notification.FileInfo = $"Execel Накладная реализация за {mainGroup.Datetime} для {mainGroup.AgentName}";
-        Workbook wb = new Workbook();
-        Worksheet sh = new Worksheet("Main");
-        
-        notification.TotalSteps = prodajaAltModels.Count + 1;
-        sh.Cells[0, 0] = new Cell("Накладная реализации");
-        sh.Cells[1, 0] = new Cell("Номер накладной:");
-        sh.Cells[1, 1] = new Cell($"{mainGroup.Id}");
-        sh.Cells[2, 0] = new Cell("Дата:");
-        sh.Cells[2, 1] = new Cell($"{mainGroup.Datetime}");
-        sh.Cells[3, 0] = new Cell($"Покупатель:");
-        sh.Cells[3, 1] = new Cell($"{mainGroup.AgentName}");
-        sh.Cells[4, 0] = new Cell("Валюта:");
-        sh.Cells[4, 1] = new Cell($"{mainGroup.CurrencyName}");
-        notification.CurrStep = 1;
-        sh.Cells[6, 0] = new Cell("Номер запчасти");
-        sh.Cells[6, 1] = new Cell("Наименование");
-        sh.Cells[6, 2] = new Cell("Производитель");
-        sh.Cells[6, 3] = new Cell($"Цена({mainGroup.CurrencySign})");
-        sh.Cells[6, 4] = new Cell("Количество");
-        sh.Cells[6, 5] = new Cell("Сумма");
-
-        int row = 7;
-        foreach (var part in prodajaAltModels)
-        {
-            sh.Cells[row, 0] = new Cell(part.UniValue);
-            sh.Cells[row, 1] = new Cell(part.MainCatName);
-            sh.Cells[row, 2] = new Cell(part.ProducerName);
-            sh.Cells[row, 3] = new Cell(part.Price);
-            sh.Cells[row, 4] = new Cell(part.Count);
-            sh.Cells[row, 5] = new Cell(part.PriceSum);
-            notification.CurrStep++;
-            row++;
-        }
-        sh.Cells[row, 4] = new Cell("Итого:");
-        sh.Cells[row, 5] = new Cell($"{prodajaAltModels.Sum(x => x.PriceSum)}{mainGroup.CurrencySign}");
-        
         string path = $"../Documents/{fileId}ExcelInvoice{mainGroup.Id}от{mainGroup.Datetime}.xlsx";
-        notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
-        wb.Worksheets.Add(sh);
-        wb.Save(path);
-        notification.StatusOfFile = FileStatus.Ready;
-        notification.Description = new DescriptionModel
+        notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin","").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
+        using (var excelPackage = new ExcelPackage(notification.FilePath))
+        {
+            var sh = excelPackage.Workbook.Worksheets.Add("Main");
+            
+            notification.FileInfo = $"Execel Накладная реализация за {mainGroup.Datetime} для {mainGroup.AgentName}";
+            var prodajaAltModels = parts.ToList();
+            notification.TotalSteps = prodajaAltModels.Count + 1;
+            
+            sh.Cells["A1"].Value = "Накладная реализации";
+            sh.Cells["A2"].Value = "Номер накладной:";
+            sh.Cells["B2"].Value = mainGroup.Id;
+            sh.Cells["A3"].Value = "Дата:";
+            sh.Cells["B3"].Value = $"{mainGroup.Datetime}";
+            sh.Cells["A4"].Value = $"Покупатель:";
+            sh.Cells["B4"].Value = $"{mainGroup.AgentName}";
+            sh.Cells["A5"].Value = "Валюта:";
+            sh.Cells["B5"].Value = $"{mainGroup.CurrencyName}";
+            notification.CurrStep = 1;
+            
+            sh.Cells["A7"].Value = "Номер запчасти";
+            sh.Cells["B7"].Value = "Наименование";
+            sh.Cells["C7"].Value = "Производитель";
+            sh.Cells["D7"].Value = $"Цена({mainGroup.CurrencySign})";
+            sh.Cells["E7"].Value = "Количество";
+            sh.Cells["F7"].Value = $"Сумма{mainGroup.CurrencySign}";
+            for (int i = 1; i < 7; i++)
+                sh.Cells[7, i].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
+            sh.Cells["A7:F7"].Style.Font.Bold = true;
+
+            int row = 8;
+            foreach (var part in prodajaAltModels)
+            {
+                sh.Cells[$"A{row}"].Value = part.UniValue; 
+                sh.Cells[$"B{row}"].Value = part.MainCatName;
+                sh.Cells[$"C{row}"].Value = part.ProducerName;
+                sh.Cells[$"D{row}"].Value = part.Price;
+                sh.Cells[$"E{row}"].Value = part.Count;
+                sh.Cells[$"F{row}"].Value = part.PriceSum;
+                
+                for (int i = 1; i < 7; i++)
+                    sh.Cells[row, i].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
+                notification.CurrStep++;
+                row++;
+            }
+            sh.Cells[$"E{row}"].Value = "Итого:";
+            sh.Cells[$"F{row}"].Value = prodajaAltModels.Sum(x => x.PriceSum);
+            
+            for (int i = 1; i < 7; i++)
+                sh.Cells[row, i].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
+            sh.Cells[$"A1:F{row}"].AutoFitColumns();
+            
+            await excelPackage.SaveAsync();
+            GC.Collect();
+            notification.StatusOfFile = FileStatus.Ready;
+            notification.Description = new DescriptionModel
         {
             StartDate = mainGroup.Datetime,
             Description = "Накладная реализация\n" +
@@ -71,8 +88,10 @@ public class ExcelInvoice
                           $"Дата: {mainGroup.Datetime}\n" +
                           $"Путь к файлу: {notification.FilePath}"
         };
+        }
+        
+        
         _messenger.Send(new EditedMessage(new ChangedItem
             { Id = notification.FileId, MainName = "", Where = "FileReady" }));
-        return wb;
     }
 }
