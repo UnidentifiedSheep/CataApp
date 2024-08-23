@@ -58,6 +58,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<object> ViewModels { get; }
 
+    public void ChangeUniValuesVis()
+    {
+        var cata = (CatalogueViewModel)ViewModels[0];
+        cata.UnVisCatalogue = false;
+    }
     private void OnDataBaseLoaded(object recipient, ActionMessage message)
     {
         if (message.Value == "DataBaseLoaded") Dispatcher.UIThread.Post(() => IsDataBaseLoaded = true);

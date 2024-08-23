@@ -11,6 +11,7 @@ public partial class Agent
     public int IsZak { get; set; }
     public int OverPr { get; set; }
 
+    public virtual ICollection<AgentBalance> AgentBalances { get; set; } = new List<AgentBalance>();
     public virtual ICollection<AgentTransaction> AgentTransactions { get; set; } = new List<AgentTransaction>();
 
     public virtual ICollection<ProdMainGroup> ProdMainGroups { get; set; } = new List<ProdMainGroup>();

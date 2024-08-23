@@ -155,9 +155,16 @@
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Номер запчасти"
-                                        Width="3*"
-                                        Binding="{Binding UniValue}" />
+                    <DataGridTemplateColumn Header="Номер запчасти"
+                                            Width="3*">
+                        <DataTemplate>
+                            <TextBlock Text="{Binding UniValue}"
+                                       ToolTip.Tip="{Binding Comment}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0,0,0"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn>
                     <DataGridTextColumn Header="Название запчасти неоригинальное"
                                         Width="5*"
                                         Binding="{Binding MainCatName}" />

@@ -1,4 +1,6 @@
-﻿namespace CatalogueAvalonia.Models;
+﻿using System;
+
+namespace CatalogueAvalonia.Models;
 
 public class AgentTransactionModel
 {
@@ -40,4 +42,18 @@ public class AgentTransactionModel
     }
 
     public string TransactionDatatime { get; set; } = string.Empty;
+    private string _shortTime = String.Empty;
+    public string ShortTime
+    {
+        get => _shortTime;
+        set
+        {
+            _shortTime = value;
+            DateTime.TryParse(TransactionDatatime + " " + value, out _resultDate);
+        }
+        
+    }
+
+    private DateTime _resultDate;
+    public DateTime ResultDate => _resultDate;
 }

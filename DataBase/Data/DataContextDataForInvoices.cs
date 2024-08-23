@@ -19,6 +19,7 @@ public partial class DataContextDataForInvoices : DbContext
     public virtual DbSet<Agent> Agents { get; set; }
 
     public virtual DbSet<AgentTransaction> AgentTransactions { get; set; }
+    public virtual DbSet<AgentBalance> AgentBalances { get; set; }
 
     public virtual DbSet<Currency> Currencies { get; set; }
 
@@ -94,6 +95,9 @@ public partial class DataContextDataForInvoices : DbContext
             entity.Property(e => e.Currency)
                 .HasDefaultValue(1)
                 .HasColumnName("currency");
+            entity.Property(e => e.Time)
+                .HasDefaultValue("000000")
+                .HasColumnName("time");
             entity.Property(e => e.TransactionDatatime).HasColumnName("transaction_datatime");
             entity.Property(e => e.TransactionStatus).HasColumnName("transaction_status");
             entity.Property(e => e.TransactionSum)
@@ -103,6 +107,24 @@ public partial class DataContextDataForInvoices : DbContext
             entity.HasOne(d => d.Agent).WithMany(p => p.AgentTransactions).HasForeignKey(d => d.AgentId);
 
             entity.HasOne(d => d.CurrencyNavigation).WithMany(p => p.AgentTransactions).HasForeignKey(d => d.Currency);
+        });
+        modelBuilder.Entity<AgentBalance>(entity =>
+        {
+            entity.ToTable("agent_balance");
+
+            entity.HasIndex(e => e.Id, "IX_agent_balance_id").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.AgentId).HasColumnName("agent_id");
+            entity.Property(e => e.Balance)
+                .HasDefaultValueSql("0")
+                .HasColumnType("NUMERIC")
+                .HasColumnName("balance");
+            entity.Property(e => e.CurrencyId).HasColumnName("currency_id");
+
+            entity.HasOne(d => d.Agent).WithMany(p => p.AgentBalances).HasForeignKey(d => d.AgentId);
+
+            entity.HasOne(d => d.Currency).WithMany(p => p.AgentBalances).HasForeignKey(d => d.CurrencyId);
         });
 
         modelBuilder.Entity<Currency>(entity =>
@@ -263,7 +285,7 @@ public partial class DataContextDataForInvoices : DbContext
             entity.ToTable("prodaja");
 
             entity.HasIndex(e => e.Id, "IX_prodaja_id").IsUnique();
-
+            entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Count).HasColumnName("count");
             entity.Property(e => e.CurrencyId).HasColumnName("currency_id");

@@ -29,11 +29,23 @@ public partial class ProdajaAltModel : ObservableObject
     [ObservableProperty] private string? _uniValue = string.Empty;
     [ObservableProperty] private string _textDecimal = "0,00";
     [ObservableProperty] private string _textCont = "0";
+    [ObservableProperty] private string? _comment;
     
 
     public int? Id { get; set; }
     public int ProdajaId { get; set; }
     public int? MainCatId { get; set; }
+
+    partial void OnCommentChanged(string? value)
+    {
+        if (string.IsNullOrEmpty(value)) return;
+        
+        if (value[0] != ' ')
+            value = $" {value}";
+        if (value[^1] != ' ')
+            value = $"{value} ";
+        Comment = value;
+    }
 
     partial void OnTextContChanged(string value)
     {

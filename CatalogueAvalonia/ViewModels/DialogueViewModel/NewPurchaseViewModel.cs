@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -26,7 +27,7 @@ public partial class NewPurchaseViewModel : ViewModelBase
     private readonly DataStore _dataStore;
     private readonly IDialogueService _dialogueServices;
     private readonly TopModel _topModel;
-    private readonly ObservableCollection<ZakupkaAltModel> _zakupka;
+    private  ObservableCollection<ZakupkaAltModel> _zakupka;
 
     [ObservableProperty] private bool _canEditUsd;
 
@@ -195,43 +196,16 @@ public partial class NewPurchaseViewModel : ViewModelBase
     {
         _zakupka.RemoveMany(altModels);
     }
-
+    public AgentTransactionModel TransactionModel = new();
     [RelayCommand]
     private async Task SaveZakupka(Window parent)
     {
         if (SelectedAgent != null && SelectedCurrency != null)
         {
-            var transactionSum = -1 * TotalSum;
-            var lastTransaction =
-                await _topModel.GetLastTransactionAsync(SelectedAgent.Id, SelectedCurrency.Id ?? default);
-            var agentModel = new AgentTransactionModel
-            {
-                AgentId = SelectedAgent.Id,
-                CurrencyId = SelectedCurrency.Id ?? default,
-                TransactionDatatime = PurchaseDate.Date.ToString("dd.MM.yyyy"),
-                TransactionStatus = 2,
-                TransactionSum = transactionSum,
-                Balance = lastTransaction.Balance + transactionSum
-            };
-            var transactionId = await _topModel.AddNewTransactionAsync(agentModel);
-            await _dialogueServices.OpenDialogue(new AddNewPayment(),
-                new AddNewPaymentViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name),
-                parent);
-            parent.Close();
-            var zakMain = new ZakupkiModel
-            {
-                AgentId = SelectedAgent.Id,
-                CurrencyId = SelectedCurrency.Id ?? default,
-                Datetime = PurchaseDate.Date.ToString("dd.MM.yyyy"),
-                TransactionId = transactionId,
-                TotalSum = TotalSum,
-                Comment = Comment
-            };
-            await _topModel.AddNewZakupkaAsync(_zakupka, zakMain);
-
+            List<ZakupkaAltModel> zakupkas = new();
+            int currencyId = 2;
             if (ConvertToUsd)
-            {
-                var zakupkiToUsd = _zakupka.Select(x => new ZakupkaAltModel
+                zakupkas.AddRange(_zakupka.Select(x => new ZakupkaAltModel
                 {
                     Count = x.Count,
                     MainCatId = x.MainCatId,
@@ -240,17 +214,40 @@ public partial class NewPurchaseViewModel : ViewModelBase
                     MainCatName = x.MainCatName,
                     UniValue = x.UniValue,
                     Price = x.Price / SelectedCurrency.ToUsd
-                });
-                var catas = await _topModel.AddNewPricesForPartsAsync(zakupkiToUsd, 2);
-                Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
-                Messenger.Send(new ActionMessage("Update"));
-            }
+                }));
             else
             {
-                var catas = await _topModel.AddNewPricesForPartsAsync(_zakupka, SelectedCurrency.Id ?? 2);
-                Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
-                Messenger.Send(new ActionMessage("Update"));
+                currencyId = SelectedCurrency.Id ?? 2;
+                zakupkas.AddRange(_zakupka);
             }
+            var transactionSum = -1 * TotalSum;
+            var balance = await _topModel.GetAgentsBalance(SelectedAgent.Id, SelectedCurrency.Id ?? default);
+            var agentModel = new AgentTransactionModel
+            {
+                AgentId = SelectedAgent.Id,
+                CurrencyId = SelectedCurrency.Id ?? default,
+                TransactionDatatime = PurchaseDate.Date.ToString("dd.MM.yyyy"),
+                TransactionStatus = 2,
+                TransactionSum = transactionSum,
+                Balance = balance + transactionSum
+            };
+            await _dialogueServices.OpenDialogue(new AddNewPayment(),
+                new AddNewPaymentViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name, TransactionModel),
+                parent);
+            parent.Close();
+            var zakMain = new ZakupkiModel
+            {
+                AgentId = SelectedAgent.Id,
+                CurrencyId = SelectedCurrency.Id ?? default,
+                Datetime = PurchaseDate.Date.ToString("dd.MM.yyyy"),
+                TotalSum = TotalSum,
+                Comment = Comment
+            };
+            var catas = await _topModel.AddNewZakupkaAsync(_zakupka, zakMain, agentModel, TransactionModel, zakupkas, currencyId);
+            
+            Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
+            Messenger.Send(new ActionMessage("Update"));
+            
         }
     }
 }

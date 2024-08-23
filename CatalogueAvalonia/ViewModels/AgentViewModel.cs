@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -11,6 +13,7 @@ using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.Views;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -32,6 +35,7 @@ public partial class AgentViewModel : ViewModelBase
 
     [ObservableProperty] private string _agentSearchField = string.Empty;
 
+    [ObservableProperty] private DateTime _startDate;
     [ObservableProperty] private DateTime _endDate;
 
     [ObservableProperty] private bool _isCurrencyVisible = true;
@@ -49,7 +53,6 @@ public partial class AgentViewModel : ViewModelBase
 
     [ObservableProperty] private AgentTransactionModel? _selectedTransaction;
 
-    [ObservableProperty] private DateTime _startDate;
 
     [ObservableProperty] private decimal _totalCredit;
 
@@ -79,7 +82,7 @@ public partial class AgentViewModel : ViewModelBase
 
         _startDate = DateTime.Now.AddMonths(-1).Date;
         _endDate = DateTime.Now.Date;
-
+        
         Messenger.Register<ActionMessage>(this, OnAction);
         Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
         Messenger.Register<EditedMessage>(this, OnDataBaseEdited);
@@ -181,12 +184,27 @@ public partial class AgentViewModel : ViewModelBase
 
     partial void OnEndDateChanged(DateTime value)
     {
-        GetTransactionsCommand.Execute(null);
+        
+        if (value >= StartDate)
+            GetTransactionsCommand.Execute(null);
+        else
+            MessageBoxManager
+                .GetMessageBoxStandard("Неверные даты", "Начальная дата должна быть меньше или равна дате конца.")
+                .ShowWindowDialogAsync((MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!);
+            
+        
     }
 
+    
     partial void OnStartDateChanged(DateTime value)
     {
-        GetTransactionsCommand.Execute(null);
+        if (EndDate >= value)
+            GetTransactionsCommand.Execute(null);
+        else
+            MessageBoxManager
+                .GetMessageBoxStandard("Неверные даты", "Начальная дата должна быть меньше или равна дате конца.")
+                .ShowWindowDialogAsync((MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!);
+        
     }
 
     [RelayCommand]
@@ -200,7 +218,8 @@ public partial class AgentViewModel : ViewModelBase
             var model = await _topModel.GetAgentTransactionsByIdsAsync(SelectedAgent.Id, SelectedCurrency.Id ?? default,
                 Converters.ToDateTimeSqlite(StartDate.ToString("dd.MM.yyyy")),
                 Converters.ToDateTimeSqlite(EndDate.ToString("dd.MM.yyyy")));
-            _agentTransactions.AddRange(model.Where(x => x.TransactionStatus != 3).OrderByDescending(x => x.Id).ToList());
+            var transactions = model.Where(x => x.TransactionStatus != 3).OrderByDescending(x => x.ResultDate).ToList();
+            _agentTransactions.AddRange(transactions);
 
             if (SelectedCurrency.Id == 1)
             {
@@ -208,12 +227,11 @@ public partial class AgentViewModel : ViewModelBase
                 IsCurrencyVisible = true;
             }
 
-
-            var lastTr = await _topModel.GetLastTransactionAsync(SelectedAgent.Id, SelectedCurrency.Id ?? 1);
-            if (lastTr.Balance > 0)
-                TotalDebt = lastTr.Balance;
-            else if (lastTr.Balance < 0)
-                TotalCredit = lastTr.Balance * -1;
+            var balance = await _topModel.GetAgentsBalance(SelectedAgent.Id, SelectedCurrency.Id ?? default);
+            if (balance > 0)
+                TotalDebt = balance;
+            else if (balance < 0)
+                TotalCredit = balance * -1;
         }
     }
 

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -159,7 +160,8 @@ public class DataBaseProvider : IDataBaseProvider
             CurrencyId = x.Currency,
             TransactionDatatime = x.TransactionDatatime,
             AgentId = x.AgentId,
-            TransactionSum = x.TransactionSum
+            TransactionSum = x.TransactionSum,
+            ShortTime = x.Time.Insert(2, ":").Insert(5, ":")
         }).ToListAsync();
     }
 
@@ -210,30 +212,10 @@ public class DataBaseProvider : IDataBaseProvider
                 TransactionDatatime = Converters.ToNormalDateTime(lastTransaction.TransactionDatatime),
                 AgentId = lastTransaction.AgentId,
                 TransactionSum = lastTransaction.TransactionSum,
-                CurrencySign = lastTransaction.CurrencyNavigation.CurrencySign
+                CurrencySign = lastTransaction.CurrencyNavigation.CurrencySign,
+                ShortTime = lastTransaction.Time.Insert(2, ":").Insert(5, ":")
             };
-
-        var model = new AgentTransaction
-        {
-            AgentId = agentId,
-            Currency = currencyId,
-            TransactionSum = 0,
-            TransactionStatus = 3,
-            Balance = 0,
-            TransactionDatatime = Converters.ToDateTimeSqlite(DateTime.Now.ToString("dd.MM.yyyy"))
-        };
-        await _context.AgentTransactions.AddAsync(model);
-        await _context.SaveChangesAsync();
-        return new AgentTransactionModel
-        {
-            AgentId = model.AgentId,
-            CurrencyId = model.Currency,
-            TransactionDatatime = Converters.ToNormalDateTime(model.TransactionDatatime),
-            TransactionStatus = model.TransactionStatus,
-            TransactionSum = model.TransactionSum,
-            Balance = model.Balance,
-            Id = model.Id
-        };
+        return new AgentTransactionModel();
     }
 
     public async Task<IEnumerable<MainCatPriceModel>> GetMainCatPricesById(int mainCatId)
@@ -385,7 +367,8 @@ public class DataBaseProvider : IDataBaseProvider
                         ProdajaId = item.ProdajaId,
                         ProducerName = item.MainCat.Producer.ProducerName,
                         InitialPrice = item.InitialPrice,
-                        CurrencyInitialId = item.CurrencyId
+                        CurrencyInitialId = item.CurrencyId,
+                        Comment = item.Comment
                     });
                 else
                     list.Add(new ProdajaAltModel
@@ -400,7 +383,8 @@ public class DataBaseProvider : IDataBaseProvider
                         Price = item.Price,
                         TextDecimal = Convert.ToString(item.Price),
                         UniValue = item.UniValue,
-                        ProdajaId = item.ProdajaId
+                        ProdajaId = item.ProdajaId,
+                        Comment = item.Comment
                     });
             return list;
         }
@@ -426,7 +410,8 @@ public class DataBaseProvider : IDataBaseProvider
                         ProdajaId = item.ProdajaId,
                         ProducerName = item.MainCat.Producer.ProducerName,
                         InitialPrice = item.InitialPrice,
-                        CurrencyInitialId = item.CurrencyId
+                        CurrencyInitialId = item.CurrencyId,
+                        Comment = item.Comment
                     });
                 else
                     list.Add(new ProdajaAltModel
@@ -441,7 +426,8 @@ public class DataBaseProvider : IDataBaseProvider
                         Price = item.Price,
                         TextDecimal = Convert.ToString(item.Price),
                         UniValue = item.UniValue,
-                        ProdajaId = item.ProdajaId
+                        ProdajaId = item.ProdajaId,
+                        Comment = item.Comment
                     });
             return list;
         }
@@ -459,7 +445,8 @@ public class DataBaseProvider : IDataBaseProvider
             TransactionDatatime = Converters.ToNormalDateTime(x.TransactionDatatime),
             AgentId = x.AgentId,
             TransactionSum = x.TransactionSum,
-            CurrencySign = x.CurrencyNavigation.CurrencySign
+            CurrencySign = x.CurrencyNavigation.CurrencySign,
+            ShortTime = x.Time.Insert(2, ":").Insert(5, ":")
         });
     }
 
@@ -496,5 +483,12 @@ public class DataBaseProvider : IDataBaseProvider
             return new ProducerModel { Id = producer.Id, ProducerName = producer.ProducerName };
         else
             return null;
+    }
+
+    public async Task<decimal> GetAgentsBalance(int agentId, int currencyId)
+    {
+        var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
+            x.AgentId == agentId && x.CurrencyId == currencyId);
+        return agent?.Balance ?? 0m;
     }
 }

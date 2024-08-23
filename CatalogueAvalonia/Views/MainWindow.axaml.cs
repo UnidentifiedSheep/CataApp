@@ -47,4 +47,10 @@ public partial class MainWindow : Window
             dc.SetTextBoxVisOrUnvisCommand.Execute(null);
         }
     }
+
+    private void SelectingItemsControl_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        var dc = (MainWindowViewModel?)DataContext;
+        dc?.ChangeUniValuesVis();
+    }
 }

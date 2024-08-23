@@ -33,8 +33,6 @@ public partial class AddNewAgentViewModel : ViewModelBase
     private async Task AddNewAgent()
     {
         var agent = await _topModel.AddNewAgentAsync(AgentName, IsZak);
-        foreach (var curr in _dataStore.CurrencyModels)
-            await _topModel.GetLastTransactionAsync(agent.Id, curr.Id ?? default);
         
         Messenger.Send(new AddedMessage(new ChangedItem { What = agent, Where = "Agent", Id = agent.Id }));
         Messenger.Send(new ActionMessage("Update"));

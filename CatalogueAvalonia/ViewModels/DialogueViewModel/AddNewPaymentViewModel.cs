@@ -20,6 +20,7 @@ public partial class AddNewPaymentViewModel : ViewModelBase
     public IEnumerable<CurrencyModel> Currencies => _currencies;
     private readonly DataStore _dataStore;
     private readonly TopModel _topModel;
+    private AgentTransactionModel _agentTransaction;
     public AgentTransactionModel? TransactionData { get; private set; }
     
     private readonly int _agentId;
@@ -49,7 +50,7 @@ public partial class AddNewPaymentViewModel : ViewModelBase
     }
 
     public AddNewPaymentViewModel(IMessenger messenger, TopModel topModel, DataStore dataStore,
-        AgentTransactionModel transactionData, string nameOfAgent) : base(messenger)
+        AgentTransactionModel transactionData, string nameOfAgent, AgentTransactionModel agentTransaction) : base(messenger)
     {
         TransactionData = transactionData;
         _isVisAndEnb = false;
@@ -60,6 +61,7 @@ public partial class AddNewPaymentViewModel : ViewModelBase
         _agentId = transactionData.AgentId;
         Date = DateTime.Now.Date;
         TransactionSum = transactionData.TransactionSum;
+        _agentTransaction = agentTransaction;
         
         _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
         SelectedCurrency = _currencies.FirstOrDefault(x => x.Id == transactionData.CurrencyId);
@@ -109,17 +111,20 @@ public partial class AddNewPaymentViewModel : ViewModelBase
                 status = 1;
             else if (transactionSum < 0)
                 status = 0;
-
-            var lastTransaction = await _topModel.GetLastTransactionAsync(_agentId, SelectedCurrency.Id ?? default);
-            int id = await _topModel.AddNewTransactionAsync(new AgentTransactionModel
+            _agentTransaction.AgentId = _agentId;
+            _agentTransaction.CurrencyId = SelectedCurrency.Id ?? default;
+            _agentTransaction.TransactionDatatime = Date.Date.ToString("dd.MM.yyyy");
+            _agentTransaction.TransactionStatus = status;
+            _agentTransaction.TransactionSum = transactionSum;
+            /*int id = await _topModel.AddNewTransactionAsync(new AgentTransactionModel
             {
                 AgentId = _agentId,
                 CurrencyId = SelectedCurrency.Id ?? default,
                 TransactionDatatime = Date.Date.ToString("dd.MM.yyyy"),
                 TransactionStatus = status,
                 TransactionSum = transactionSum,
-                Balance = lastTransaction.Balance + transactionSum
-            });
+                Balance = balance + transactionSum
+            });*/
         }
     }
 

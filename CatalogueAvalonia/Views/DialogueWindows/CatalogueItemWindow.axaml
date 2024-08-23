@@ -62,7 +62,9 @@
         </Grid>
         <TreeDataGrid Grid.Column="1"
                       Margin="0, 10, 0, 10"
-                      Source="{Binding CatalogueModels}">
+                      Source="{Binding CatalogueModels}"
+                      DoubleTapped="InputElement_OnDoubleTapped"
+                      KeyDown="InputElement_OnKeyDown">
             <TreeDataGrid.Styles>
                 <Style Selector="TreeDataGrid TreeDataGridRow">
                     <Setter Property="BorderThickness" Value="0, 1,0 ,0"/>

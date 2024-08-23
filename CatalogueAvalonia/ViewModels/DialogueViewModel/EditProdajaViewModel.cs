@@ -47,6 +47,7 @@ public partial class EditProdajaViewModel : ViewModelBase
     [ObservableProperty] private ProdajaAltModel? _selectedProdaja;
 
     [ObservableProperty] private decimal _totalSum;
+    [ObservableProperty] private bool _isCommentVis = false;
     public bool IsEditingRestricted => true;
 
     public bool IsDirty;
@@ -210,6 +211,11 @@ public partial class EditProdajaViewModel : ViewModelBase
     public void RemoveWhereZero(IEnumerable<ProdajaAltModel> altModels)
     {
         _prodajaAlts.RemoveMany(altModels);
+    }
+    [RelayCommand]
+    private void MakeCommentVis()
+    {
+        IsCommentVis = !IsCommentVis;
     }
 
     [RelayCommand]

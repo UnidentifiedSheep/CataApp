@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -11,6 +13,7 @@ using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.Views;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -134,12 +137,22 @@ public partial class ZakupkaViewModel : ViewModelBase
 
     partial void OnEndDateChanged(DateTime value)
     {
-        LoadZakupkiMainGroupCommand.Execute(null);
+        if (StartDate <= value)
+            LoadZakupkiMainGroupCommand.Execute(null);
+        else
+            MessageBoxManager
+                .GetMessageBoxStandard("Неверные даты", "Начальная дата должна быть меньше или равна дате конца.")
+                .ShowWindowDialogAsync((MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!);
     }
 
     partial void OnStartDateChanged(DateTime value)
     {
-        LoadZakupkiMainGroupCommand.Execute(null);
+        if (value <= EndDate)
+            LoadZakupkiMainGroupCommand.Execute(null);
+        else
+            MessageBoxManager
+                .GetMessageBoxStandard("Неверные даты", "Начальная дата должна быть меньше или равна дате конца.")
+                .ShowWindowDialogAsync((MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!);
     }
 
     partial void OnSelectedAgentChanged(AgentModel? value)

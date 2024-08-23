@@ -46,6 +46,7 @@ public partial class NewProdajaViewModel : ViewModelBase
 
     [ObservableProperty] private string _producerSearch = string.Empty;
     [ObservableProperty] private bool _producerSearchOpen = false;
+    [ObservableProperty] private bool _isCommentVis = false;
     public bool IsEditingRestricted => false;
 
     public NewProdajaViewModel()
@@ -220,24 +221,29 @@ public partial class NewProdajaViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void MakeCommentVis()
+    {
+        IsCommentVis = !IsCommentVis;
+    }
+
+    public AgentTransactionModel TransactionModel = new();
+    [RelayCommand]
     private async Task SaveChanges(Window parent)
     {
         if (SelectedAgent != null && SelectedCurrency != null)
         {
-            var lastTransaction =
-                await _topModel.GetLastTransactionAsync(SelectedAgent.Id, SelectedCurrency.Id ?? default);
+            var balance = await _topModel.GetAgentsBalance(SelectedAgent.Id, SelectedCurrency.Id ?? default);
             var agentModel = new AgentTransactionModel
             {
                 AgentId = SelectedAgent.Id,
                 CurrencyId = SelectedCurrency.Id ?? 1,
                 TransactionDatatime = ProdajaDate.Date.ToString("dd.MM.yyyy"),
                 TransactionSum = TotalSum,
-                Balance = lastTransaction.Balance + TotalSum,
+                Balance = balance + TotalSum,
                 TransactionStatus = 4
             };
-            var transactionId = await _topModel.AddNewTransactionAsync(agentModel);
             await _dialogueService.OpenDialogue(new AddNewPayment(),
-                new AddNewPaymentViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name),
+                new AddNewPaymentViewModel(Messenger, _topModel, _dataStore, agentModel, SelectedAgent.Name, TransactionModel),
                 parent);
             var mainModel = new ProdajaModel
             {
@@ -246,10 +252,10 @@ public partial class NewProdajaViewModel : ViewModelBase
                 Comment = $" {Comment} ",
                 CurrencyId = SelectedCurrency.Id ?? 1,
                 TotalSum = TotalSum,
-                TransactionId = transactionId
             };
             parent.Close();
-            var catas = await _topModel.AddNewProdaja(Prodaja, mainModel);
+            var catas = await _topModel.AddNewProdaja(Prodaja, mainModel, agentModel, TransactionModel);
+            
             Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
             Messenger.Send(new ActionMessage("Update"));
         }

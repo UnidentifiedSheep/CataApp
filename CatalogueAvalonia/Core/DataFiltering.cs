@@ -27,14 +27,24 @@ public class DataFiltering
     public static async IAsyncEnumerable<CatalogueModel> FilterByUniValue(List<CatalogueModel> catalogueModels,
         string objectToFind, [EnumeratorCancellation] CancellationToken token)
     {
-        for (var i = 0; i < catalogueModels.Count(); i++)
-            if (catalogueModels[i].Children != null)
-                for (var k = 0; k < catalogueModels[i].Children.Count; k++)
-                    if (await CheckIfContainsUniValue(catalogueModels[i].Children[k], objectToFind))
-                    {
-                        yield return catalogueModels[i];
-                        break;
-                    }
+        for (var i = 0; i < catalogueModels.Count; i++)
+        {
+            if (catalogueModels[i].Children == null) continue;
+            for (var k = 0; k < catalogueModels[i].Children.Count; k++)
+                if (await CheckIfContainsUniValue(catalogueModels[i].Children[k], objectToFind))
+                {
+                    yield return catalogueModels[i];
+                    break;
+                }
+
+            if (!catalogueModels[i].UnVisChildren.Any()) continue;
+            for (int j = 0; j < catalogueModels[i].UnVisChildren.Count; j++)
+                if (await CheckIfContainsUniValue(catalogueModels[i].UnVisChildren[j], objectToFind))
+                {
+                    yield return catalogueModels[i];
+                    break;
+                }
+        }
     }
 
     public static async IAsyncEnumerable<ProducerModel> FilterProducer(IEnumerable<ProducerModel> producerModels,

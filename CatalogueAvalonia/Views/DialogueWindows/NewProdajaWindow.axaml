@@ -153,12 +153,18 @@
 									Width="*"
 									IsReadOnly="True"
 									Binding="{Binding PriceSum}"/>
+                <DataGridTextColumn Header="Комментарий"
+                                    Width="100"
+                                    Binding="{Binding Comment}"
+                                    IsVisible="{Binding IsCommentVis}"/>
 			</DataGrid.Columns>
 			<DataGrid.ContextMenu>
 				<ContextMenu>
 					<MenuItem Header="Посмотреть цены"
 					          Command="{Binding LookForPricesCommand}"
 					          CommandParameter="{Binding $parent[Window]}"/>
+                    <MenuItem Header="Редактировать комментарии"
+                              Command="{Binding MakeCommentVisCommand}"/>
 					<MenuItem Header="Добавить"
 					          CommandParameter="{Binding $parent[Window]}"
 					          Command="{Binding AddNewPartCommand}"/>

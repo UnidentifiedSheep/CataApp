@@ -108,12 +108,12 @@ public partial class AddNewTransactionViewModel : ViewModelBase
         if (Action == 2)
         {
             MinTrSum = 0;
-            ActionName = "Расход:";
+            ActionName = "Приход:";
         }
         else if (Action == 3)
         {
             MinTrSum = 0;
-            ActionName = "Приход:";
+            ActionName = "Расход:";
         }
     }
 
@@ -166,8 +166,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
                     else if (TransactionSum < 0)
                         status = 0;
 
-                    var lastTransaction =
-                        await _topModel.GetLastTransactionAsync(_agentId, SelectedCurrency.Id ?? default);
+                    var balance = await _topModel.GetAgentsBalance(_agentId, SelectedCurrency.Id ?? default);
                     decimal sum = -1 * (TransactionSum ?? 0) / SelectedConvertCurrency.ToUsd * SelectedCurrency.ToUsd;
                     var id = await _topModel.AddNewTransactionAsync(new AgentTransactionModel
                     {
@@ -176,7 +175,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
                         TransactionDatatime = Date.Date.ToString("dd.MM.yyyy"),
                         TransactionStatus = status,
                         TransactionSum = sum,
-                        Balance = lastTransaction.Balance + sum
+                        Balance = balance + sum
                     });
                     Messenger.Send(new ActionMessage("Update"));
                 }
@@ -199,7 +198,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
             else if (transactionSum < 0)
                 status = 0;
 
-            var lastTransaction = await _topModel.GetLastTransactionAsync(_agentId, SelectedCurrency.Id ?? default);
+            var balance = await _topModel.GetAgentsBalance(_agentId, SelectedCurrency.Id ?? 1);
             var id = await _topModel.AddNewTransactionAsync(new AgentTransactionModel
             {
                 AgentId = _agentId,
@@ -207,7 +206,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
                 TransactionDatatime = Date.Date.ToString("dd.MM.yyyy"),
                 TransactionStatus = status,
                 TransactionSum = transactionSum,
-                Balance = lastTransaction.Balance + transactionSum
+                Balance = balance + transactionSum
             });
             Messenger.Send(new ActionMessage("Update"));
         }

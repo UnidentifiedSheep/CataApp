@@ -355,26 +355,7 @@ public class TopModel
         }
     }
 
-    /// <summary>
-    ///     Получение последней транзакции.
-    /// </summary>
-    /// <param name="agentId"></param>
-    /// <param name="currencyId"></param>
-    /// <returns></returns>
-    public async Task<AgentTransactionModel> GetLastTransactionAsync(int agentId, int currencyId)
-    {
-        try
-        {
-            return await _dataBaseProvider.GetLastAddedTransaction(agentId, currencyId);
-        }
-        catch (Exception e)
-        {
-            _logger.Error($"Ошибка: {e}");
-            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
-                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
-            return new AgentTransactionModel();
-        }
-    }
+    
 
     /// <summary>
     ///     Удаляет транзакцию и меняет Сальдо последующих операций.
@@ -513,17 +494,19 @@ public class TopModel
         }
     }
 
-    public async Task AddNewZakupkaAsync(IEnumerable<ZakupkaAltModel> zakupkaAlts, ZakupkiModel zakupkiModel)
+    public async Task<IEnumerable<CatalogueModel>> AddNewZakupkaAsync(IEnumerable<ZakupkaAltModel> zakupkaAlts, ZakupkiModel zakupkiModel,AgentTransactionModel initTransaction, AgentTransactionModel agentPayment,IEnumerable<ZakupkaAltModel> catas,
+        int currencyId)
     {
         try
         {
-            await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel));
+            return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewZakupka(zakupkaAlts, zakupkiModel, initTransaction, agentPayment,catas, currencyId));
         }
         catch (Exception e)
         {
             _logger.Error($"Ошибка: {e}");
             await MessageBoxManager.GetMessageBoxStandard("Ошибка",
                 $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return new List<CatalogueModel>();
         }
     }
 
@@ -653,11 +636,11 @@ public class TopModel
     }
 
     public async Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models,
-        ProdajaModel mainModel)
+        ProdajaModel mainModel, AgentTransactionModel initTransaction, AgentTransactionModel agentPayment)
     {
         try
         {
-            return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewProdaja(models, mainModel));
+            return await _taskQueue.Enqueue(async () => await _dataBaseAction.AddNewProdaja(models, mainModel, initTransaction, agentPayment));
         }
         catch (Exception e)
         {
@@ -764,6 +747,21 @@ public class TopModel
             await MessageBoxManager.GetMessageBoxStandard("Ошибка",
                 $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
             return null;
+        }
+    }
+
+    public async Task<decimal> GetAgentsBalance(int agentId, int currencyId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.GetAgentsBalance(agentId, currencyId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return 0;
         }
     }
 

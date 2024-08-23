@@ -52,6 +52,7 @@ public partial class CatalogueViewModel : ViewModelBase
     [ObservableProperty] private bool _isImgVisible;
     [ObservableProperty] private bool _isImgLoading;
     [ObservableProperty] private string _totalSum = "0$";
+    [ObservableProperty] private bool _unVisCatalogue = false;
 
     public CatalogueViewModel()
     {
@@ -87,6 +88,25 @@ public partial class CatalogueViewModel : ViewModelBase
         Messenger.Register<AddedMessage>(this, OnDataBaseAdded);
 
         CatalogueModels.RowSelection!.SelectionChanged += CatalogueModelSelectionChanged;
+    }
+
+    partial void OnUnVisCatalogueChanged(bool value)
+    {
+        if(value)
+            foreach (var cata in _catalogueModels)
+            {
+                if (cata.Children == null) continue;
+                var unVis = cata.Children.Where(x => x.Children == null || !x.Children.Any()).ToList();
+                cata.UnVisChildren.AddRange(unVis);
+                cata.Children.Remove(unVis);
+            }
+        else
+            foreach (var cata in _catalogueModels)
+            {
+                if (cata.Children == null) continue;
+                cata.Children.AddRange(cata.UnVisChildren);
+                cata.UnVisChildren.Clear();
+            }
     }
 
     private void CatalogueModelSelectionChanged(object? sender,
@@ -319,6 +339,7 @@ public partial class CatalogueViewModel : ViewModelBase
         {
             _catalogueModels.Clear();
             _catalogueModels.AddRange(_dataStore.CatalogueModels);
+            OnUnVisCatalogueChanged(UnVisCatalogue);
             SumTotalSum();
         }
     }
@@ -350,6 +371,7 @@ public partial class CatalogueViewModel : ViewModelBase
             _isFilteringByUniValue = false;
             _catalogueModels.Clear();
             _catalogueModels.AddRange(_dataStore.CatalogueModels);
+            OnUnVisCatalogueChanged(UnVisCatalogue);
             OnPartNameChanged(PartName);
             SumTotalSum();
         }

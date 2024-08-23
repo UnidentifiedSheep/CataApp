@@ -20,7 +20,8 @@ public interface IDataBaseAction
     Task DeleteMainCatPricesById(int mainCatId);
     Task EditCurrency(IEnumerable<CurrencyModel> currencyModels, IEnumerable<int> deletedIds);
     Task DeleteAllCurrencies();
-    Task AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain);
+    Task<IEnumerable<CatalogueModel>> AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain, AgentTransactionModel initTransaction, AgentTransactionModel agentPayment,IEnumerable<ZakupkaAltModel> catas,
+        int currencyId);
     Task<IEnumerable<CatalogueModel>> AddNewPricesForParts(IEnumerable<ZakupkaAltModel> parts, int currencyId);
     Task DeleteZakupkaByTransactionId(int transactionId);
 
@@ -31,7 +32,7 @@ public interface IDataBaseAction
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
         string comment);
 
-    Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models, ProdajaModel mainModel);
+    Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models, ProdajaModel mainModel, AgentTransactionModel initTransaction, AgentTransactionModel agentPayment);
 
     Task<IEnumerable<CatalogueModel>> DeleteProdajaCountReCalc(int transactionId,
         IEnumerable<ProdajaAltModel> prodajaAltModels, int currencyId);

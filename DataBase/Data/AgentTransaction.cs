@@ -13,6 +13,7 @@ public partial class AgentTransaction
     public decimal Balance { get; set; }
 
     public string TransactionDatatime { get; set; } = null!;
+    public string Time { get; set; } = null!;
 
     public int Currency { get; set; }
 

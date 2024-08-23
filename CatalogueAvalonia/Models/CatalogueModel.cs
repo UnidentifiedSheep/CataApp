@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Data.SqlTypes;
+using System.Linq;
 using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
+using DynamicData;
 
 namespace CatalogueAvalonia.Models;
 
@@ -30,7 +32,9 @@ public partial class CatalogueModel : ObservableObject
     public int ProducerId { get; set; }
     public int CurrencyId { get; set; }
 
-    public ObservableCollection<CatalogueModel>? Children { get; set; } 
+    public ObservableCollection<CatalogueModel>? Children { get; set; }
+    public ObservableCollection<CatalogueModel> UnVisChildren { get; private set; } = new();
+    
 
     partial void OnNameChanged(string value)
     {

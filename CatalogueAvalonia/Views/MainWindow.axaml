@@ -73,6 +73,7 @@
             
         </Button>
         <TabControl Grid.Row="1"
+                     SelectionChanged="SelectingItemsControl_OnSelectionChanged"
                     BorderBrush="#20202020"
                     BorderThickness="0,1.8,0,0">
             <TabItem>

@@ -51,9 +51,10 @@ public class ExcelInvoice
             sh.Cells["D7"].Value = $"Цена({mainGroup.CurrencySign})";
             sh.Cells["E7"].Value = "Количество";
             sh.Cells["F7"].Value = $"Сумма{mainGroup.CurrencySign}";
+            sh.Cells["G7"].Value = $"Комментарий/номер машины";
             for (int i = 1; i < 7; i++)
                 sh.Cells[7, i].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-            sh.Cells["A7:F7"].Style.Font.Bold = true;
+            sh.Cells["A7:G7"].Style.Font.Bold = true;
 
             int row = 8;
             foreach (var part in prodajaAltModels)
@@ -64,8 +65,9 @@ public class ExcelInvoice
                 sh.Cells[$"D{row}"].Value = part.Price;
                 sh.Cells[$"E{row}"].Value = part.Count;
                 sh.Cells[$"F{row}"].Value = part.PriceSum;
+                sh.Cells[$"G{row}"].Value = part.Comment != null ? part.Comment.TrimStart(' ').TrimEnd(' ') : "";
                 
-                for (int i = 1; i < 7; i++)
+                for (int i = 1; i < 8; i++)
                     sh.Cells[row, i].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
                 notification.CurrStep++;
                 row++;
@@ -75,7 +77,7 @@ public class ExcelInvoice
             
             for (int i = 1; i < 7; i++)
                 sh.Cells[row, i].Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
-            sh.Cells[$"A1:F{row}"].AutoFitColumns();
+            sh.Cells[$"A1:G{row}"].AutoFitColumns();
             
             await excelPackage.SaveAsync();
             GC.Collect();

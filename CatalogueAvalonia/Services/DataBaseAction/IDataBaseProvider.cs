@@ -27,5 +27,6 @@ public interface IDataBaseProvider
     Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModel(int zakMainGroupId, int action);
     Task<Bitmap?> GetPartsImg(int? mainCatId);
     Task<ProducerModel?> GetProducerById(int producerId);
-    
+    Task<decimal> GetAgentsBalance(int agentId, int currencyId);
+
 }

@@ -98,8 +98,20 @@ public partial class EditCatalogueViewModel : ViewModelBase
                 UniId = x.UniId,
                 Name = x.Name
             });
+        var modelUnVis = _dataStore.CatalogueModels.Where(x => x.UniId == id).OrderBy(x => x.UniId).First().UnVisChildren.Select(
+            x => new CatalogueModel
+            {
+                MainCatId = x.MainCatId,
+                ProducerId = x.ProducerId,
+                ProducerName = x.ProducerName,
+                UniValue = x.UniValue,
+                UniId = x.UniId,
+                Name = x.Name
+            });
         if (model != null)
             _catalogueModels.AddRange(model);
+        _catalogueModels.AddRange(modelUnVis);
+        
     }
     [RelayCommand]
     private async Task FilterProducers(string value)

@@ -20,6 +20,7 @@ public partial class Prodaja
     public decimal InitialPrice { get; set; }
 
     public int CurrencyId { get; set; }
+    public string? Comment { get; set; }
 
     public virtual Currency Currency { get; set; } = null!;
 

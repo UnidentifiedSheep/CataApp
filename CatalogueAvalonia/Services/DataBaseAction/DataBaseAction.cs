@@ -180,10 +180,31 @@ public class DataBaseAction : IDataBaseAction
 
     public async Task<AgentModel> AddNewAgent(string name, int isZak)
     {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
         var model = new Agent { Name = name, IsZak = isZak };
         await _context.Agents.AddAsync(model);
         await _context.SaveChangesAsync();
 
+        foreach (var curr in _context.Currencies)
+        {
+            await _context.AgentTransactions.AddAsync(new AgentTransaction
+            {
+                AgentId = model.Id,
+                Balance = 0,
+                Currency = curr.Id,
+                Time = DateTime.Now.ToString("HH:mm:ss").Replace(":", ""),
+                TransactionDatatime = Converters.ToDateTimeSqlite(DateTime.Now.ToString("dd.MM.yyyy")),
+                TransactionStatus = 3, 
+                TransactionSum = 0
+            });
+            await _context.AgentBalances.AddAsync(new AgentBalance
+            {
+                AgentId = model.Id,
+                CurrencyId = curr.Id,
+                Balance = 0m
+            });
+            await _context.SaveChangesAsync();
+        }
         await AddRecordToLog(new Action
         {
             Action1 = (int)ActionsEnum.Write,
@@ -192,6 +213,7 @@ public class DataBaseAction : IDataBaseAction
             Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
             Time = DateTime.Now.ToShortTimeString()
         });
+        await dbTransaction.CommitAsync();
         return new AgentModel
         {
             Id = model.Id, IsZak = model.IsZak, Name = model.Name, OverPrice = model.OverPr,
@@ -218,45 +240,135 @@ public class DataBaseAction : IDataBaseAction
             await _context.SaveChangesAsync();
         }
     }
-
-    public async Task<int> AddNewTransaction(AgentTransactionModel agentTransaction)
+    
+    private async Task<decimal> PrevBalance(int agentId, int currencyId, string date, string time)
     {
-        var model = new AgentTransaction
+        List<AgentTransaction> endList = new();
+        FormattableString sameDate =
+            $"SELECT * from agent_transactions where {date} = transaction_datatime and transaction_status != 3 and agent_id = {agentId} and currency = {currencyId} and time <= {time} order by transaction_datatime desc , time desc";
+        FormattableString otherDays =
+            $"SELECT * from agent_transactions where {date} > transaction_datatime and transaction_status != 3 and agent_id = {agentId} and currency = {currencyId} order by transaction_datatime desc , time desc limit 1";
+        endList.AddRange(await _context.AgentTransactions.FromSql(sameDate).ToListAsync());
+        
+        if (endList.Count != 0) return endList.First().Balance;
+        
+        endList.AddRange(await _context.AgentTransactions.FromSql(otherDays).ToListAsync());
+        
+        var balance = endList.FirstOrDefault();
+        return balance?.Balance ?? 0m;
+    }
+
+    private async Task<int> AddNewTransactionNoTracking(AgentTransactionModel agentTransaction, string time)
+    {
+        var transaction = new AgentTransaction
         {
             AgentId = agentTransaction.AgentId,
             TransactionDatatime = Converters.ToDateTimeSqlite(agentTransaction.TransactionDatatime),
             TransactionStatus = agentTransaction.TransactionStatus,
             TransactionSum = agentTransaction.TransactionSum,
             Currency = agentTransaction.CurrencyId,
-            Balance = agentTransaction.Balance
+            Balance = agentTransaction.Balance,
+            Time = time,
         };
-        await _context.AgentTransactions.AddAsync(model);
+        transaction.Balance = await PrevBalance(transaction.AgentId, transaction.Currency, transaction.TransactionDatatime, transaction.Time) + transaction.TransactionSum;
+        var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
+            x.AgentId == transaction.AgentId && x.CurrencyId == transaction.Currency);
+        agent!.Balance += transaction.TransactionSum;
+        await _context.AgentTransactions.AddAsync(transaction);
+        await _context.SaveChangesAsync();
+        FormattableString query =
+            $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency}";
+        var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
+        afterTransactions.Remove(transaction);
+        var items = afterTransactions.Where(x =>
+            x.TransactionDatatime == transaction.TransactionDatatime &&
+            Convert.ToInt32(x.Time) <= Convert.ToInt32(transaction.Time)).ToList();
+        afterTransactions.Remove(items);
+        foreach (var tr in afterTransactions)
+            tr.Balance += transaction.TransactionSum;
+        
         await _context.SaveChangesAsync();
         await AddRecordToLog(new Action
         {
             Action1 = (int)ActionsEnum.Write,
-            Values = model.TransactionSum.ToString(),
+            Values = transaction.TransactionSum.ToString(),
             Description =
-                $"Новая транзакция id={model.Id}, agent_id={model.AgentId}, transaction_status={model.TransactionStatus}",
+                $"Новая транзакция id={transaction.Id}, agent_id={transaction.AgentId}, transaction_status={transaction.TransactionStatus}",
             Seen = 0,
             Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
             Time = DateTime.Now.ToShortTimeString()
         });
-        return model.Id;
+        return transaction.Id;
+    }
+
+    public async Task<int> AddNewTransaction(AgentTransactionModel agentTransaction)
+    {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        var transaction = new AgentTransaction
+        {
+            AgentId = agentTransaction.AgentId,
+            TransactionDatatime = Converters.ToDateTimeSqlite(agentTransaction.TransactionDatatime),
+            TransactionStatus = agentTransaction.TransactionStatus,
+            TransactionSum = agentTransaction.TransactionSum,
+            Currency = agentTransaction.CurrencyId,
+            Balance = agentTransaction.Balance,
+            Time = DateTime.Now.ToString("HH:mm:ss").Replace(":", ""),
+        };
+        transaction.Balance = await PrevBalance(transaction.AgentId, transaction.Currency, transaction.TransactionDatatime, transaction.Time) + transaction.TransactionSum;
+        var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
+            x.AgentId == transaction.AgentId && x.CurrencyId == transaction.Currency);
+        agent!.Balance += transaction.TransactionSum;
+        await _context.AgentTransactions.AddAsync(transaction);
+        await _context.SaveChangesAsync();
+        FormattableString query =
+            $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency}";
+        var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
+        afterTransactions.Remove(transaction);
+        var items = afterTransactions.Where(x =>
+            x.TransactionDatatime == transaction.TransactionDatatime &&
+            Convert.ToInt32(x.Time) <= Convert.ToInt32(transaction.Time)).ToList();
+        afterTransactions.Remove(items);
+        foreach (var tr in afterTransactions)
+            tr.Balance += transaction.TransactionSum;
+        
+        await _context.SaveChangesAsync();
+        await dbTransaction.CommitAsync();
+        await AddRecordToLog(new Action
+        {
+            Action1 = (int)ActionsEnum.Write,
+            Values = transaction.TransactionSum.ToString(),
+            Description =
+                $"Новая транзакция id={transaction.Id}, agent_id={transaction.AgentId}, transaction_status={transaction.TransactionStatus}",
+            Seen = 0,
+            Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
+            Time = DateTime.Now.ToShortTimeString()
+        });
+        return transaction.Id;
     }
 
     public async Task DeleteTransaction(int agentId, int currencyId, int transactionId)
     {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        
         var transaction = await _context.AgentTransactions.FindAsync(transactionId);
         if (transaction != null)
         {
             var transactionSum = transaction.TransactionSum;
+            var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
+                x.AgentId == transaction.AgentId && x.CurrencyId == transaction.Currency);
+            agent!.Balance -= transaction.TransactionSum;
+            
             FormattableString query =
-                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} >= transaction_datatime and agent_id = {agentId} and currency = {currencyId} and id > {transactionId}";
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {agentId} and currency = {currencyId}";
             _context.AgentTransactions.Remove(transaction);
+            await _context.SaveChangesAsync();
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
-            foreach (var tr in afterTransactions) tr.Balance = tr.Balance - transactionSum;
+            var items = afterTransactions.Where(x =>
+                x.TransactionDatatime == transaction.TransactionDatatime &&
+                Convert.ToInt32(x.Time) <= Convert.ToInt32(transaction.Time)).ToList();
+            afterTransactions.Remove(items);
+            foreach (var tr in afterTransactions) tr.Balance -= transactionSum;
 
             await AddRecordToLog(new Action
             {
@@ -270,6 +382,8 @@ public class DataBaseAction : IDataBaseAction
             });
             await _context.SaveChangesAsync();
         }
+
+        await dbTransaction.CommitAsync();
     }
 
     public async Task<CatalogueModel?> EditMainCatPrices(IEnumerable<MainCatPriceModel> mainCatPrices, int mainCatId,
@@ -451,10 +565,18 @@ public class DataBaseAction : IDataBaseAction
         await _context.SaveChangesAsync();
     }
 
-    public async Task AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain)
+    public async Task<IEnumerable<CatalogueModel>> AddNewZakupka(IEnumerable<ZakupkaAltModel> zakupka, ZakupkiModel zakMain,AgentTransactionModel initTransaction, AgentTransactionModel agentPayment,
+        IEnumerable<ZakupkaAltModel> catas,
+        int currencyId)
     {
-        var transaction = await _context.Database.BeginTransactionAsync();
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
 
+        var time = Convert.ToInt32(DateTime.Now.ToString("HH:mm:ss").Replace(":", ""));
+        var transaction = await AddNewTransactionNoTracking(initTransaction, time.ToString());
+        zakMain.TransactionId = transaction;
+        if (agentPayment.AgentId != 0)
+            await AddNewTransactionNoTracking(agentPayment, (time+1).ToString());
+        
         foreach (var model in zakupka)
         {
             var zakAndProd = await _context.ZakProdCounts.FirstOrDefaultAsync(x => x.MainCatId == model.MainCatId);
@@ -496,7 +618,8 @@ public class DataBaseAction : IDataBaseAction
         };
         await _context.ZakMainGroups.AddAsync(a);
 
-        await transaction.CommitAsync();
+        var cat = await AddNewPricesForParts(catas, currencyId);
+        await dbTransaction.CommitAsync();
 
         await AddRecordToLog(new Action
         {
@@ -506,6 +629,7 @@ public class DataBaseAction : IDataBaseAction
             Date = Converters.ToDateTimeSqlite(DateTime.Now.Date.ToString("dd.MM.yyyy")),
             Time = DateTime.Now.ToShortTimeString()
         });
+        return cat;
     }
 
     public async Task<IEnumerable<CatalogueModel>> AddNewPricesForParts(IEnumerable<ZakupkaAltModel> parts,
@@ -707,7 +831,6 @@ public class DataBaseAction : IDataBaseAction
         });
         return uniIds;
     }
-
     private async Task ReCallcMainCount(int uniId)
     {
         var mainName = await _context.MainNames.Include(x => x.MainCats).FirstOrDefaultAsync(x => x.UniId == uniId);
@@ -1070,7 +1193,7 @@ public class DataBaseAction : IDataBaseAction
                 }
                 else
                 {
-                    if (part != null) ;
+                    if (part != null) 
                     {
                         await _context.ZakProdCounts.AddAsync(new ZakProdCount
                         {
@@ -1089,7 +1212,8 @@ public class DataBaseAction : IDataBaseAction
                     UniValue = item.UniValue,
                     Count = item.Count ?? 0,
                     Price = item.Price ?? 0,
-                    ProdajaId = item.ProdajaId
+                    ProdajaId = item.ProdajaId,
+                    Comment = item.Comment
                 });
                 await _context.SaveChangesAsync();
 
@@ -1135,6 +1259,7 @@ public class DataBaseAction : IDataBaseAction
 
                 if (prodajaAlt != null)
                 {
+                    prodajaAlt.Comment = item.Comment;
                     prodajaAlt.Count = item.Count ?? 0;
                     prodajaAlt.Price = item.Price ?? 0;
                 }
@@ -1249,10 +1374,17 @@ public class DataBaseAction : IDataBaseAction
         });
         return catas;
     }
-
+    
     public async Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models,
-        ProdajaModel mainModel)
+        ProdajaModel mainModel, AgentTransactionModel initTransaction, AgentTransactionModel agentPayment)
     {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        var time = Convert.ToInt32(DateTime.Now.ToString("HH:mm:ss").Replace(":", ""));
+        var transaction = await AddNewTransactionNoTracking(initTransaction,time.ToString());
+        if (agentPayment.AgentId != 0)
+            await AddNewTransactionNoTracking(agentPayment,(time+1).ToString());
+        
+        mainModel.TransactionId = transaction;
         var catas = new List<CatalogueModel>();
         foreach (var model in models)
         {
@@ -1338,13 +1470,15 @@ public class DataBaseAction : IDataBaseAction
                 Price = x.Price ?? 0,
                 UniValue = x.UniValue,
                 InitialPrice = x.InitialPrice,
-                CurrencyId = x.CurrencyInitialId
+                CurrencyId = x.CurrencyInitialId,
+                Comment = x.Comment
             }).ToList()
         };
         await _context.ProdMainGroups.AddAsync(prod);
 
         await _context.SaveChangesAsync();
 
+        await dbTransaction.CommitAsync();
         await AddRecordToLog(new Action
         {
             Action1 = (int)ActionsEnum.Write,
@@ -1478,12 +1612,18 @@ public class DataBaseAction : IDataBaseAction
         var transaction = await _context.AgentTransactions.FindAsync(transactionId);
         if (transaction != null)
         {
+            var balance = await _context.AgentBalances.FirstOrDefaultAsync(x =>
+                x.AgentId == transaction.AgentId && x.CurrencyId == transaction.Currency);
+            balance!.Balance -= transaction.TransactionSum;
             var transactionSum = transaction.TransactionSum;
             FormattableString query =
-                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and id > {transactionId}";
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency}";
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
-            foreach (var tr in afterTransactions) tr.Balance = tr.Balance - transactionSum;
+            afterTransactions.Remove(afterTransactions.Where(x =>
+                x.TransactionDatatime == transaction.TransactionDatatime &&
+                Convert.ToInt32(x.Time) <= Convert.ToInt32(transaction.Time)).ToList());
+            foreach (var tr in afterTransactions) tr.Balance -= transactionSum;
             await _context.SaveChangesAsync();
             return transaction;
         }
@@ -1498,10 +1638,16 @@ public class DataBaseAction : IDataBaseAction
         {
             transaction.TransactionSum += diff;
             transaction.Balance += diff;
+            var balance = await _context.AgentBalances.FirstOrDefaultAsync(x =>
+                x.AgentId == transaction.AgentId && x.CurrencyId == transaction.Currency);
+            balance!.Balance += diff;
             FormattableString query =
-                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and id > {transactionId}";
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and time > {transaction.Time}";
 
             var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
+            afterTransactions.Remove(afterTransactions.Where(x =>
+                x.TransactionDatatime == transaction.TransactionDatatime &&
+                Convert.ToInt32(x.Time) <= Convert.ToInt32(transaction.Time)));
             foreach (var tr in afterTransactions)
                 tr.Balance += diff;
             await _context.SaveChangesAsync();

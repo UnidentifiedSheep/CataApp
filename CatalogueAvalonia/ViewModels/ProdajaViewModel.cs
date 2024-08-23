@@ -4,7 +4,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
@@ -13,6 +15,7 @@ using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.Services.Messeges;
 using CatalogueAvalonia.ViewModels.DialogueViewModel;
+using CatalogueAvalonia.Views;
 using CatalogueAvalonia.Views.DialogueWindows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -35,6 +38,7 @@ public partial class ProdajaViewModel : ViewModelBase
     private readonly ObservableCollection<ProdajaModel> _prodajaMainGroup;
     private readonly TopModel _topModel;
 
+    [ObservableProperty] private DateTime _startDate;
     [ObservableProperty] private DateTime _endDate;
     [ObservableProperty] private string _searchFiled = string.Empty;
     [ObservableProperty] private string _searchFiledComment = string.Empty;
@@ -49,7 +53,6 @@ public partial class ProdajaViewModel : ViewModelBase
 
     [ObservableProperty] private ProdajaModel? _selectedProdaja;
 
-    [ObservableProperty] private DateTime _startDate;
 
     public ProdajaViewModel()
     {
@@ -169,12 +172,22 @@ public partial class ProdajaViewModel : ViewModelBase
 
     partial void OnEndDateChanged(DateTime value)
     {
-        LoadProdajaMainGroupCommand.Execute(null);
+        if (StartDate <= value)
+            LoadProdajaMainGroupCommand.Execute(null);
+        else
+            MessageBoxManager
+                .GetMessageBoxStandard("Неверные даты", "Начальная дата должна быть меньше или равна дате конца.")
+                .ShowWindowDialogAsync((MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!);
     }
 
     partial void OnStartDateChanged(DateTime value)
     {
-        LoadProdajaMainGroupCommand.Execute(null);
+        if (value <= EndDate)
+            LoadProdajaMainGroupCommand.Execute(null);
+        else
+            MessageBoxManager
+                .GetMessageBoxStandard("Неверные даты", "Начальная дата должна быть меньше или равна дате конца.")
+                .ShowWindowDialogAsync((MainWindow)((IClassicDesktopStyleApplicationLifetime)Application.Current!.ApplicationLifetime!).MainWindow!);
     }
 
     partial void OnSelectedAgentChanged(AgentModel? value)

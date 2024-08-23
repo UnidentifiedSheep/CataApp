@@ -223,6 +223,10 @@ public partial class CatalogueItemViewModel : ViewModelBase
             new AddNewPartViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
     }
 
+    public void ExpandRow(IndexPath index)
+    {
+        CatalogueModels.Expand(index);
+    }
     [RelayCommand]
     private async Task SelectPart(Window parent)
     {
