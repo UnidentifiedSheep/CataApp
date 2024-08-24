@@ -38,10 +38,37 @@ public partial class MainWindow : Window
             .ShowWindowDialogAsync(this);
         if (res == ButtonResult.Yes)
         {
+            bool fileSaved = false;
+            int? startCount = null;
             var folder = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { AllowMultiple = false });
-            var filePath = Directory.GetCurrentDirectory() /*.Replace("\\bin", "")*/.Replace("\\net8.0", "") + "\\Data\\data.db";
-            var folderPath = folder[0].Path.ToString().Replace("file:///", "") + $"\\data({DateTime.Now:dd.MM.yyyy}).db";
-            File.Copy(filePath, folderPath);
+            var filePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + "\\Data\\data.db";
+            var folderPath = folder[0].Path.ToString().Replace("file:///", "") +
+                             $"\\{startCount}data({DateTime.Now:dd.MM.yyyy}).db";
+            
+            while (!fileSaved)
+            {
+                try
+                {
+                    File.Copy(filePath, folderPath);
+                    fileSaved = true;
+                    if (startCount != null)
+                        await MessageBoxManager
+                            .GetMessageBoxStandard("Ok", $"Файл сохранен под название - {startCount}data({DateTime.Now:dd.MM.yyyy}).db")
+                            .ShowWindowDialogAsync(this);
+                    
+                    
+                }
+                catch (Exception exception)
+                {
+                    if (exception.Message.Contains("already exists"))
+                    {
+                        if (startCount == null) startCount = 1;
+                        else startCount++;
+                        folderPath = folder[0].Path.ToString().Replace("file:///", "") +
+                                     $"\\{startCount}data({DateTime.Now:dd.MM.yyyy}).db";
+                    }
+                }
+            }
         }
         _canClose = true;
         Close();
