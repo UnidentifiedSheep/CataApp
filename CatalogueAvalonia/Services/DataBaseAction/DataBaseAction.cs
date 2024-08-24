@@ -1134,6 +1134,8 @@ public class DataBaseAction : IDataBaseAction
         Dictionary<int, int> lastCounts, CurrencyModel currency, string date, decimal totalSum, int transactionId,
         string comment)
     {
+        var prodajaMain = await _context.ProdMainGroups.FirstAsync(x => x.TransactionId == transactionId);
+        var prodajaMainId = prodajaMain.Id;
         await using var dbTransaction = await _context.Database.BeginTransactionAsync();
         var uniIds = new List<int>();
 
@@ -1205,16 +1207,19 @@ public class DataBaseAction : IDataBaseAction
                 }
 
 
-                await _context.Prodajas.AddAsync(new Prodaja
+                var prodaja = new Prodaja
                 {
                     MainCatId = item.MainCatId,
                     MainName = item.MainName,
                     UniValue = item.UniValue,
                     Count = item.Count ?? 0,
                     Price = item.Price ?? 0,
-                    ProdajaId = item.ProdajaId,
+                    ProdajaId = prodajaMainId,
+                    CurrencyId = item.CurrencyInitialId,
+                    InitialPrice = item.InitialPrice,
                     Comment = item.Comment
-                });
+                };
+                await _context.Prodajas.AddAsync(prodaja);
                 await _context.SaveChangesAsync();
 
                 var prices = _context.MainCatPrices.Where(x => x.MainCatId == item.MainCatId);
@@ -1230,14 +1235,12 @@ public class DataBaseAction : IDataBaseAction
                         if (count >= 0)
                             break;
                     }
-
-                    await _context.SaveChangesAsync();
                 }
 
-                if (part != null)
-                {
-                    await ReCallcMainCount(part.UniId);
-                }
+                uniIds.Add(part!.Id);
+                part.Count -= item.Count ?? 0;
+                await _context.SaveChangesAsync();
+                await ReCallcMainCount(part.UniId);
             }
             else
             {
@@ -1641,13 +1644,14 @@ public class DataBaseAction : IDataBaseAction
             var balance = await _context.AgentBalances.FirstOrDefaultAsync(x =>
                 x.AgentId == transaction.AgentId && x.CurrencyId == transaction.Currency);
             balance!.Balance += diff;
-            FormattableString query =
-                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} <= transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and time > {transaction.Time}";
+            FormattableString sameDate =
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} = transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency} and time > {transaction.Time}";
+            FormattableString otherDate =
+                $"SELECT * from agent_transactions where {transaction.TransactionDatatime} < transaction_datatime and agent_id = {transaction.AgentId} and currency = {transaction.Currency}";
 
-            var afterTransactions = await _context.AgentTransactions.FromSql(query).ToListAsync();
-            afterTransactions.Remove(afterTransactions.Where(x =>
-                x.TransactionDatatime == transaction.TransactionDatatime &&
-                Convert.ToInt32(x.Time) <= Convert.ToInt32(transaction.Time)));
+            var afterTransactions = await _context.AgentTransactions.FromSql(sameDate).ToListAsync();
+            afterTransactions.AddRange(await _context.AgentTransactions.FromSql(otherDate).ToListAsync());
+            
             foreach (var tr in afterTransactions)
                 tr.Balance += diff;
             await _context.SaveChangesAsync();

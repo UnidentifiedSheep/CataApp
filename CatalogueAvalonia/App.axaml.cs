@@ -5,6 +5,8 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.BarcodeServer;
@@ -21,6 +23,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using Serilog;
 using Serilog.Events;
 using ILogger = Serilog.ILogger;
@@ -73,20 +77,22 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
         await host.StartAsync();
     }
+    
 
-    private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    private async void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
     { 
         DirectoryInfo di = new DirectoryInfo("../Documents");
         foreach (FileInfo file in di.GetFiles())
             file.Delete();
-        if (GlobalHost != null)
-        {
-            if (GlobalHost.Services.GetRequiredService<DataContext>().Database.GetDbConnection() is SqliteConnection conn)
-                SqliteConnection.ClearPool(conn);
-            if (GlobalHost.Services.GetRequiredService<DataContextDataProvider>().Database.GetDbConnection() is SqliteConnection conn2)
-                SqliteConnection.ClearPool(conn2);
-            
-        }
+        if (GlobalHost == null) return;
+        
+        if (GlobalHost.Services.GetRequiredService<DataContext>().Database.GetDbConnection() is SqliteConnection conn)
+            SqliteConnection.ClearPool(conn);
+        if (GlobalHost.Services.GetRequiredService<DataContextDataProvider>().Database.GetDbConnection() is SqliteConnection conn2)
+            SqliteConnection.ClearPool(conn2);
+        if (GlobalHost.Services.GetRequiredService<DataContextDataForInvoices>().Database.GetDbConnection() is SqliteConnection conn3)
+            SqliteConnection.ClearPool(conn3);
+        
     }
 
     private static HostApplicationBuilder CreateHostBuilder()
