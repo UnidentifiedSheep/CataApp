@@ -88,13 +88,13 @@ public partial class ProdajaViewModel : ViewModelBase
 
     private void OnDataBaseAction(object recipient, ActionMessage message)
     {
-        if (message.Value == "DataBaseLoaded")
+        if (message.Value.Value == "DataBaseLoaded")
             Dispatcher.UIThread.Post(() =>
             {
                 _agents.AddRange(_dataStore.AgentModels);
                 IsLoaded = true;
             });
-        else if (message.Value == "Update")
+        else if (message.Value.Value == "Update")
             Dispatcher.UIThread.Post(() =>
             {
                 LoadProdajaMainGroupCommand.Execute(null);
@@ -245,8 +245,9 @@ public partial class ProdajaViewModel : ViewModelBase
                 IEnumerable<CatalogueModel> catas = new List<CatalogueModel>();
                 catas = await _topModel.DeleteProdajaAsync(SelectedProdaja.TransactionId, _prodajaAltGroup,
                     SelectedProdaja.CurrencyId);
+                var balances = await _topModel.GetAgentsBalance(SelectedProdaja.Id);
                 Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
-                Messenger.Send(new ActionMessage("Update"));
+                Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
             }
         }
     }

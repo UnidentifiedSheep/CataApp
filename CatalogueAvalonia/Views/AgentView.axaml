@@ -81,7 +81,7 @@
                 <ColumnDefinition Width="450*"
                                   MinWidth="100" />
                 <ColumnDefinition Width="1" />
-                <ColumnDefinition Width="733*"
+                <ColumnDefinition Width="403*"
                                   MinWidth="100" />
             </Grid.ColumnDefinitions>
             <ui:ProgressRing Grid.Column="0"
@@ -104,12 +104,24 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Имя контрагента"
                                         Binding="{Binding Name}"
-                                        Width="6*"
+                                        Width="4*"
                                         IsReadOnly="False" />
                     <DataGridCheckBoxColumn Header="Закупки"
                                             Binding="{Binding IsZak}"
-                                            Width="2*"
+                                            Width="100"
                                             IsReadOnly="False" />
+                    <DataGridTextColumn Header="Мы должны"
+                                        Binding="{Binding Credit}"
+                                        Width="Auto"
+                                        MinWidth="100"
+                                        IsVisible="{Binding IsDebtCreditVisible}"
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn Header="Нам должны"
+                                        Binding="{Binding Debit}"
+                                        Width="Auto"
+                                        MinWidth="100"
+                                        IsVisible="{Binding IsDebtCreditVisible}"
+                                        IsReadOnly="True" />
                     <DataGridTextColumn Header="Наценка"
                                         Width="80"
                                         Binding="{Binding OverPriceText}"
@@ -118,9 +130,6 @@
                 </DataGrid.Columns>
                 <DataGrid.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Новая транзакция"
-                                  Command="{Binding AddNewTransactionCommand}"
-                                  CommandParameter="{Binding $parent[Window]}" />
                         <MenuItem Header="Выплата нам"
                                   Command="{Binding AddNewConsumptionCommand}"
                                   CommandParameter="{Binding $parent[Window]}" />
@@ -133,6 +142,11 @@
                                   Command="{Binding SetVisabilityCommand}"/>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
+                <DataGrid.Styles>
+                    <Style Selector="DataGrid">
+                        
+                    </Style>
+                </DataGrid.Styles>
             </DataGrid>
             <GridSplitter Grid.Row="0"
                           Grid.Column="1"
@@ -165,24 +179,9 @@
                             </DataTemplate>
                         </DataGridTemplateColumn>
 
-                        <DataGridTextColumn Binding="{Binding Summa}"
-                                            Width="*">
-                            <DataGridTextColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="Сумма (-)"
-                                               ToolTip.Tip="Выплата контрагента нам либо закупка у контрагента"/>
-                                </DataTemplate>
-                            </DataGridTextColumn.HeaderTemplate>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Binding="{Binding SummaPlateja}"
-                                            Width="*">
-                            <DataGridTextColumn.HeaderTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="Сумма платежа (+)"
-                                               ToolTip.Tip="Наша выплата контрагенту либо продажа контрагенту."/>
-                                </DataTemplate>
-                            </DataGridTextColumn.HeaderTemplate>
-                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Сумма транзакция"
+                                            Binding="{Binding TransactionSum}"
+                                            Width="*"/>
                         <DataGridTextColumn Header="Сальдо"
                                             Binding="{Binding Balance}"
                                             Width="*" />
@@ -190,7 +189,11 @@
                                             Binding="{Binding CurrencySign}"
                                             Width="auto"/>
                     </DataGrid.Columns>
-
+                    <DataGrid.Styles>
+                        <Style Selector="DataGrid">
+                            
+                        </Style>
+                    </DataGrid.Styles>
                     <DataGrid.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="Удалить транзакцию"
@@ -229,8 +232,6 @@
                                                    FontSize="16"
                                                    Foreground="Gray" />
                                     </StackPanel>
-
-
                                 </Grid>
                             </Grid>
                             <GridSplitter Grid.Column="1"

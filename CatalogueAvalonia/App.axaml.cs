@@ -7,6 +7,8 @@ using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using CatalogueAvalonia.Configs;
+using CatalogueAvalonia.Configs.SettingModels;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.BarcodeServer;
@@ -15,6 +17,7 @@ using CatalogueAvalonia.Services.DataBaseAction;
 using CatalogueAvalonia.Services.DataStore;
 using CatalogueAvalonia.Services.DialogueServices;
 using CatalogueAvalonia.ViewModels;
+using CatalogueAvalonia.ViewModels.DialogueViewModel;
 using CatalogueAvalonia.ViewModels.ItemViewModel;
 using CatalogueAvalonia.Views;
 using CommunityToolkit.Mvvm.Messaging;
@@ -106,7 +109,7 @@ public class App : Application
             .CreateLogger();
 
         var builder = Host.CreateApplicationBuilder(Environment.GetCommandLineArgs());
-
+        
         builder.Services.AddSingleton(log);
         builder.Services.AddDbContext<DataContext>(o => o.UseSqlite("DataSource=../Data/data.db"));
         builder.Services.AddDbContext<DataContextDataProvider>(o =>
@@ -120,18 +123,20 @@ public class App : Application
         builder.Services.AddSingleton<ZakupkaViewModel>();
         builder.Services.AddSingleton<ProdajaViewModel>();
         builder.Services.AddSingleton<FileAndNotificationsViewModel>();
+        builder.Services.AddSingleton<SettingsViewModel>();
 
         builder.Services.AddSingleton<MainInvoice>();
         builder.Services.AddSingleton<Invoice>();
         builder.Services.AddSingleton<InvoiceForPeriod>();
         builder.Services.AddSingleton<InvoiceForPeriodMinimal>();
         builder.Services.AddSingleton<ExcelInvoice>();
+
+        builder.Services.AddSingleton<OpenAndReadConfig>();
+        builder.Services.AddSingleton<Configuration>();
         
         builder.Services.AddSingleton<TopModel>();
         builder.Services.AddSingleton<DataStore>();
         builder.Services.AddSingleton<TaskQueue>();
-        builder.Services.AddSingleton<Listener>();
-        builder.Services.AddSingleton<TcpServer>();
         builder.Services.AddSingleton<IDataBaseProvider, DataBaseProvider>();
         builder.Services.AddSingleton<IDataBaseAction, DataBaseAction>();
         builder.Services.AddSingleton<IDialogueService, DialogueService>();

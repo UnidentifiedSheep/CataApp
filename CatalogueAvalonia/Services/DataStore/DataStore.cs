@@ -212,7 +212,7 @@ public class DataStore : ObservableRecipient
     public async Task LoadLazy()
     {
         await _lazyInit.Value;
-        Messenger.Send(new ActionMessage("DataBaseLoaded"));
+        Messenger.Send(new ActionMessage(new ActionM("DataBaseLoaded")));
     }
 
     public async Task LoadAll()

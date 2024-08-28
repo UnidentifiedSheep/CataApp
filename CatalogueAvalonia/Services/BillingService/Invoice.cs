@@ -249,7 +249,8 @@ public class Invoice : ObservableRecipient
 
         });
         string path = $"../Documents/{fileId}Invoice{mainGroup.Id}от{mainGroup.Datetime}.pdf";
-        notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
+        var f = Directory.GetCurrentDirectory();
+        notification.FilePath = f.Substring(0, f.LastIndexOf('\\')) + path.TrimStart('.').Replace('/', '\\');
         notification.StatusOfFile = FileStatus.Ready;
         notification.Description = new DescriptionModel
         {

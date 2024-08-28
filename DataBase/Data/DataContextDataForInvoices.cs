@@ -17,7 +17,7 @@ public partial class DataContextDataForInvoices : DbContext
    public virtual DbSet<Action> Actions { get; set; }
 
     public virtual DbSet<Agent> Agents { get; set; }
-
+    
     public virtual DbSet<AgentTransaction> AgentTransactions { get; set; }
     public virtual DbSet<AgentBalance> AgentBalances { get; set; }
 
@@ -81,6 +81,7 @@ public partial class DataContextDataForInvoices : DbContext
                 .HasColumnName("over_pr");
         });
 
+        
         modelBuilder.Entity<AgentTransaction>(entity =>
         {
             entity.ToTable("agent_transactions");
@@ -302,7 +303,9 @@ public partial class DataContextDataForInvoices : DbContext
 
             entity.HasOne(d => d.Currency).WithMany(p => p.Prodajas).HasForeignKey(d => d.CurrencyId);
 
-            entity.HasOne(d => d.MainCat).WithMany(p => p.Prodajas).HasForeignKey(d => d.MainCatId);
+            entity.HasOne(d => d.MainCat).WithMany(p => p.Prodajas)
+                .HasForeignKey(d => d.MainCatId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             entity.HasOne(d => d.ProdajaNavigation).WithMany(p => p.Prodajas).HasForeignKey(d => d.ProdajaId);
         });

@@ -272,7 +272,8 @@ public class InvoiceForPeriod
             }
         });
         string path = $"../Documents/{fileId}InvoiceОт{start:dd/MM/yyyy}-{end:dd/MM/yyyy}.pdf";
-        notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
+        var f = Directory.GetCurrentDirectory();
+        notification.FilePath = f.Substring(0, f.LastIndexOf('\\')) + path.TrimStart('.').Replace('/', '\\');
         notification.Description = new DescriptionModel
         {
             StartDate = start.ToString("dd/MM/yyyy"),

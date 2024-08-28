@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -25,13 +26,14 @@ public class DataBaseProvider : IDataBaseProvider
 
     public async Task<IEnumerable<AgentModel>> GetAgentsAsync()
     {
-        return await _context.Agents.Select(x => new AgentModel
+        return await _context.Agents.Include(x => x.AgentBalances).Select(x => new AgentModel
         {
             Id = x.Id,
             IsZak = x.IsZak,
             Name = x.Name,
             OverPrice = x.OverPr,
-            OverPriceText = x.OverPr.ToString()
+            OverPriceText = x.OverPr.ToString(),
+            Balances = new ObservableCollection<AgentBalance>(x.AgentBalances.ToList())
         }).ToListAsync();
     }
 
@@ -490,5 +492,10 @@ public class DataBaseProvider : IDataBaseProvider
         var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
             x.AgentId == agentId && x.CurrencyId == currencyId);
         return agent?.Balance ?? 0m;
+    }
+
+    public async Task<IEnumerable<AgentBalance>> GetAgentBalances(int agentId)
+    {
+        return await _context.AgentBalances.Where(x => x.AgentId == agentId).ToListAsync();
     }
 }

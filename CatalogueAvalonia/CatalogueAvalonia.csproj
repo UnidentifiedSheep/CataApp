@@ -40,4 +40,14 @@
     <ItemGroup>
         <ProjectReference Include="..\DataBase\DataBase.csproj"/>
     </ItemGroup>
+
+
+    <ItemGroup>
+      <None Update="Configs\appsettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="Configs\defaultappsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 </Project>

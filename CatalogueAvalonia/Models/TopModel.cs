@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Services.DataBaseAction;
+using DataBase.Data;
 using MsBox.Avalonia;
 using Serilog;
 
@@ -821,6 +823,20 @@ public class TopModel
             await MessageBoxManager.GetMessageBoxStandard("Ошибка",
                 $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
             return null;
+        }
+    }
+    public async Task<IEnumerable<AgentBalance>> GetAgentsBalance(int agentId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.GetAgentBalances(agentId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return new List<AgentBalance>();
         }
     }
 }

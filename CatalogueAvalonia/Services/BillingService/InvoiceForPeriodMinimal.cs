@@ -360,8 +360,9 @@ public class InvoiceForPeriodMinimal
             }
         });
         string path = $"../Documents/{fileId}InvoiceОт{startDate:dd/MM/yyyy}-{endDate:dd/MM/yyyy}.pdf";
+        var f = Directory.GetCurrentDirectory();
         notification.CurrStep++;
-        notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
+        notification.FilePath = f.Substring(0, f.LastIndexOf('\\')) + path.TrimStart('.').Replace('/', '\\');
         notification.Description = new DescriptionModel
         {
             StartDate = startDate.ToString("dd/MM/yyyy"),

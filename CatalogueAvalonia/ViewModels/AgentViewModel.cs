@@ -79,7 +79,7 @@ public partial class AgentViewModel : ViewModelBase
         _agents = new ObservableCollection<AgentModel>();
         _currencyModels = new ObservableCollection<CurrencyModel>();
         _agentTransactions = new ObservableCollection<AgentTransactionModel>();
-
+        
         _startDate = DateTime.Now.AddMonths(-1).Date;
         _endDate = DateTime.Now.Date;
         
@@ -115,16 +115,34 @@ public partial class AgentViewModel : ViewModelBase
 
     private void OnAction(object recipient, ActionMessage message)
     {
-        if (message.Value == "DataBaseLoaded")
+        if (message.Value.Value == "DataBaseLoaded")
             Dispatcher.UIThread.Post(() =>
             {
                 IsLoaded = !true;
                 IsDataBaseLoaded = true;
                 _agents.AddRange(_dataStore.AgentModels.Where(x => x.Id != 1));
                 _currencyModels.AddRange(_dataStore.CurrencyModels);
+                SelectedCurrency = _dataStore.CurrencyModels.FirstOrDefault(x => x.CurrencyName.ToLower().Contains("руб"));
             });
-        else if (message.Value == "Update")
-            Dispatcher.UIThread.Post(() => GetTransactionsCommand.Execute(null));
+        else if (message.Value.Value == "Update")
+            Dispatcher.UIThread.Post(() =>
+            {
+                GetTransactionsCommand.Execute(null);
+                var balances = message.Value.Balances;
+                var agent = balances == null ? null : _agents.First(x => x.Id == balances.First().AgentId);
+                if (agent == null) return;
+                
+                agent.Balances.Clear();
+                agent.Balances.AddRange(balances!);
+                if (SelectedCurrency == null) return;
+                if (SelectedCurrency.Id == 1)
+                    agent.CurrBalance = 0;
+                else
+                {
+                    agent.CurrBalance = agent.Balances.First(x => x.CurrencyId == SelectedCurrency.Id).Balance;
+                }
+                
+            });
     }
 
     private void OnDataBaseAdded(object recipient, AddedMessage message)
@@ -163,15 +181,22 @@ public partial class AgentViewModel : ViewModelBase
 
     partial void OnSelectedCurrencyChanged(CurrencyModel? value)
     {
-        if (SelectedCurrency != null && SelectedCurrency.Id == 1)
+        if (SelectedCurrency == null) return;
+        
+        if (SelectedCurrency.Id == 1)
         {
             IsCurrencyVisible = true;
             IsDebtCreditVisible = false;
+            foreach (var agent in _agents)
+                agent.CurrBalance = 0;
+            
         }
         else
         {
             IsCurrencyVisible = false;
             IsDebtCreditVisible = true;
+            foreach (var agent in _agents)
+                agent.CurrBalance = agent.Balances.First(x => x.CurrencyId == SelectedCurrency.Id).Balance;
         }
 
         GetTransactionsCommand.Execute(null);
@@ -208,7 +233,7 @@ public partial class AgentViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task GetTransactions()
+    private async Task GetTransactions(AgentModel? agent)
     {
         TotalDebt = 0;
         TotalCredit = 0;
@@ -269,15 +294,6 @@ public partial class AgentViewModel : ViewModelBase
     }
 
     [RelayCommand(CanExecute = nameof(canDoWithAgent))]
-    private async Task AddNewTransaction(Window parent)
-    {
-        if (SelectedAgent != null)
-            await _dialogueService.OpenDialogue(new AddNewTransactionWindow(),
-                new AddNewTransactionViewModel(Messenger, _topModel, _dataStore, SelectedAgent.Name, SelectedAgent.Id,
-                    0), parent);
-    }
-
-    [RelayCommand(CanExecute = nameof(canDoWithAgent))]
     private async Task AddNewConsumption(Window parent)
     {
         if (SelectedAgent != null)
@@ -321,6 +337,8 @@ public partial class AgentViewModel : ViewModelBase
                     {
                         await _topModel.DeleteAgentTransactionAsync(SelectedAgent.Id, SelectedTransaction.CurrencyId,
                             SelectedTransaction.Id);
+                        var balances = await _topModel.GetAgentsBalance(SelectedAgent.Id);
+                        Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
                         GetTransactionsCommand.Execute(null);
                     }
                 }

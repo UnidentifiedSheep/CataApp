@@ -9,6 +9,7 @@ using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using CatalogueAvalonia.Configs.SettingModels;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
 using CatalogueAvalonia.Services.DataStore;
@@ -31,6 +32,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly DataStore _dataStore;
     private readonly IDialogueService _dialogueService;
     private readonly TopModel _topModel;
+    private readonly Configuration _configuration;
 
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(OpenCurrencySettingsCommand))] [NotifyCanExecuteChangedFor(nameof(OpenProducersSettingsCommand))]
     private bool _isDataBaseLoaded;
@@ -38,11 +40,13 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isVisAndEnb = false;
     [ObservableProperty] private string _fastSearch = string.Empty;
 
-    public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel,
+    public MainWindowViewModel(IMessenger messenger, CatalogueViewModel catalogueViewModel, Configuration configuration,
         AgentViewModel agentViewModel, ZakupkaViewModel zakupkaViewModel, DataStore dataStore,
-        IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel, FileAndNotificationsViewModel fileAndNotificationsViewModel) : base(messenger)
+        IDialogueService dialogueService, TopModel topModel, ProdajaViewModel prodajaViewModel, FileAndNotificationsViewModel fileAndNotificationsViewModel,
+        SettingsViewModel settingsViewModel) : base(messenger)
     {
         _dataStore = dataStore;
+        _configuration = configuration;
         _topModel = topModel;
         _dialogueService = dialogueService;
         ViewModels =
@@ -51,7 +55,8 @@ public partial class MainWindowViewModel : ViewModelBase
             agentViewModel,
             zakupkaViewModel,
             prodajaViewModel,
-            fileAndNotificationsViewModel
+            fileAndNotificationsViewModel,
+            settingsViewModel
         ];
         Messenger.Register<ActionMessage>(this, OnDataBaseLoaded);
     }
@@ -65,7 +70,7 @@ public partial class MainWindowViewModel : ViewModelBase
     }
     private void OnDataBaseLoaded(object recipient, ActionMessage message)
     {
-        if (message.Value == "DataBaseLoaded") Dispatcher.UIThread.Post(() => IsDataBaseLoaded = true);
+        if (message.Value.Value == "DataBaseLoaded") Dispatcher.UIThread.Post(() => IsDataBaseLoaded = true);
     }
 
     [RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]
@@ -73,6 +78,12 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         await _dialogueService.OpenDialogue(new CurrencySettingsWindow(),
             new CurrencySettingsViewModel(Messenger, _dataStore, _topModel), parent);
+    }
+    [RelayCommand]
+    private async Task OpenMainSettings(Window parent)
+    {
+        await _dialogueService.OpenDialogue(new SettingsWindow(),
+            new SettingsViewModel(Messenger, _configuration), parent);
     }
 
     [RelayCommand(CanExecute = nameof(IsDataBaseLoaded))]

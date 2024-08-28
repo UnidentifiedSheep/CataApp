@@ -121,13 +121,13 @@ public partial class ZakupkaViewModel : ViewModelBase
 
     private void OnDataBaseAction(object recipient, ActionMessage message)
     {
-        if (message.Value == "DataBaseLoaded")
+        if (message.Value.Value == "DataBaseLoaded")
             Dispatcher.UIThread.Post(() =>
             {
                 _agents.AddRange(_dataStore.AgentModels.Where(x => x.IsZak == 1));
                 IsLoaded = true;
             });
-        else if (message.Value == "Update")
+        else if (message.Value.Value== "Update")
             Dispatcher.UIThread.Post(() =>
             {
                 LoadZakupkiMainGroupCommand.Execute(null);
@@ -239,8 +239,9 @@ public partial class ZakupkaViewModel : ViewModelBase
                 {
                     var catas = await _topModel.DeleteZakupkaWithPricesReCount(SelectedZakupki.TransactionId,
                         _altGroup);
+                    var balances = await _topModel.GetAgentsBalance(SelectedZakupki.AgentId);
                     Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
-                    Messenger.Send(new ActionMessage("Update"));
+                    Messenger.Send(new ActionMessage(new ActionM( "Update", balances)));
                 }
             }
             else

@@ -47,31 +47,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
         _isVisAndEnb = true;
         Date = DateTime.Now.Date;
     }
-
-    /// <summary>
-    ///     Для оплаты покупок м продаж.
-    /// </summary>
-    /// <param name="messenger"></param>
-    /// <param name="topModel"></param>
-    /// <param name="dataStore"></param>
-    /// <param name="transactionData"></param>
-    /// <param name="nameOfAgent"></param>
-    public AddNewTransactionViewModel(IMessenger messenger, TopModel topModel, DataStore dataStore,
-        AgentTransactionModel transactionData, string nameOfAgent) : base(messenger)
-    {
-        Action = 1;
-        TransactionData = transactionData;
-        _isVisAndEnb = false;
-        _isEnb = false;
-        _topModel = topModel;
-        _dataStore = dataStore;
-        _nameOfAgent = nameOfAgent;
-        _agentId = transactionData.AgentId;
-        Date = DateTime.Now.Date;
-        TransactionSum = -1 * transactionData.TransactionSum;
-        _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
-        SelectedCurrency = _currencies.FirstOrDefault(x => x.Id == transactionData.CurrencyId);
-    }
+    
 
     /// <summary>
     ///     Для создания транзакции.
@@ -92,6 +68,7 @@ public partial class AddNewTransactionViewModel : ViewModelBase
         _nameOfAgent = nameOfAgent;
         _agentId = agentId;
         _currencies = new ObservableCollection<CurrencyModel>(_dataStore.CurrencyModels.Where(x => x.Id != 1));
+        SelectedCurrency = _currencies.FirstOrDefault(x => x.CurrencyName.ToLower().Contains("рубл"));
         Date = DateTime.Now.Date;
 
         OnStart();
@@ -177,7 +154,8 @@ public partial class AddNewTransactionViewModel : ViewModelBase
                         TransactionSum = sum,
                         Balance = balance + sum
                     });
-                    Messenger.Send(new ActionMessage("Update"));
+                    var balances = await _topModel.GetAgentsBalance(_agentId);
+                    Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
                 }
             }
             else
@@ -208,7 +186,8 @@ public partial class AddNewTransactionViewModel : ViewModelBase
                 TransactionSum = transactionSum,
                 Balance = balance + transactionSum
             });
-            Messenger.Send(new ActionMessage("Update"));
+            var balances = await _topModel.GetAgentsBalance(_agentId);
+            Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
         }
     }
 }

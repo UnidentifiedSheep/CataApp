@@ -226,9 +226,9 @@ public partial class EditProdajaViewModel : ViewModelBase
             var catas = await _topModel.EditProdajaAsync(_deletedIds, Prodaja, _prevCounts, SelectedCurrency,
                 Converters.ToDateTimeSqlite(ProdajaDate.Date.ToString("dd.MM.yyyy")), TotalSum,
                 _prodajaModel.TransactionId, $" {Comment} ");
-
+            var balances = await _topModel.GetAgentsBalance(SelectedAgent!.Id);
             Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
-            Messenger.Send(new ActionMessage("Update"));
+            Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
         }
     }
 
@@ -238,8 +238,8 @@ public partial class EditProdajaViewModel : ViewModelBase
         IEnumerable<CatalogueModel> catas = new List<CatalogueModel>();
 
         catas = await _topModel.DeleteProdajaAsync(_prodajaModel.TransactionId, _prodajaAlts, SelectedCurrency.Id ?? 0);
-
+        var balances = await _topModel.GetAgentsBalance(SelectedAgent!.Id);
         Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
-        Messenger.Send(new ActionMessage("Update"));
+        Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
     }
 }

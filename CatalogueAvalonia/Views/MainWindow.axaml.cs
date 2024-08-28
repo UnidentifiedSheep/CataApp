@@ -15,6 +15,8 @@ using CatalogueAvalonia.ViewModels;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using MsBox.Avalonia;
+using MsBox.Avalonia.Controls;
+using MsBox.Avalonia.Dto;
 using MsBox.Avalonia.Enums;
 
 namespace CatalogueAvalonia.Views;
@@ -29,6 +31,7 @@ public partial class MainWindow : Window
     }
 
     private bool _canClose = false;
+    private bool _isSaving = false;
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
         if (_canClose) return;
@@ -38,25 +41,45 @@ public partial class MainWindow : Window
             .ShowWindowDialogAsync(this);
         if (res == ButtonResult.Yes)
         {
+            _isSaving = true;
             bool fileSaved = false;
             int? startCount = null;
             var folder = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { AllowMultiple = false });
-            var filePath = Directory.GetCurrentDirectory().Replace("\\bin", "").Replace("\\net8.0", "") + "\\Data\\data.db";
+            var f = Directory.GetCurrentDirectory();
+            var filePath = f.Substring(0, f.LastIndexOf('\\')) + @"\Data\data.db";
             var folderPath = folder[0].Path.ToString().Replace("file:///", "") +
                              $"\\{startCount}data({DateTime.Now:dd.MM.yyyy}).db";
+            var msBox = MessageBoxManager.GetMessageBoxCustom(new MessageBoxCustomParams
+            {
+                WindowIcon = null,
+                CanResize = false,
+                ShowInCenter = true,
+                ContentTitle = "Сохранение",
+                ContentHeader = null,
+                ContentMessage = "Идет сохранение пожалуйста подождите",
+                Markdown = false,
+                Width = 340,
+                Height = 140,
+                SizeToContent = SizeToContent.Manual,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                SystemDecorations = SystemDecorations.BorderOnly,
+                Topmost = false,
+                HyperLinkParams = null,
+                Icon = MsBox.Avalonia.Enums.Icon.Info,
+                ButtonDefinitions = null,
+            }).ShowWindowDialogAsync(this);
+            
             
             while (!fileSaved)
             {
                 try
                 {
-                    File.Copy(filePath, folderPath);
+                    await Task.Run(() => File.Copy(filePath, folderPath));
                     fileSaved = true;
                     if (startCount != null)
                         await MessageBoxManager
                             .GetMessageBoxStandard("Ok", $"Файл сохранен под название - {startCount}data({DateTime.Now:dd.MM.yyyy}).db")
                             .ShowWindowDialogAsync(this);
-                    
-                    
                 }
                 catch (Exception exception)
                 {
@@ -80,7 +103,7 @@ public partial class MainWindow : Window
         if (dc != null)
         {
             IMessenger messenger = dc.GetMessenger();
-            messenger.Send(new ActionMessage("AppClosed"));
+            messenger.Send(new ActionMessage(new ActionM("AppClosed")));
         }
     }
     public async Task StartTransitionUpAsync()

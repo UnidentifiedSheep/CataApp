@@ -1,0 +1,51 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:vm="using:CatalogueAvalonia.ViewModels.DialogueViewModel"
+        x:Class="CatalogueAvalonia.Views.DialogueWindows.SettingsWindow"
+        Title="Настройки"
+        Background="#EAEBEB"
+        x:CompileBindings="False">
+        <Design.DataContext>
+            <vm:SettingsViewModel />
+        </Design.DataContext>
+        <Grid ColumnDefinitions="*,3*"
+              RowDefinitions="*,30">
+            <Grid Row="0" 
+                  Column="0"
+                  Background="#F1F1F2"
+                  RowDefinitions="10, 30,*">
+                <Border Grid.Row="0"
+                        BorderBrush="#ABABAC"
+                        BorderThickness="0,0,1,0"/>
+                <Border Grid.Row="1"
+                        BorderBrush="#ABABAC"
+                        BorderThickness="0,0,1,0">
+                    <TextBox MinHeight="25"
+                             BorderBrush="#ABABAC"
+                             Background="WhiteSmoke"
+                             Margin="10"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Center"/>
+                </Border>
+                <Border Grid.Row="2"
+                        BorderBrush="#ABABAC"
+                        BorderThickness="0,0,1,0">
+                    <TreeDataGrid Source="{Binding Settings}">
+                        
+                    </TreeDataGrid>
+                </Border>
+            </Grid>
+            <Border Grid.Row="1" 
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    BorderBrush="#ABABAC"
+                    BorderThickness="0,1,0,0">
+                <Grid>
+                    
+                </Grid>
+            </Border>
+        </Grid>
+</Window>

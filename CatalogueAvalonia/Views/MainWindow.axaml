@@ -7,6 +7,7 @@
         x:Class="CatalogueAvalonia.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         xmlns:view="using:CatalogueAvalonia.Views"
+        xmlns:ui="using:FluentAvalonia.UI.Controls"
         xmlns:viewitem="using:CatalogueAvalonia.Views.ViewItems"
         Icon="/Assets/Untitled.ico"
         Title="CatalogueAvalonia">
@@ -41,10 +42,8 @@
                 <Setter Property="Opacity" Value="0.0"/>
             </KeyFrame>
         </Animation>
-        
     </Window.Resources>
     <Grid RowDefinitions="auto, *">
-        
         <Menu Grid.Row="0">
             <MenuItem Header="Настройки">
                 <MenuItem Header="Валюта"
@@ -53,6 +52,9 @@
                 <MenuItem Header="Производители"
                           CommandParameter="{Binding $parent[Window]}"
                           Command="{Binding OpenProducersSettingsCommand}" />
+                <MenuItem Header="Основые настройки"
+                          CommandParameter="{Binding $parent[Window]}"
+                          Command="{Binding OpenMainSettingsCommand}" />
             </MenuItem>
         </Menu>
         <Button Grid.Row="0"

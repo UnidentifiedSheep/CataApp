@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using CatalogueAvalonia.Models;
+using DataBase.Data;
 
 namespace CatalogueAvalonia.Services.DataBaseAction;
 
@@ -28,5 +29,6 @@ public interface IDataBaseProvider
     Task<Bitmap?> GetPartsImg(int? mainCatId);
     Task<ProducerModel?> GetProducerById(int producerId);
     Task<decimal> GetAgentsBalance(int agentId, int currencyId);
+    Task<IEnumerable<AgentBalance>> GetAgentBalances(int agentId);
 
 }

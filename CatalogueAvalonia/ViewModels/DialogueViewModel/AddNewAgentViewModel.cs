@@ -35,6 +35,7 @@ public partial class AddNewAgentViewModel : ViewModelBase
         var agent = await _topModel.AddNewAgentAsync(AgentName, IsZak);
         
         Messenger.Send(new AddedMessage(new ChangedItem { What = agent, Where = "Agent", Id = agent.Id }));
-        Messenger.Send(new ActionMessage("Update"));
+        var balances = await _topModel.GetAgentsBalance(agent.Id);
+        Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
     }
 }

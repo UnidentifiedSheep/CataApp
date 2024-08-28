@@ -262,8 +262,9 @@ public partial class EditPurchaseViewModel : ViewModelBase
             var catas = await _topModel.EditZakupkaAsync(_deletedIds, Zakupka, _prevCounts, SelectedCurrency, TotalSum,
                 Converters.ToDateTimeSqlite(PurchaseDate.Date.ToString("dd.MM.yyyy")), _zakupkaMainGroup.TransactionId,
                 Comment);
+            var balances = await _topModel.GetAgentsBalance(SelectedAgent!.Id);
             Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
-            Messenger.Send(new ActionMessage("Update"));
+            Messenger.Send(new ActionMessage(new ActionM( "Update", balances)));
         }
     }
 
@@ -272,8 +273,8 @@ public partial class EditPurchaseViewModel : ViewModelBase
     {
         var catas = await _topModel.DeleteZakupkaWithPricesReCount(_zakupkaMainGroup.TransactionId,
             _prevCounts.Select(x => new ZakupkaAltModel { MainCatId = x.Key, Count = x.Value }));
-
+        var balances = await _topModel.GetAgentsBalance(SelectedAgent!.Id);
         Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
-        Messenger.Send(new ActionMessage("Update"));
+        Messenger.Send(new ActionMessage(new ActionM( "Update", balances)));
     }
 }

@@ -78,6 +78,8 @@ public class DataBaseAction : IDataBaseAction
 
     public async Task EditCatalogue(CatalogueModel catalogue, List<int> deleteIds)
     {
+        await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        
         var uniId = catalogue.UniId;
         var mainName = await _context.MainNames.FindAsync(uniId);
         foreach (var id in deleteIds)
@@ -113,6 +115,7 @@ public class DataBaseAction : IDataBaseAction
             }
 
             await _context.SaveChangesAsync();
+            await ReCallcMainCount(mainName.UniId);
             await AddRecordToLog(new Action
             {
                 Action1 = (int)ActionsEnum.Update,
@@ -122,6 +125,8 @@ public class DataBaseAction : IDataBaseAction
                 Time = DateTime.Now.ToShortTimeString()
             });
         }
+
+        await dbTransaction.CommitAsync();
     }
 
     public async Task<int> AddCatalogue(CatalogueModel catalogueModel)
@@ -184,17 +189,18 @@ public class DataBaseAction : IDataBaseAction
         var model = new Agent { Name = name, IsZak = isZak };
         await _context.Agents.AddAsync(model);
         await _context.SaveChangesAsync();
-
+        
         foreach (var curr in _context.Currencies)
         {
+            var time = DateTime.Now.ToString("HH:mm:ss").Replace(":", "");
             await _context.AgentTransactions.AddAsync(new AgentTransaction
             {
                 AgentId = model.Id,
                 Balance = 0,
                 Currency = curr.Id,
-                Time = DateTime.Now.ToString("HH:mm:ss").Replace(":", ""),
+                Time = time.Length == 6 ? time : "0" + time,
                 TransactionDatatime = Converters.ToDateTimeSqlite(DateTime.Now.ToString("dd.MM.yyyy")),
-                TransactionStatus = 3, 
+                TransactionStatus = 3,
                 TransactionSum = 0
             });
             await _context.AgentBalances.AddAsync(new AgentBalance
@@ -268,7 +274,7 @@ public class DataBaseAction : IDataBaseAction
             TransactionSum = agentTransaction.TransactionSum,
             Currency = agentTransaction.CurrencyId,
             Balance = agentTransaction.Balance,
-            Time = time,
+            Time = time.Length == 6 ? time : "0" + time,
         };
         transaction.Balance = await PrevBalance(transaction.AgentId, transaction.Currency, transaction.TransactionDatatime, transaction.Time) + transaction.TransactionSum;
         var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
@@ -304,6 +310,7 @@ public class DataBaseAction : IDataBaseAction
     public async Task<int> AddNewTransaction(AgentTransactionModel agentTransaction)
     {
         await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        var time = DateTime.Now.ToString("HH:mm:ss").Replace(":", "");
         var transaction = new AgentTransaction
         {
             AgentId = agentTransaction.AgentId,
@@ -312,7 +319,7 @@ public class DataBaseAction : IDataBaseAction
             TransactionSum = agentTransaction.TransactionSum,
             Currency = agentTransaction.CurrencyId,
             Balance = agentTransaction.Balance,
-            Time = DateTime.Now.ToString("HH:mm:ss").Replace(":", ""),
+            Time = time.Length == 6 ? time : "0" + time,
         };
         transaction.Balance = await PrevBalance(transaction.AgentId, transaction.Currency, transaction.TransactionDatatime, transaction.Time) + transaction.TransactionSum;
         var agent = await _context.AgentBalances.FirstOrDefaultAsync(x =>
@@ -512,8 +519,10 @@ public class DataBaseAction : IDataBaseAction
     public async Task DeleteMainCatPricesById(int mainCatId)
     {
         List<MainCatPrice>? prices = await _context.MainCatPrices.Where(x => x.MainCatId == mainCatId).ToListAsync();
-
         if (prices != null) _context.MainCatPrices.RemoveRange(prices);
+        var mainCat = await _context.MainCats.FindAsync(mainCatId);
+        if (mainCat!=null) await ReCallcMainCount(mainCat.UniId);
+        
         await AddRecordToLog(new Action
         {
             Action1 = (int)ActionsEnum.Delete,
@@ -572,10 +581,11 @@ public class DataBaseAction : IDataBaseAction
         await using var dbTransaction = await _context.Database.BeginTransactionAsync();
 
         var time = Convert.ToInt32(DateTime.Now.ToString("HH:mm:ss").Replace(":", ""));
+        time = time % 100 == 59 ? time - 1 : time;
         var transaction = await AddNewTransactionNoTracking(initTransaction, time.ToString());
         zakMain.TransactionId = transaction;
         if (agentPayment.AgentId != 0)
-            await AddNewTransactionNoTracking(agentPayment, (time+1).ToString());
+            await AddNewTransactionNoTracking(agentPayment, (time + 1).ToString());
         
         foreach (var model in zakupka)
         {
@@ -1383,6 +1393,7 @@ public class DataBaseAction : IDataBaseAction
     {
         await using var dbTransaction = await _context.Database.BeginTransactionAsync();
         var time = Convert.ToInt32(DateTime.Now.ToString("HH:mm:ss").Replace(":", ""));
+        time = time % 100 == 59 ? time - 1 : time;
         var transaction = await AddNewTransactionNoTracking(initTransaction,time.ToString());
         if (agentPayment.AgentId != 0)
             await AddNewTransactionNoTracking(agentPayment,(time+1).ToString());
@@ -1534,6 +1545,7 @@ public class DataBaseAction : IDataBaseAction
                 if (mainCat != null)
                 {
                     mainCat.Count += model.Count ?? 0;
+                    await _context.SaveChangesAsync();
                     catas.Add(new CatalogueModel
                     {
                         UniId = mainCat.UniId,

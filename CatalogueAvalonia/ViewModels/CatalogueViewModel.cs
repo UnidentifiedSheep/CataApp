@@ -241,7 +241,7 @@ public partial class CatalogueViewModel : ViewModelBase
 
     private void OnAction(object recipient, ActionMessage message)
     {
-        if (message.Value == "DataBaseLoaded")
+        if (message.Value.Value == "DataBaseLoaded")
             Dispatcher.UIThread.Post(() =>
             {
                 IsLoaded = !true;

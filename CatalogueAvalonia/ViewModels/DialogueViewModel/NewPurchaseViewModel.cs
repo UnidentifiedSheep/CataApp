@@ -244,9 +244,10 @@ public partial class NewPurchaseViewModel : ViewModelBase
                 Comment = Comment
             };
             var catas = await _topModel.AddNewZakupkaAsync(_zakupka, zakMain, agentModel, TransactionModel, zakupkas, currencyId);
+            var balances = await _topModel.GetAgentsBalance(SelectedAgent.Id);
             
             Messenger.Send(new EditedMessage(new ChangedItem { Where = "CataloguePricesList", What = catas }));
-            Messenger.Send(new ActionMessage("Update"));
+            Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
             
         }
     }

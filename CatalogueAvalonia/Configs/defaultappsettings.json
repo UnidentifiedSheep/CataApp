@@ -1,0 +1,65 @@
+﻿{
+    "Appearance|Внешний вид": {
+        "Description|Описание": "Настройка внешнего вида программы: изменение шрифта, размера шрифта итд",
+        "Font|Шрифт": {
+            "Description|Описание": "Настройка шрифтов",
+            "FontLabel|Шрифт заголовка": {
+                "Description|Описание": "Настройка загаловков",
+                "FontFamily|Название Шрифта" : "Arial",
+                "FontSize|Размер текста" : "15",
+                "ForeGround|Цвет текста" : "#505050"
+            },
+            "FontNormal|Шрифт текста": {
+                "Description|Описание": "Настройка обычного текста",
+                "FontFamily|Название Шрифта" : "Arial",
+                "FontSize|Размер текста" : "16",
+                "ForeGround|Цвет текст" : "Gray"
+            },
+            "FontControl|Шрифт кнопок и.т.д": {
+                "Description|Описание": "Настройка размера текста кнопок и.т.д",
+                "FontFamily|Название Шрифта" : "Arial",
+                "FontSize|Размер текста" : "16",
+                "ForeGround|Цвет текста" : "Black"
+            }
+        },
+        "MainColors|Основые палитра":{
+            "Description|Описание": "Настройка основных цветов",
+            "FirstBackground|Основной цвет": "#F1F1F2",
+            "SecondBackground|Вторичный цвет": "#EAEBEB"
+        },
+        "Border|Гриницы": {
+            "BorderBrush|Цвет границ": "#20202020"
+        },
+        "CatalogueGrid|Каталог запчастей":{
+            "Description|Описание": "Изменение настроек таблицы в разделе \"Каталог\"",
+            "BorderBrush|Цвет граней": "DarkGray",
+            "FontSize|Размер текста": "",
+            "FontFamily|Шрифт текста": "Arial",
+            "FontWeight|Жирность текста": "Normal",
+            "RowHeight|Высота строки": ""
+        },
+        "AgentGrid|Таблица контрагентов": {
+            "Description|Описание": "Изменение настроек таблицы в разделе \"Контрагенты\"",
+            "BorderBrush|Цвет Граней": "DarkGray",
+            "RowBackGround|Цвет заднего фона": "White",
+            "ForeGround|Цвет текста": "Black",
+            "FontSize|Размер текста": "",
+            "FontFamily|Шрифт": "Arial",
+            "FontWeight|Жирность текста": "Normal",
+            "RowHeight|Высота текста": ""
+        }
+    },
+    "Behavior|Поведение": {
+        "Description|Описание": "Изменение поведения программы в некоторых аспектах",
+        "ZakupkaAndProdaja|Закупка и продажа": {
+            "ShouldOpenDialogue|": "1"
+        }
+    },
+    "DefaultValues|Стандартные значения": {
+        "Description|Описание": "В данной вкладке вы можете поменять валюту которая будет выбрана по стандарту...",
+        "Currency|Валюта":{
+            "DefaultCurrencyId|Id стандартной валюты": "1",
+            "DefaultCurrencyName|Название стандартной валюты": "Неизвестно"
+        }
+    }
+}

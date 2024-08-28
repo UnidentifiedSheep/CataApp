@@ -25,7 +25,8 @@ public class ExcelInvoice
     public async Task CreateExcel(IEnumerable<ProdajaAltModel> parts, ProdajaModel mainGroup, int fileId, NotificationModel notification)
     {
         string path = $"../Documents/{fileId}ExcelInvoice{mainGroup.Id}от{mainGroup.Datetime}.xlsx";
-        notification.FilePath = Directory.GetCurrentDirectory().Replace("\\bin","").Replace("\\net8.0", "") + path.TrimStart('.').Replace('/', '\\');
+        var f = Directory.GetCurrentDirectory();
+        notification.FilePath = f.Substring(0, f.LastIndexOf('\\')) + path.TrimStart('.').Replace('/', '\\');
         using (var excelPackage = new ExcelPackage(notification.FilePath))
         {
             var sh = excelPackage.Workbook.Worksheets.Add("Main");
@@ -59,8 +60,11 @@ public class ExcelInvoice
             int row = 8;
             foreach (var part in prodajaAltModels)
             {
-                sh.Cells[$"A{row}"].Value = part.UniValue; 
-                sh.Cells[$"B{row}"].Value = part.MainCatName;
+                var name = part.MainCatName;
+                if (string.IsNullOrWhiteSpace(part.MainCatName) || part.MainCatName == "Название не указано")
+                    name = part.MainName;
+                sh.Cells[$"A{row}"].Value = part.UniValue;
+                sh.Cells[$"B{row}"].Value = name;
                 sh.Cells[$"C{row}"].Value = part.ProducerName;
                 sh.Cells[$"D{row}"].Value = part.Price;
                 sh.Cells[$"E{row}"].Value = part.Count;
