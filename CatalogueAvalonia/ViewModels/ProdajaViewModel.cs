@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -24,6 +26,7 @@ using DynamicData;
 using DynamicData.Kernel;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
+using OfficeOpenXml.Drawing.Chart.ChartEx;
 
 namespace CatalogueAvalonia.ViewModels;
 
@@ -42,8 +45,10 @@ public partial class ProdajaViewModel : ViewModelBase
     [ObservableProperty] private DateTime _endDate;
     [ObservableProperty] private string _searchFiled = string.Empty;
     [ObservableProperty] private string _searchFiledComment = string.Empty;
+    [ObservableProperty] private string _searchFieldName = string.Empty;
     [ObservableProperty] private bool _isAgentsDown;
-
+    [ObservableProperty] private bool _isSearching = false;
+    
     [ObservableProperty] [NotifyCanExecuteChangedFor(nameof(NewProdajaCommand))]
     private bool _isLoaded;
 
@@ -106,6 +111,7 @@ public partial class ProdajaViewModel : ViewModelBase
     private readonly List<string> _commentValues = new();
     partial void OnSearchFiledCommentChanged(string value)
     {
+        SearchFieldName = "";
         DivideComments();
         _prodajaMainGroup.Clear();
         if (!string.IsNullOrEmpty(value.TrimStart(' ')))
@@ -121,6 +127,62 @@ public partial class ProdajaViewModel : ViewModelBase
         {
             _prodajaMainGroup.AddRange(_prodajaFilterMain);
         }
+    }
+    private async Task SearchViaPartName(CancellationTokenSource token, string value)
+    {
+        SearchFiledComment = "";
+        IsSearching = true;
+        var altModels = new List<ProdajaAltModel>();
+        if (token.IsCancellationRequested)
+        {
+            IsSearching = false;
+            altModels.Clear();
+            throw new OperationCanceledException();
+        }
+        altModels.AddRange(await _topModel.GetProdajaAltGroupsNewTask(_prodajaFilterMain.Select(x => x.Id)));
+        
+        var whereContains = altModels.Where(x =>
+            (x.MainName != null && x.MainCatName != null) && (x.MainName.ToLower().Contains(value.ToLower()) ||
+                                                              x.MainCatName.ToLower().Contains(value.ToLower()))).ToList();
+        _prodajaMainGroup.AddRange(_prodajaFilterMain.Where(x => whereContains.Any(z => z.ProdajaId == x.Id)).ToList());
+        _prodajaMainGroup.DistinctBy(x => x.Id);
+        IsSearching = false;
+    }
+
+    [RelayCommand]
+    private async Task SearchViaPartNameTask(string value) 
+    {
+        if (IsSearching)
+        {
+            await _cancellationToken.CancelAsync();
+            _cancellationToken.Dispose();
+        }
+        else
+            _cancellationToken = new CancellationTokenSource();
+        
+        _prodajaMainGroup.Clear();
+        _prodajaAltGroup.Clear();
+        
+        if (string.IsNullOrWhiteSpace(value))
+            _prodajaMainGroup.AddRange(_prodajaFilterMain);
+        else
+        {
+            try
+            {
+                await SearchViaPartName(_cancellationToken, value);
+            }
+            catch (Exception e)
+            {
+                // ignored
+            }
+        }
+    }
+
+    private CancellationTokenSource _cancellationToken;
+    partial void OnSearchFieldNameChanged(string value)
+    {
+        value = value.TrimStart(' ');
+        SearchViaPartNameTaskCommand.Execute(value);
     }
 
     private StringBuilder _stringBuilder = new();
@@ -245,7 +307,7 @@ public partial class ProdajaViewModel : ViewModelBase
                 IEnumerable<CatalogueModel> catas = new List<CatalogueModel>();
                 catas = await _topModel.DeleteProdajaAsync(SelectedProdaja.TransactionId, _prodajaAltGroup,
                     SelectedProdaja.CurrencyId);
-                var balances = await _topModel.GetAgentsBalance(SelectedProdaja.Id);
+                var balances = await _topModel.GetAgentsBalance(SelectedProdaja.AgentId);
                 Messenger.Send(new EditedMessage(new ChangedItem { What = catas, Where = "CataloguePricesList" }));
                 Messenger.Send(new ActionMessage(new ActionM("Update", balances)));
             }

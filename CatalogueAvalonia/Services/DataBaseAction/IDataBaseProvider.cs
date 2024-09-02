@@ -29,6 +29,10 @@ public interface IDataBaseProvider
     Task<Bitmap?> GetPartsImg(int? mainCatId);
     Task<ProducerModel?> GetProducerById(int producerId);
     Task<decimal> GetAgentsBalance(int agentId, int currencyId);
+    Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModels(IEnumerable<int> ids);
     Task<IEnumerable<AgentBalance>> GetAgentBalances(int agentId);
+    Task<bool> CanDeleteAgent(int agentId);
+    Task<bool> CanDeleteGroup(int uniId);
+    Task<bool> CanDeleteMainCat(int mainCatId);
 
 }

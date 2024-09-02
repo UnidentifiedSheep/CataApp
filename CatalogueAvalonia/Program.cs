@@ -1,10 +1,15 @@
 ﻿using Avalonia;
 using System;
 using System.Threading;
+using Avalonia.Controls;
 using CatalogueAvalonia.Core;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using OfficeOpenXml;
 using QuestPDF;
 using QuestPDF.Infrastructure;
+using Serilog;
+using Serilog.Events;
 
 namespace CatalogueAvalonia
 {
@@ -18,13 +23,24 @@ namespace CatalogueAvalonia
         [STAThread]
         public static void Main(string[] args)
         {
-            
             if (mutex.WaitOne(TimeSpan.Zero, true))
             {
-                Settings.License = LicenseType.Community;
-                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-                mutex.ReleaseMutex();
+                try
+                {
+                    Settings.License = LicenseType.Community;
+                    ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                    BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+                    mutex.ReleaseMutex();
+                }
+                catch (Exception e)
+                {
+                    ILogger log = new LoggerConfiguration()
+                        .Enrich.FromLogContext()
+                        .WriteTo.File("../Logger/FATALlog.txt", LogEventLevel.Information, rollingInterval: RollingInterval.Day,
+                            rollOnFileSizeLimit: true)
+                        .CreateLogger();
+                    log.Error(e, "Fatal error");
+                }
             }
             else
             {

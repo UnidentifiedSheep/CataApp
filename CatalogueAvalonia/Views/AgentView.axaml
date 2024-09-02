@@ -136,8 +136,11 @@
                         <MenuItem Header="Выплата контрагенту"
                                   Command="{Binding AddNewInComeCommand}"
                                   CommandParameter="{Binding $parent[Window]}" />
+                        <MenuItem Header="Обновить задолженность"
+                                  Command="{Binding UpdateBalancesCommand}"/>
                         <MenuItem Header="Удалить контрагента"
-                                  Command="{Binding DeleteAgentCommand}" />
+                                  CommandParameter="{Binding $parent[Window]}"
+                                  Command="{Binding DeleteAgentCommand}"/>
                         <MenuItem Header="Наценка"
                                   Command="{Binding SetVisabilityCommand}"/>
                     </ContextMenu>

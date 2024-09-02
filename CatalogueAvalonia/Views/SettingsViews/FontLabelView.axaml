@@ -1,0 +1,84 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
+             Background="Transparent"
+             xmlns:vm="using:CatalogueAvalonia.ViewModels.SettingsViewModels"
+             x:Class="CatalogueAvalonia.Views.SettingsViews.FontLabelView"
+             x:CompileBindings="False">
+    <Design.DataContext>
+        <vm:FontLabelViewModel />
+    </Design.DataContext>
+    <Grid>
+        <Border BorderBrush="LightGray"
+                Margin="5"
+                BorderThickness="1">
+            <Grid RowDefinitions="70,70,70"
+                  ColumnDefinitions="300,*"
+                  Margin="5,0,0,0">
+                <StackPanel Grid.Row="0"
+                            Grid.Column="0"
+                            Orientation="Horizontal">
+                    <TextBlock Text="Выбранный шрифт"
+                               FontSize="15"
+                               VerticalAlignment="Center"/>
+                    <ComboBox ItemsSource="{Binding Fonts}"
+                              SelectedItem="{Binding SelectedFont}"
+                              VerticalAlignment="Center"
+                              Margin="5,0,0,0"
+                              Width="150">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock 
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis"/>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <TextBlock Grid.Row="0"
+                           Grid.Column="1"
+                           Grid.RowSpan="3"
+                           Margin="0,25,0,0"
+                           FontFamily="{Binding SelectedFont}"
+                           FontSize="{Binding FontSize}"
+                           Foreground="{Binding ForeGround}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Stretch"
+                           Text="{Binding TestString }"/>
+                <StackPanel Grid.Row="1"
+                            Grid.Column="0"
+                            Orientation="Horizontal">
+                    <TextBlock Text="Размер шрифта"
+                               FontSize="15"
+                               VerticalAlignment="Center"/>
+                    <NumericUpDown Value="{Binding  FontSize}"
+                                   Increment="1"
+                                   Margin="5,0,0,0"
+                                   Minimum="1"
+                                   Maximum="100"
+                                   ShowButtonSpinner="False"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Row="2"
+                            Grid.Column="0"
+                            Orientation="Horizontal">
+                    <TextBlock Text="Цвет шрифта"
+                               FontSize="15"
+                               VerticalAlignment="Center"/>
+                    <ColorPicker Margin="20,0,0,0"
+                                 Color="{Binding ForeColor}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+        <TextBlock Text="{Binding ThisSetting.SettingName}"
+                   FontSize="15"
+                   Margin="15,-2,0,0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Top"
+                   Background="Transparent"
+                   ToolTip.Tip="{Binding Description}"/>
+    </Grid>
+</UserControl>

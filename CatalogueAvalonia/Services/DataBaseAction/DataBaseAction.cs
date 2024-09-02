@@ -2,16 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reactive.Disposables;
 using System.Threading.Tasks;
 using CatalogueAvalonia.Core;
 using CatalogueAvalonia.Models;
-using CatalogueAvalonia.Views.DialogueWindows;
 using DataBase.Data;
 using DynamicData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using SQLitePCL;
 using Action = DataBase.Data.Action;
 
 namespace CatalogueAvalonia.Services.DataBaseAction;

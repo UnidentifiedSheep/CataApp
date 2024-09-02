@@ -118,10 +118,14 @@ public partial class CatalogueViewModel : ViewModelBase
             GetImageCommand.Execute(null);
         }
         else
-        {
-            if (ItemsImg != null)
-                ItemsImg.Dispose();
-        }
+            ItemsImg?.Dispose();
+        
+    }
+
+    private void DeSelectCatalogue()
+    {
+        var selected = CatalogueModels.RowSelection!.SelectedIndex;
+        CatalogueModels.RowSelection!.Deselect(selected);
     }
 
     [RelayCommand]
@@ -262,6 +266,7 @@ public partial class CatalogueViewModel : ViewModelBase
                 Dispatcher.UIThread.Post(() =>
                 {
                     _catalogueModels.Add(what);
+                    DeSelectCatalogue();
                 });
         }
     }
@@ -273,6 +278,7 @@ public partial class CatalogueViewModel : ViewModelBase
             Dispatcher.UIThread.Post(() =>
             {
                 _catalogueModels.Remove(_catalogueModels.Single(x => x.UniId == message.Value.Id));
+                DeSelectCatalogue();
             });
         
     }
@@ -291,6 +297,7 @@ public partial class CatalogueViewModel : ViewModelBase
                     Dispatcher.UIThread.Post(() =>
                     {
                         _catalogueModels.ReplaceOrAdd(item, model);
+                        DeSelectCatalogue();
                     });
             }
         }
@@ -342,6 +349,7 @@ public partial class CatalogueViewModel : ViewModelBase
             OnUnVisCatalogueChanged(UnVisCatalogue);
             SumTotalSum();
         }
+        DeSelectCatalogue();
     }
 
     [RelayCommand]
@@ -375,6 +383,7 @@ public partial class CatalogueViewModel : ViewModelBase
             OnPartNameChanged(PartName);
             SumTotalSum();
         }
+        DeSelectCatalogue();
     }
 
     private bool CanDeleteGroup()
@@ -388,16 +397,26 @@ public partial class CatalogueViewModel : ViewModelBase
     {
         if (Selecteditem != null)
         {
-            var res = await MessageBoxManager.GetMessageBoxStandard("Удалить группу запчастей",
-                $"Вы уверенны что хотите удалить: \n\"{Selecteditem.Name}\"?",
-                ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
-            if (res == ButtonResult.Yes)
+            if (await _topModel.CanDeleteMainGroup(Selecteditem.UniId ?? 0))
             {
-                await _topModel.DeleteGroupFromCatalogue(Selecteditem.UniId);
-                _dataStore.CatalogueModels.Remove(Selecteditem);
-                _catalogueModels.Remove(Selecteditem);
-                SumTotalSum();
+                var res = await MessageBoxManager.GetMessageBoxStandard("Удалить группу запчастей",
+                    $"Вы уверенны что хотите удалить: \n\"{Selecteditem.Name}\"?",
+                    ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+                if (res == ButtonResult.Yes)
+                {
+                    await _topModel.DeleteGroupFromCatalogue(Selecteditem.UniId);
+                    _dataStore.CatalogueModels.Remove(Selecteditem);
+                    _catalogueModels.Remove(Selecteditem);
+                    SumTotalSum();
+                }
             }
+            else
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Внимание",
+                    $"Не удалось удалить т.к какая-то из запчастей есть в закупке или продаже.",
+                    ButtonEnum.Ok, Icon.Warning, WindowStartupLocation.CenterOwner).ShowWindowDialogAsync(parent);
+            }
+            DeSelectCatalogue();
         }
     }
 
@@ -410,14 +429,12 @@ public partial class CatalogueViewModel : ViewModelBase
     {
         if (Selecteditem != null)
         {
-            var res = await MessageBoxManager.GetMessageBoxStandard("Удалить запчасть",
-                $"Вы уверенны что хотите удалить: \n\"{Selecteditem.UniValue}\"?",
-                ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
-            if (res == ButtonResult.Yes)
+            if (await _topModel.CanDeleteMainCat(Selecteditem.MainCatId ?? 0))
             {
-                var model = _catalogueModels.SingleOrDefault(x => x.UniId == Selecteditem.UniId);
-
-                if (model != null)
+                var res = await MessageBoxManager.GetMessageBoxStandard("Удалить запчасть",
+                    $"Вы уверенны что хотите удалить: \n\"{Selecteditem.UniValue}\"?",
+                    ButtonEnum.YesNo).ShowWindowDialogAsync(parent);
+                if (res == ButtonResult.Yes)
                 {
                     await _topModel.DeleteSoloFromCatalogue(Selecteditem.MainCatId);
                     var item = _dataStore.CatalogueModels.SingleOrDefault(x => x.UniId == Selecteditem.UniId);
@@ -428,8 +445,14 @@ public partial class CatalogueViewModel : ViewModelBase
                     }
                     GetImageCommand.Execute(null);
                 }
-                
             }
+            else
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Внимание",
+                    $"Не удалось удалить т.к запчасть есть в закупке или продаже.",
+                    ButtonEnum.Ok, Icon.Warning, WindowStartupLocation.CenterOwner).ShowWindowDialogAsync(parent);
+            }
+            DeSelectCatalogue();
         }
     }
 
@@ -445,7 +468,7 @@ public partial class CatalogueViewModel : ViewModelBase
                 new EditPricesViewModel(Messenger, _topModel, Selecteditem.MainCatId ?? default, _dataStore,
                     Selecteditem.UniValue), parent);
             GetImageCommand.Execute(null);
-
+            DeSelectCatalogue();
         }
     }
 
@@ -460,6 +483,7 @@ public partial class CatalogueViewModel : ViewModelBase
             await _dialogueService.OpenDialogue(new EditCatalogueWindow(),
                 new EditCatalogueViewModel(Messenger, _dataStore, Selecteditem.UniId, _topModel, _dialogueService), parent);
             GetImageCommand.Execute(null);
+            DeSelectCatalogue();
         }
         
     }
@@ -470,6 +494,7 @@ public partial class CatalogueViewModel : ViewModelBase
         await _dialogueService.OpenDialogue(new AddNewPartView(),
             new AddNewPartViewModel(Messenger, _dataStore, _topModel, _dialogueService), parent);
         GetImageCommand.Execute(null);
+        DeSelectCatalogue();
     }
 
     [RelayCommand(CanExecute = nameof(CanDeletePart))]

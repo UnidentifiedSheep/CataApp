@@ -494,8 +494,83 @@ public class DataBaseProvider : IDataBaseProvider
         return agent?.Balance ?? 0m;
     }
 
+    public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltModels(IEnumerable<int> ids)
+    {
+        var list = new List<ProdajaAltModel>();
+        var model = await _context.Prodajas.Include(x => x.MainCat)
+            .ThenInclude(x => x.Producer)
+            .Where(x => ids.Any(z => x.ProdajaId == z))
+            .ToListAsync();
+        foreach (var item in model)
+            if (item.MainCat != null)
+                list.Add(new ProdajaAltModel
+                {
+                    Id = item.Id,
+                    MaxCount = item.Count,
+                    Count = item.Count,
+                    TextCont = Convert.ToString(item.Count),
+                    MainCatId = item.MainCatId,
+                    MainCatName = item.MainCat.Name,
+                    MainName = item.MainName,
+                    Price = item.Price,
+                    TextDecimal = Convert.ToString(item.Price),
+                    UniValue = item.MainCat.UniValue,
+                    ProdajaId = item.ProdajaId,
+                    ProducerName = item.MainCat.Producer.ProducerName,
+                    InitialPrice = item.InitialPrice,
+                    CurrencyInitialId = item.CurrencyId,
+                    Comment = item.Comment
+                });
+            else
+                list.Add(new ProdajaAltModel
+                {
+                    Id = item.Id,
+                    Count = item.Count,
+                    MaxCount = item.Count,
+                    TextCont = Convert.ToString(item.Count),
+                    MainCatId = item.MainCatId,
+                    MainCatName = null,
+                    MainName = item.MainName,
+                    Price = item.Price,
+                    TextDecimal = Convert.ToString(item.Price),
+                    UniValue = item.UniValue,
+                    ProdajaId = item.ProdajaId,
+                    Comment = item.Comment
+                });
+        return list;
+    }
+
     public async Task<IEnumerable<AgentBalance>> GetAgentBalances(int agentId)
     {
         return await _context.AgentBalances.Where(x => x.AgentId == agentId).ToListAsync();
+    }
+
+    public async Task<bool> CanDeleteAgent(int agentId)
+    {
+        var list = await _context.AgentTransactions.Where(x => x.AgentId == agentId && x.TransactionStatus != 3).Take(1).ToListAsync();
+        return !list.Any();
+    }
+
+    public async Task<bool> CanDeleteGroup(int uniId)
+    {
+        var canDelete = true;
+        var uniIds = await _context.MainCats.Where(x => x.UniId == uniId).ToListAsync();
+        foreach (var mainCat in uniIds)
+        {
+            var zakupkas = await _context.Zakupkas.Where(x => x.MainCatId == mainCat.Id).Take(1).ToListAsync();
+            var prodajas = await _context.Prodajas.Where(x => x.MainCatId == mainCat.Id).Take(1).ToListAsync();
+            canDelete = canDelete && !zakupkas.Any() && !prodajas.Any();
+            if (!canDelete)
+                return canDelete;
+        }
+
+        return canDelete;
+    }
+
+    public async Task<bool> CanDeleteMainCat(int mainCatId)
+    {
+        var zakupkas = await _context.Zakupkas.Where(x => x.MainCatId == mainCatId).Take(1).ToListAsync();
+        var prodajas = await _context.Prodajas.Where(x => x.MainCatId == mainCatId).Take(1).ToListAsync();
+        return !zakupkas.Any() && !prodajas.Any();
     }
 }

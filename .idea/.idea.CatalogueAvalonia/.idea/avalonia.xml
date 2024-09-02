@@ -34,6 +34,10 @@
         <entry key="CatalogueAvalonia/Views/DialogueWindows/WebWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/MainWindow.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ProdajaView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/SettingsViews/FontControlView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/SettingsViews/FontLabelView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/SettingsViews/FontNormalView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
+        <entry key="CatalogueAvalonia/Views/SettingsViews/FontView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ViewItems/FilesAndNotificationsView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ViewItems/FilesAndNotofocationsView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />
         <entry key="CatalogueAvalonia/Views/ViewItems/ServerStatusView.axaml" value="CatalogueAvalonia/CatalogueAvalonia.csproj" />

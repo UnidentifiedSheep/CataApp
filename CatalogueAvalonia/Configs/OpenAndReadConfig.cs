@@ -4,8 +4,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Platform;
 using CatalogueAvalonia.Configs.SettingModels;
+using CatalogueAvalonia.Services.Messeges;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using DynamicData;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -15,14 +17,15 @@ using Serilog;
 
 namespace CatalogueAvalonia.Configs;
 
-public partial class OpenAndReadConfig 
+public partial class OpenAndReadConfig : ObservableRecipient
 {
     private readonly ILogger _logger;
-    public SettingModel Settings { get; private set; } = new();
+    public SettingModel Settings { get; private set; } 
 
-    public OpenAndReadConfig(ILogger logger)
+    public OpenAndReadConfig(ILogger logger, IMessenger messenger) : base(messenger)
     {
         _logger = logger;
+        Settings = new("MainSettings|Основные настройки", Messenger);
         Settings.SetName("MainSettings|Основные настройки", Language.Rus).SetId(_id);
         TryGetConfigurationCommand.Execute(null);
     }
@@ -57,7 +60,8 @@ public partial class OpenAndReadConfig
                     $"Произошла ошибка при попытке загрузить стандартные настройки.", ButtonEnum.YesNo).ShowWindowAsync();
             }
         }
-        
+
+        Messenger.Send(new ActionMessage(new ActionM("ConfigurationLoaded")));
     }
 
     private void ReadUserConfiguration()
@@ -93,7 +97,7 @@ public partial class OpenAndReadConfig
                 continue;
             }
 
-            var model = new SettingModel();
+            var model = new SettingModel(key, Messenger);
             model.SetName(key, Language.Rus).SetId(_id);
             currentSettings.Children.Add(model);
             ArrayRecursive((JObject?)value, model);

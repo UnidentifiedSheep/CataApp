@@ -636,6 +636,17 @@ public class TopModel
             return new List<ProdajaAltModel>();
         }
     }
+    public async Task<IEnumerable<ProdajaAltModel>> GetProdajaAltGroupsNewTask(IEnumerable<int> ids)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.GetProdajaAltModels(ids));
+        }
+        catch (Exception e)
+        {
+            return new List<ProdajaAltModel>();
+        }
+    }
 
     public async Task<IEnumerable<CatalogueModel>> AddNewProdaja(IEnumerable<ProdajaAltModel> models,
         ProdajaModel mainModel, AgentTransactionModel initTransaction, AgentTransactionModel agentPayment)
@@ -837,6 +848,49 @@ public class TopModel
             await MessageBoxManager.GetMessageBoxStandard("Ошибка",
                 $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
             return new List<AgentBalance>();
+        }
+    }
+
+    public async Task<bool> CanDeleteAgent(int agentId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.CanDeleteAgent(agentId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return false;
+        }
+    }
+    public async Task<bool> CanDeleteMainGroup(int uniId)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.CanDeleteGroup(uniId));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return false;
+        }
+    }
+    public async Task<bool> CanDeleteMainCat(int mainCat)
+    {
+        try
+        {
+            return await _taskQueue.Enqueue(async () => await _dataBaseProvider.CanDeleteMainCat(mainCat));
+        }
+        catch (Exception e)
+        {
+            _logger.Error($"Ошибка: {e}");
+            await MessageBoxManager.GetMessageBoxStandard("Ошибка",
+                $"Произошла ошибка: \"{e}\"?").ShowWindowAsync();
+            return false;
         }
     }
 }

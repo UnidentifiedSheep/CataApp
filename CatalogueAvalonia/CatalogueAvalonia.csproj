@@ -34,6 +34,7 @@
         <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.1-dev-00582"/>
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.1-dev-00972"/>
         <PackageReference Include="Splat.Avalonia.Microsoft.Extensions.DependencyInjection" Version="14.8.12"/>
+        <PackageReference Include="sqlite-net-sqlcipher" Version="1.9.172" />
     </ItemGroup>
 
 

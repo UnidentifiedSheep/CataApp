@@ -129,22 +129,41 @@ public partial class AgentViewModel : ViewModelBase
             {
                 GetTransactionsCommand.Execute(null);
                 var balances = message.Value.Balances;
-                var agent = balances == null ? null : _agents.First(x => x.Id == balances.First().AgentId);
+                var bal = balances?.FirstOrDefault();
+                if (bal == null)
+                {
+                    UpdateBalancesCommand.Execute(null);
+                    return;
+                }
+                
+                var agent = balances == null ? null : _agents.First(x => x.Id == bal.AgentId);
                 if (agent == null) return;
                 
                 agent.Balances.Clear();
-                agent.Balances.AddRange(balances!);
+                agent.Balances.AddRange(balances);
                 if (SelectedCurrency == null) return;
                 if (SelectedCurrency.Id == 1)
                     agent.CurrBalance = 0;
                 else
-                {
                     agent.CurrBalance = agent.Balances.First(x => x.CurrencyId == SelectedCurrency.Id).Balance;
-                }
+                
                 
             });
     }
 
+    [RelayCommand]
+    private async Task UpdateBalances()
+    {
+        foreach (var agent in _agents)
+        {
+            agent.Balances.Clear();
+            agent.Balances.AddRange(await _topModel.GetAgentsBalance(agent.Id));
+            if (SelectedCurrency == null) return;
+            agent.Credit = agent.Debit = agent.CurrBalance = 0;
+            agent.CurrBalance = SelectedCurrency.Id == 1 ? 0 : agent.Balances.First(x => x.CurrencyId == SelectedCurrency.Id).Balance;
+            
+        }
+    }
     private void OnDataBaseAdded(object recipient, AddedMessage message)
     {
         if (message.Value.Where == "Agent")
@@ -283,13 +302,28 @@ public partial class AgentViewModel : ViewModelBase
     }
 
     [RelayCommand(CanExecute = nameof(canDoWithAgent))]
-    private async Task DeleteAgent()
+    private async Task DeleteAgent(Window parent)
     {
         if (SelectedAgent != null)
         {
-            await _topModel.DeleteAgentAsync(SelectedAgent.Id);
-            Messenger.Send(new DeletedMessage(new DeletedItem { Id = SelectedAgent.Id, Where = "Agent" }));
-            _agents.Remove(SelectedAgent);
+            bool canDeleteAgent = await _topModel.CanDeleteAgent(SelectedAgent.Id);
+            if (canDeleteAgent)
+            {
+                var res = await MessageBoxManager.GetMessageBoxStandard("Внимание",
+                    $"Вы уверены что хотите удалить {SelectedAgent.Name}?",
+                    ButtonEnum.YesNo, Icon.Warning, WindowStartupLocation.CenterOwner).ShowWindowDialogAsync(parent);
+                if (res == ButtonResult.No) return;
+                await _topModel.DeleteAgentAsync(SelectedAgent.Id);
+                Messenger.Send(new DeletedMessage(new DeletedItem { Id = SelectedAgent.Id, Where = "Agent" }));
+                _dataStore.AgentModels.Remove(SelectedAgent);
+                _agents.Remove(SelectedAgent);
+            }
+            else
+            {
+                await MessageBoxManager.GetMessageBoxStandard("Внимание",
+                    "Нельзя удалить данного контрагента т.к у него есть транзакции.\nДля начала удалите все транзакции.",
+                    ButtonEnum.Ok, Icon.Warning, WindowStartupLocation.CenterOwner).ShowWindowDialogAsync(parent);
+            }
         }
     }
 

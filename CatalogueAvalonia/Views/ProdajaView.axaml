@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignHeight="650" d:DesignWidth="1200"
              x:Class="CatalogueAvalonia.Views.ProdajaView"
+             xmlns:ui="using:FluentAvalonia.UI.Controls"
              xmlns:vm="using:CatalogueAvalonia.ViewModels"
              x:CompileBindings="False">
     <Design.DataContext>
@@ -61,9 +62,21 @@
                                 HorizontalAlignment="Stretch"/>
                         <StackPanel Margin="0,5,0,0">
                             <TextBlock Text="Поиск по комментариям"
-                                       FontSize="15"
+                                       ToolTip.Tip="Для перечисления коментариева используйте /"
+                                       FontSize="14"
                                        Foreground="#505050"/>
-                            <TextBox Text="{Binding SearchFiledComment}"/>
+                            <TextBox Text="{Binding SearchFiledComment}"
+                                     Watermark="Введите комментарий/и"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel>
+                        <StackPanel Margin="0,5,0,0">
+                            <TextBlock Text="По названию/номеру запчасти"
+                                       FontSize="14"
+                                       ToolTip.Tip="Для поиска по номеру введите перед номером #"
+                                       Foreground="#505050"/>
+                            <TextBox Text="{Binding SearchFieldName}"
+                                     Watermark="Название или #Номер запчасти"/>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
@@ -82,12 +95,20 @@
                       BorderBrush="#20202020"
                       BorderThickness="1,0,0,0"
                       HorizontalAlignment="Stretch" />
+        
         <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" MinHeight="100" />
                 <RowDefinition MaxHeight="1" />
                 <RowDefinition Height="*" MinHeight="100" />
             </Grid.RowDefinitions>
+            <ui:ProgressRing Grid.Row="0"
+                             BorderThickness="3"
+                             Height="50"
+                             Width="50"
+                             IsEnabled="{Binding IsSearching}"
+                             IsVisible="{Binding IsSearching}"
+                             IsIndeterminate="True" />
             <DataGrid Grid.Row="0"
                       CanUserReorderColumns="True"
                       CanUserResizeColumns="True"

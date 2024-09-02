@@ -24,6 +24,8 @@
                         BorderBrush="#ABABAC"
                         BorderThickness="0,0,1,0">
                     <TextBox MinHeight="25"
+                             FontSize="12"
+                             Text="{Binding SearchBox}"
                              BorderBrush="#ABABAC"
                              Background="WhiteSmoke"
                              Margin="10"
@@ -34,6 +36,12 @@
                         BorderBrush="#ABABAC"
                         BorderThickness="0,0,1,0">
                     <TreeDataGrid Source="{Binding Settings}">
+                        
+                        <TreeDataGrid.Styles>
+                            <Style Selector="TreeDataGrid TreeDataGridColumnHeadersPresenter">
+                                <Setter Property="IsVisible" Value="False"/>
+                            </Style>
+                        </TreeDataGrid.Styles>
                         
                     </TreeDataGrid>
                 </Border>
@@ -47,5 +55,11 @@
                     
                 </Grid>
             </Border>
+            <Grid Grid.Column="1"
+                  Grid.Row="0">
+                <UserControl Content="{Binding CurrentView}"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Top"/>
+            </Grid>
         </Grid>
 </Window>
